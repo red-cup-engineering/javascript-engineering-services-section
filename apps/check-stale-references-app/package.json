@@ -1,0 +1,22 @@
+{
+  "name": "@red-cup-engineering/check-stale-references-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Reports every file under a root whose content still contains a literal old string, as NDJSON, one line per matching line. Use after a rename to find the references the rename left behind.",
+  "exports": "./src/check-stale-references.mjs",
+  "bin": {
+    "check-stale-references": "./scripts/check-stale-references.mjs"
+  },
+  "scripts": {
+    "check": "node --check src/check-stale-references.mjs && node --check scripts/check-stale-references.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@red-cup-engineering/searching-filepath-service": "0.1.1"
+  }
+}

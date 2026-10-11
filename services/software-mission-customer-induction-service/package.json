@@ -1,0 +1,19 @@
+{
+  "name": "@red-cup-engineering/software-mission-customer-induction-service",
+  "version": "1.0.2",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic actuator that validates proposal delta evidence and forms a JS-Mark induction manifest.",
+  "exports": "./src/customer-induction.mjs",
+  "scripts": {
+    "check": "node --check src/customer-induction.mjs",
+    "test": "node --test test/customer-induction.test.mjs",
+    "verify": "npm run check && npm test"
+  },
+  "dependencies": {
+    "@red-cup-engineering/semantic-content-identify-service": "0.2.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
