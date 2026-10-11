@@ -2,7 +2,7 @@ import { assayCasesOfDelivery, testsOfClosure } from "./derive-jsnode-package-fr
 import { constitute } from "@red-cup-engineering/eavt-services-section";
 import { admitArtifactFabricationRealizationReceipt, admitArtifactFabricationSpecification } from "@red-cup-engineering/computer-data-engineering-services-section/artifact-fabrication";
 import { admitJsnodeOperationPackageCreationReceipt } from "./admit-jsnode-operation-package-creation-receipt.mjs";
-import { semanticId } from "@red-cup-engineering/computer-content-engineering-services-section/semiotic-content-address";
+import { semanticId } from "@red-cup-engineering/computer-content-address-engineering-services-section/semiotic-content-address";
 
 function immutable(value) {
   if (value && typeof value === "object" && !Object.isFrozen(value)) {

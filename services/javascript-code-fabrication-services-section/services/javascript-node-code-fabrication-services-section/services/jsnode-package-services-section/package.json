@@ -57,7 +57,6 @@
     "check:interfaces": "node scripts/check-package-interfaces.mjs --check"
   },
   "dependencies": {
-    "@red-cup-engineering/computer-content-engineering-services-section": "workspace:*",
     "@red-cup-engineering/computer-filepath-engineering-services-section": "workspace:*",
     "@red-cup-engineering/computer-text-content-engineering-services-section": "workspace:*",
     "@red-cup-engineering/cryptographic-computer-data-engineering-services-section": "workspace:*",
@@ -75,7 +74,8 @@
     "@red-cup-engineering/relating": "workspace:*",
     "@red-cup-engineering/uri-services-section": "workspace:*",
     "@red-cup-engineering/yaml-frontmatter-codec-service": "workspace:*",
-    "@red-cup-engineering/computer-data-engineering-services-section": "workspace:*"
+    "@red-cup-engineering/computer-data-engineering-services-section": "workspace:*",
+    "@red-cup-engineering/computer-content-address-engineering-services-section": "workspace:*"
   },
   "engines": {
     "node": ">=24"
