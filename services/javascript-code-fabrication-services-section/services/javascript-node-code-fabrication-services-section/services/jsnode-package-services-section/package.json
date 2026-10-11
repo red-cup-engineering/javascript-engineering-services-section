@@ -36,7 +36,9 @@
     "./derive-jsnode-package-from-closure": "./src/derive-jsnode-package-from-closure.mjs",
     "./package-imports": "./src/package-imports.mjs",
     "./sync-package-manifest": "./src/sync-package-manifest.mjs",
-    "./package-tree": "./src/package-tree.mjs"
+    "./package-tree": "./src/package-tree.mjs",
+    "./standardize-package-tests": "./src/standardize-package-tests.mjs",
+    "./package-test-plan": "./src/package-test-plan.mjs"
   },
   "files": [
     "apps",
@@ -47,8 +49,8 @@
     "data/records/jsnode-package-cli.specification.json"
   ],
   "scripts": {
-    "test": "node --test test/*.test.mjs",
-    "check": "node --check src/admit-jsnode-operation-package-specification.mjs && node --check src/project-jsnode-operation-package.mjs && node --check src/create-jsnode-operation-package.mjs && node --check src/stage-text-file-creation-projections.mjs && node --check src/translate-markdown-jsnode-operation-package-specification.mjs && node --check src/project-jsnode-modules.mjs && node --check src/project-jsnode-operation-package-readme.mjs && node --check src/project-jsnode-operation-tests.mjs && node --check src/admit-jsnode-operation-package-creation-receipt.mjs && node --check src/fabricate-markdown-jsnode-operation-package.mjs && node --check src/fabrication-records.mjs && node --check scripts/project-jsnode-package-cli.mjs && node --check apps/jsnode-package-cli.mjs && node --check apps/translate-markdown-cli.mjs && npm run check:generated",
+    "test": "node scripts/run-package-tests.mjs",
+    "check": "node scripts/check-package-syntax.mjs && npm run check:generated",
     "generate": "node scripts/project-jsnode-package-cli.mjs",
     "check:generated": "node scripts/project-jsnode-package-cli.mjs --check",
     "sync:manifest": "node scripts/sync-package-manifest.mjs --check"
@@ -78,6 +80,9 @@
     "node": ">=24"
   },
   "bin": {
-    "sync-package-manifest": "./scripts/sync-package-manifest.mjs"
+    "sync-package-manifest": "./scripts/sync-package-manifest.mjs",
+    "standardize-package-tests": "./scripts/standardize-package-tests.mjs",
+    "run-package-tests": "./scripts/run-package-tests.mjs",
+    "check-package-syntax": "./scripts/check-package-syntax.mjs"
   }
 }

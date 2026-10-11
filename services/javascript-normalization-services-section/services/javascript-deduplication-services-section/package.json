@@ -28,7 +28,8 @@
   ],
   "scripts": {
     "audit:boundary": "npm pack --dry-run",
-    "test": "node --test \"src/**/*.test.mjs\""
+    "test": "run-package-tests",
+    "check": "check-package-syntax"
   },
   "dependencies": {
     "@red-cup-engineering/computer-content-engineering-services-section": "workspace:*",
@@ -44,5 +45,8 @@
   },
   "bin": {
     "standardize-scripts": "./src/standardize-scripts-cli.mjs"
+  },
+  "devDependencies": {
+    "@red-cup-engineering/jsnode-package-services-section": "workspace:*"
   }
 }

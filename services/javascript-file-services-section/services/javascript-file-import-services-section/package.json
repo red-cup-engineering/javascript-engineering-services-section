@@ -13,9 +13,11 @@
     "@red-cup-engineering/jsonl-services-section": "workspace:*"
   },
   "scripts": {
-    "test": "node --test test/*.test.mjs"
+    "test": "run-package-tests",
+    "check": "check-package-syntax"
   },
   "devDependencies": {
+    "@red-cup-engineering/jsnode-package-services-section": "workspace:*",
     "@red-cup-engineering/jsonl-services-section": "workspace:*"
   }
 }

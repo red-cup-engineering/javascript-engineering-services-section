@@ -19,8 +19,8 @@
     "observe-disk-packages": "./scripts/observe-disk-packages.mjs"
   },
   "scripts": {
-    "check": "node --check src/observe-disk-packages.mjs && node --check scripts/observe-disk-packages.mjs",
-    "test": "node --test test/*.test.mjs",
+    "check": "check-package-syntax",
+    "test": "run-package-tests",
     "verify": "npm run check && npm test",
     "pack:dry-run": "npm pack --dry-run --ignore-scripts"
   },
@@ -30,5 +30,8 @@
   "dependencies": {
     "@red-cup-engineering/computer-filepath-engineering-services-section": "workspace:*",
     "@red-cup-engineering/javascript-node-services-section": "workspace:*"
+  },
+  "devDependencies": {
+    "@red-cup-engineering/jsnode-package-services-section": "workspace:*"
   }
 }

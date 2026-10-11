@@ -99,11 +99,13 @@
     "recover-demanded-versions": "scripts/recover-demanded-versions.mjs"
   },
   "scripts": {
-    "test": "node --test test/*.test.mjs",
-    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+    "test": "run-package-tests",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts",
+    "check": "check-package-syntax"
   },
   "devDependencies": {
     "@red-cup-engineering/agent-organization-engine": "workspace:*",
-    "@red-cup-engineering/feltos": "workspace:*"
+    "@red-cup-engineering/feltos": "workspace:*",
+    "@red-cup-engineering/jsnode-package-services-section": "workspace:*"
   }
 }
