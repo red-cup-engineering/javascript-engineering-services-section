@@ -12,7 +12,7 @@ import { projectJsnodeOperationModules } from "./project-jsnode-operation-packag
 import { deriveJsnodePackageFromClosure } from "./derive-jsnode-package-from-closure.mjs";
 import { writeTextFile } from "@red-cup-engineering/computer-file-engineering-services-section/write-text-file";
 import { admitMarkdownJsnodeOperationPackageFabricationReceipt } from "@red-cup-engineering/jsnode-package-services-section/fabrication-receipts";
-import { semanticId } from "@red-cup-engineering/computer-content-engineering-services-section/semiotic-content-address";
+import { semanticId } from "@red-cup-engineering/computer-content-address-engineering-services-section/semiotic-content-address";
 import { dataKindDirectory } from "@red-cup-engineering/eavt-services-section/data-artifact-address";
 
 const DEFAULT_JOURNAL_ROOT_SUFFIX = "lib/emsenn/services/561-group/services/engineering-services-section";

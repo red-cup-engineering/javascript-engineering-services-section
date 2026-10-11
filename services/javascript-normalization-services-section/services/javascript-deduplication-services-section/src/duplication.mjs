@@ -1,5 +1,5 @@
 import path from "node:path";
-import { semanticId } from "@red-cup-engineering/computer-content-engineering-services-section/semiotic-content-address";
+import { semanticId } from "@red-cup-engineering/computer-content-address-engineering-services-section/semiotic-content-address";
 import { mkdirSync, readFileSync } from "node:fs";
 import {
   discoverJavaScriptSourceFiles,
