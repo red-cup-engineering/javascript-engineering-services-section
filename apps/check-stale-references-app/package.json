@@ -17,6 +17,6 @@
     "node": ">=22"
   },
   "dependencies": {
-    "@red-cup-engineering/searching-filepath-service": "0.1.1"
+    "@red-cup-engineering/searching-filepath-service": "workspace:*"
   }
 }
