@@ -1,0 +1,16 @@
+{
+  "name": "@red-cup-engineering/jsnode-observation-service",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic JSNode API-index projection actuator.",
+  "exports": "./src/api-index-query.mts",
+  "scripts": {
+    "check": "node --check src/api-index-query.mts",
+    "test": "node --test test/api-index-query.test.mjs",
+    "verify": "npm run check && npm test"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
