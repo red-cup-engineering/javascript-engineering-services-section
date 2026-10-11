@@ -7,7 +7,7 @@ import {
 } from "@red-cup-engineering/computer-code-engineering-services-section/semiotic-expression-notation/runtime";
 import {
   EMPTY_WITNESS_ROOT,
-} from "@red-cup-engineering/computer-content-engineering-services-section/semantic-content-identity";
+} from "@red-cup-engineering/computer-content-address-engineering-services-section/semantic-content-identity";
 import { jsonToTerm } from "@red-cup-engineering/computer-data-engineering-services-section/semiotic-expression-notation/json-codec";
 import { inferTy } from "@red-cup-engineering/computer-data-engineering-services-section/semiotic-expression-notation/typing";
 
