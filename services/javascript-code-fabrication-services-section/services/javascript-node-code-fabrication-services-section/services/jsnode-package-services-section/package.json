@@ -37,6 +37,8 @@
     "./package-imports": "./src/package-imports.mjs",
     "./sync-package-manifest": "./src/sync-package-manifest.mjs",
     "./package-tree": "./src/package-tree.mjs",
+    "./workspace/exports/resolve": "./src/workspace/exports/resolve.mjs",
+    "./workspace/package-interfaces": "./src/workspace/package-interfaces.mjs",
     "./standardize-package-tests": "./src/standardize-package-tests.mjs",
     "./package-test-plan": "./src/package-test-plan.mjs"
   },
@@ -53,7 +55,8 @@
     "check": "node scripts/check-package-syntax.mjs && npm run check:generated",
     "generate": "node scripts/project-jsnode-package-cli.mjs",
     "check:generated": "node scripts/project-jsnode-package-cli.mjs --check",
-    "sync:manifest": "node scripts/sync-package-manifest.mjs --check"
+    "sync:manifest": "node scripts/sync-package-manifest.mjs --check",
+    "check:interfaces": "node scripts/check-package-interfaces.mjs --check"
   },
   "dependencies": {
     "@red-cup-engineering/computer-content-engineering-services-section": "workspace:*",
@@ -81,6 +84,7 @@
   },
   "bin": {
     "sync-package-manifest": "./scripts/sync-package-manifest.mjs",
+    "check-package-interfaces": "./scripts/check-package-interfaces.mjs",
     "standardize-package-tests": "./scripts/standardize-package-tests.mjs",
     "run-package-tests": "./scripts/run-package-tests.mjs",
     "check-package-syntax": "./scripts/check-package-syntax.mjs"
