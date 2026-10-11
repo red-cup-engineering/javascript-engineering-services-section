@@ -1,0 +1,28 @@
+[Unit]
+Description=Sovereign software program synthesis A2A provider
+After=network-online.target witness-journal-rdf-projection-service.service bare-cedar-fog-rmn-semantic-conformance.service inference-work-lot-service.service hierarchical-circuit-equivalence-assay.service bare-cedar-fog-software-mission-execution.service
+Wants=network-online.target
+Requires=witness-journal-rdf-projection-service.service bare-cedar-fog-rmn-semantic-conformance.service inference-work-lot-service.service hierarchical-circuit-equivalence-assay.service bare-cedar-fog-software-mission-execution.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/emsenn/info/lib/emsenn/services/561-group/services/red-cup-engineering/services/software-services-section/services/software-program-synthesis-service
+Environment=PORT=19847
+Environment=BASE_URL=http://127.0.0.1:19847
+Environment=WITNESS_JOURNAL_RDF_AGENT=http://127.0.0.1:19764/.well-known/agent-card.json
+Environment=RMN_CONFORMANCE_AGENT=http://127.0.0.1:8786/.well-known/agent-card.json
+Environment=INFERENCE_WORK_LOT_AGENT_CARD_URL=http://127.0.0.1:8796/.well-known/agent-card.json
+Environment=SOFTWARE_MISSION_EXECUTION_AGENT_CARD_URL=http://127.0.0.1:8797/.well-known/agent-card.json
+Environment=UNION_HIERARCHICAL_CIRCUIT_EQUIVALENCE_AGENT_CARD_URL=http://127.0.0.1:19825/.well-known/agent-card.json
+Environment=AGENT_CARD_SIGNING_KEY=/home/emsenn/info/lib/emsenn/services/561-group/services/red-cup-engineering/services/software-services-section/services/software-program-synthesis-service/data/agent-card-signing/ed25519-private.pem
+Environment=AGENT_CARD_JWKS=/home/emsenn/info/lib/emsenn/services/561-group/services/red-cup-engineering/services/software-services-section/services/software-program-synthesis-service/content/agent-card-signing/jwks.json
+Environment=AGENT_CARD_SIGNING_KID=software-program-synthesis-service-ed25519
+ExecStart=/home/emsenn/.config/nvm/versions/node/v24.13.1/bin/node bin/serve-a2a.mjs
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+TimeoutStopSec=30
+
+[Install]
+WantedBy=default.target
