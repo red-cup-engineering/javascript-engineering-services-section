@@ -13,6 +13,7 @@ import { deriveJsnodePackageFromClosure } from "./derive-jsnode-package-from-clo
 import { writeTextFile } from "@red-cup-engineering/computer-file-engineering-services-section/write-text-file";
 import { admitMarkdownJsnodeOperationPackageFabricationReceipt } from "@red-cup-engineering/jsnode-package-services-section/fabrication-receipts";
 import { semanticId } from "@red-cup-engineering/computer-content-address-engineering-services-section/semiotic-content-address";
+import { dataKindDirectory } from "@red-cup-engineering/eavt-services-section/data-artifact-address";
 
 const DEFAULT_JOURNAL_ROOT_SUFFIX = "lib/emsenn/services/561-group/services/engineering-services-section";
 
@@ -31,14 +32,14 @@ export function operationNameFromDestination(destination) {
 }
 
 /**
- * Computes the absolute path at which one fabrication's disk receipt is written, per the FROG admission convention: `<destination>/data/records/<YYYY-MM-DD>-<operation-name>-fabrication-receipt.json`.
+ * Computes the absolute path at which one fabrication's disk receipt is written: a record of its kind, `<destination>/data/records/fabrication-receipt-records/<YYYY-MM-DD>-<operation-name>-fabrication-receipt.json`.
  * @param {string} destination An absolute path to a born package directory.
  * @param {Date} recordedAt The instant the receipt is recorded, used only for its UTC calendar date.
  * @returns {string} The absolute receipt file path.
  */
 export function fabricationReceiptDiskPath(destination, recordedAt) {
   const date = recordedAt.toISOString().slice(0, 10);
-  return path.join(destination, "data", "records", `${date}-${operationNameFromDestination(destination)}-fabrication-receipt.json`);
+  return path.join(dataKindDirectory(destination, "record", "fabrication-receipt"), `${date}-${operationNameFromDestination(destination)}-fabrication-receipt.json`);
 }
 
 /**

@@ -10,6 +10,7 @@ import { basename, dirname, relative, resolve } from "node:path";
 import { appendFile, readFile, unlink } from "node:fs/promises";
 import { argument } from "@red-cup-engineering/javascript-node-services-section/argv";
 import { constitute, decode, encode } from "@red-cup-engineering/eavt-services-section";
+import { dataArtifactAddress } from "@red-cup-engineering/eavt-services-section/data-artifact-address";
 import { executeJavascriptNodeCommand } from "@red-cup-engineering/execute-javascript-node-command-service";
 import { canonicalChecked } from "@red-cup-engineering/json-services-section";
 import { makeNiUri } from "@red-cup-engineering/uri-services-section/ni-uri";
@@ -29,7 +30,7 @@ export const DEFAULT_REPOSITORY_ROOT = resolve(APPS_DIRECTORY, "../../../../../.
 const SECTION_ROOT = resolve(APPS_DIRECTORY, "..");
 export const DEFAULT_RULE_PATH = resolve(SECTION_ROOT, "data/records/2026-09-04-jsnode-script-reprojection-rule.json");
 export const DEFAULT_READOUT_PATH = resolve(DEFAULT_REPOSITORY_ROOT, "lib/emsenn/services/561-group/services/561-group-services-section/data/records/2026-09-04-jsnode-script-discovery-readout.json");
-export const DEFAULT_TRACE_PATH = resolve(DEFAULT_REPOSITORY_ROOT, "lib/emsenn/services/561-group/services/561-group-services-section/data/logs/2026/09/04/standardization.eavt");
+export const DEFAULT_TRACE_PATH = dataArtifactAddress({ root: resolve(DEFAULT_REPOSITORY_ROOT, "lib/emsenn/services/561-group/services/561-group-services-section"), tier: "log", encoding: "eavt", at: "2026-09-04", action: "standardization", subject: "standardization" }).path;
 
 /**
  * The comparison key for one import declaration record, ignoring name-list order — an import is
