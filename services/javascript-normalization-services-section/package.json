@@ -1,0 +1,18 @@
+{
+  "name": "@red-cup-engineering/javascript-normalization-services-section",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Groups services that normalize JavaScript packages and code toward standard forms.",
+  "exports": {
+    "./review-jsnode-package": "./scripts/review-jsnode-package.mjs"
+  },
+  "dependencies": {
+    "@red-cup-engineering/javascript-file-import-services-section": "workspace:*",
+    "@red-cup-engineering/javascript-node-services-section": "workspace:*",
+    "@red-cup-engineering/json-services-section": "workspace:*",
+    "@red-cup-engineering/npm-package-manifest-normalization-service": "workspace:*"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}

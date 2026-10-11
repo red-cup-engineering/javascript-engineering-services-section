@@ -1,0 +1,21 @@
+{
+  "name": "@red-cup-engineering/javascript-file-import-services-section",
+  "version": "0.1.0",
+  "description": "Groups independently packaged transformations over JavaScript file imports.",
+  "type": "module",
+  "exports": {
+    "./read-javascript-file-imports": "./scripts/read-javascript-file-imports.mjs"
+  },
+  "dependencies": {
+    "@red-cup-engineering/computer-file-engineering-services-section": "workspace:*",
+    "@red-cup-engineering/javascript-node-services-section": "workspace:*",
+    "@red-cup-engineering/json-services-section": "workspace:*",
+    "@red-cup-engineering/jsonl-services-section": "workspace:*"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "@red-cup-engineering/jsonl-services-section": "workspace:*"
+  }
+}

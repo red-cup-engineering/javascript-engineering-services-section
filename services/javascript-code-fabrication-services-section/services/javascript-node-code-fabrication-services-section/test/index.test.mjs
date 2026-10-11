@@ -1,0 +1,127 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { renderJsonSchemaModule, transformJsonSchemaToTypescript } from "../scripts/transform-json-schema-to-typescript.mjs";
+
+test("transforms object properties, required keys, and literals", () => {
+  const source = transformJsonSchemaToTypescript({
+    title: "Message",
+    type: "object",
+    required: ["kind", "body"],
+    properties: {
+      kind: { const: "message" },
+      body: { type: "string" },
+      attempts: { type: "integer" },
+    },
+  });
+  assert.equal(source, 'export type Message = { readonly "kind": "message"; readonly "body": string; readonly "attempts"?: number; };\n');
+});
+
+test("transforms unions, Draft 7 and 2020-12 tuples, and named local definitions", () => {
+  const source = transformJsonSchemaToTypescript({
+    type: "object",
+    $defs: { Tag: { enum: ["left", "right"] } },
+    properties: {
+      tag: { $ref: "#/$defs/Tag" },
+      legacyClosed: { type: "array", items: [{ type: "string" }, { type: "null" }], additionalItems: false, minItems: 2 },
+      optionalClosed: { type: "array", prefixItems: [{ type: "string" }, { type: "null" }], items: false, minItems: 1 },
+      openTail: { type: "array", prefixItems: [{ type: "string" }, { type: "null" }], items: { type: "boolean" }, minItems: 2 },
+      value: { oneOf: [{ type: "boolean" }, { type: "number" }] },
+    },
+  }, { typeName: "Envelope" });
+  assert.equal(source, 'export type Tag = "left" | "right";\nexport type Envelope = { readonly "tag"?: Tag; readonly "legacyClosed"?: readonly [string, null]; readonly "optionalClosed"?: readonly [string, null?]; readonly "openTail"?: readonly [string, null, ...boolean[]]; readonly "value"?: boolean | number; };\n');
+});
+
+test("emits optional prefix and union tail tuples", () => {
+  const declaration = transformJsonSchemaToTypescript({
+    title: "Envelope",
+    type: "object",
+    required: ["optional", "open"],
+    properties: {
+      optional: { type: "array", prefixItems: [{ type: ["string", "number"] }, { type: "null" }, { type: "boolean" }], items: false, minItems: 0 },
+      open: { type: "array", prefixItems: [{ type: "string" }], items: { type: ["boolean", "number"] }, minItems: 1 },
+    },
+  });
+  assert.equal(declaration, 'export type Envelope = { readonly "optional": readonly [(string | number)?, null?, boolean?]; readonly "open": readonly [string, ...(boolean | number)[]]; };\n');
+});
+
+test("refuses non-schema inputs and unsafe TypeScript names", () => {
+  assert.throws(() => transformJsonSchemaToTypescript(null), /schema must/u);
+  assert.throws(() => transformJsonSchemaToTypescript({}, { typeName: "not-a-name" }), /valid TypeScript identifier/u);
+  assert.throws(() => transformJsonSchemaToTypescript({ $defs: { "not-a-name": {} } }), /\$defs key/u);
+});
+
+test("emits intersections and homogeneous arrays with correct precedence", () => {
+  const source = transformJsonSchemaToTypescript({ type: "array", items: { allOf: [{ type: "string" }, { enum: ["a", "b"] }] } });
+  assert.equal(source, 'export type Schema = readonly ((unknown) & (string) & ("a" | "b"))[];\n');
+});
+
+test("renders stable schema declarations alongside their source schemas", () => {
+  const source = renderJsonSchemaModule([
+    { exportName: "zSchema", typeName: "Z", schema: { title: "Z", type: "string" } },
+    { exportName: "aSchema", typeName: "A", schema: { title: "A", type: "number" } },
+  ]);
+  assert.equal(source, `/** Generated from specifications/*.schema.json. Do not edit. */
+export type A = number;
+
+export const aSchema = Object.freeze({
+  "title": "A",
+  "type": "number"
+} as const);
+
+export type Z = string;
+
+export const zSchema = Object.freeze({
+  "title": "Z",
+  "type": "string"
+} as const);
+`);
+});
+
+test("renders declared runtime bindings from emitted schema values", () => {
+  const source = renderJsonSchemaModule([
+    { exportName: "evidenceSchema", typeName: "Evidence", runtimeName: "evidenceType", schema: { $id: "evidence.schema.json", title: "Evidence", type: "object" } },
+    { exportName: "receiptSchema", typeName: "Receipt", runtimeName: "receiptType", schema: { title: "Receipt", type: "object", properties: { evidence: { $ref: "evidence.schema.json" } } } },
+  ], { runtimeBinding: { name: "defineSchemaType", from: "../schema-type.mjs" } });
+  assert.match(source, /import \{ defineSchemaType \} from "\.\.\/schema-type\.mjs";/u);
+  assert.match(source, /export const evidenceType = defineSchemaType\(evidenceSchema\);/u);
+  assert.match(source, /export const receiptType = defineSchemaType\(receiptSchema, \[evidenceSchema\]\);/u);
+});
+
+test("closes transitive runtime schema references before declaring a type", () => {
+  const source = renderJsonSchemaModule([
+    { exportName: "cSchema", typeName: "C", schema: { $id: "https://schemas.example/sub/c.schema.json", title: "C", type: "string" } },
+    { exportName: "aSchema", typeName: "A", runtimeName: "aType", schema: { $id: "https://schemas.example/a.schema.json", title: "A", $ref: "sub/b.schema.json" } },
+    { exportName: "bSchema", typeName: "B", schema: { $id: "https://schemas.example/sub/b.schema.json", title: "B", $ref: "c.schema.json" } },
+  ], { runtimeBinding: { name: "defineSchemaType", from: "../schema-type.mjs" } });
+  assert.match(source, /export type A = B;/u);
+  assert.match(source, /export type B = C;/u);
+  assert.match(source, /export const aType = defineSchemaType\(aSchema, \[bSchema, cSchema\]\);/u);
+});
+
+test("does not interpret example data as a schema reference", () => {
+  const source = renderJsonSchemaModule([
+    { exportName: "aSchema", typeName: "A", runtimeName: "aType", schema: { $id: "https://schemas.example/a.schema.json", title: "A", examples: [{ $ref: "b.schema.json" }], type: "string" } },
+    { exportName: "bSchema", typeName: "B", schema: { $id: "https://schemas.example/b.schema.json", title: "B", type: "string" } },
+  ], { runtimeBinding: { name: "defineSchemaType", from: "../schema-type.mjs" } });
+  assert.match(source, /export const aType = defineSchemaType\(aSchema\);/u);
+});
+
+
+test("generates native ESM and matching declarations from shared carrier schemas", async () => {
+  const entries = [
+    { exportName: "refSchema", typeName: "Ref", schema: { $id: "https://test.example/ref", title: "Ref", description: "Typed reference", type: "object", required: ["id"], properties: { id: { type: "string", minLength: 1 } }, additionalProperties: false } },
+    { exportName: "recordSchema", typeName: "Record", runtimeName: "recordType", schema: { $id: "https://test.example/record", title: "Record", description: "Record with a shared reference", type: "object", required: ["ref"], properties: { ref: { $ref: "https://test.example/ref" } }, additionalProperties: false } },
+  ];
+  const runtimeBinding = { name: "defineSchemaType", from: new URL("../../../../../../../../../../computer-data-engineering-services-section/apps/computer-data-engine/src/schema-type.mjs", import.meta.url).href, genericSchema: true };
+  const javascript = renderJsonSchemaModule(entries, { format: "javascript", runtimeBinding });
+  const generated = await import(`data:text/javascript;base64,${Buffer.from(javascript).toString("base64")}`);
+  const { admit } = await import(new URL("../../../../../../../../../../computer-data-engineering-services-section/apps/computer-data-engine/src/type-system.mjs", import.meta.url));
+  assert.equal(admit(generated.recordType, { ref: { id: "retained" } }).ok, true);
+  assert.equal(admit(generated.recordType, { ref: { id: "" } }).ok, false);
+  assert.equal(admit(generated.recordType, { ref: { id: "retained", unrelated: true } }).ok, false);
+  const declarations = renderJsonSchemaModule(entries, { format: "declaration", runtimeBinding });
+  assert.match(declarations, /export type Record = .*"ref": Ref/);
+  assert.match(declarations, /export declare const recordType: ReturnType<typeof defineSchemaType<typeof recordSchema>>;/);
+  assert.doesNotMatch(javascript, /export type| as const/);
+  assert.throws(() => renderJsonSchemaModule(entries, { format: "unsupported" }), /format must/);
+});

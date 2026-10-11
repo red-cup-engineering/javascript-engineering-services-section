@@ -1,0 +1,118 @@
+{
+  "sources": [
+    {
+      "path": "src/admit-jsnode-operation-package-specification.mjs"
+    },
+    {
+      "path": "src/project-jsnode-operation-source-from-arguments.mjs"
+    },
+    {
+      "path": "src/project-jsnode-operation-package.mjs"
+    },
+    {
+      "path": "src/create-jsnode-operation-package.mjs"
+    },
+    {
+      "path": "src/project-jsnode-modules.mjs"
+    },
+    {
+      "path": "src/project-jsnode-operation-package-readme.mjs"
+    },
+    {
+      "path": "src/project-jsnode-operation-tests.mjs"
+    },
+    {
+      "path": "src/admit-jsnode-operation-package-creation-receipt.mjs"
+    },
+    {
+      "path": "src/stage-text-file-creation-projections.mjs"
+    },
+    {
+      "path": "src/translate-markdown-jsnode-operation-package-specification.mjs"
+    }
+  ],
+  "operations": [
+    {
+      "name": "admit",
+      "module": "src/admit-jsnode-operation-package-specification.mjs",
+      "exportName": "admitJsnodeOperationPackageSpecification",
+      "description": "Admit a package specification.",
+      "inputSchemaPath": "data/records/schema/admit-jsnode-operation-package-specification.input.schema.json",
+      "outputSchemaPath": "data/records/schema/admit-jsnode-operation-package-specification.output.schema.json"
+    },
+    {
+      "name": "project",
+      "module": "src/project-jsnode-operation-package.mjs",
+      "exportName": "projectJsnodeOperationPackage",
+      "description": "Project package files.",
+      "inputSchemaPath": "data/records/schema/project-jsnode-operation-package.input.schema.json",
+      "outputSchemaPath": "data/records/schema/project-jsnode-operation-package.output.schema.json"
+    },
+    {
+      "name": "create",
+      "module": "src/create-jsnode-operation-package.mjs",
+      "exportName": "createJsnodeOperationPackage",
+      "description": "Create the specified package.",
+      "inputSchemaPath": "data/records/schema/create-jsnode-operation-package.input.schema.json",
+      "outputSchemaPath": "data/records/schema/create-jsnode-operation-package.output.schema.json"
+    },
+    {
+      "name": "project-modules",
+      "module": "src/project-jsnode-modules.mjs",
+      "exportName": "projectJsnodeModules",
+      "description": "Project shared JSNode modules and an optional catalog CLI.",
+      "inputSchemaPath": "data/records/schema/jsnode-module-specification.schema.json"
+    },
+    {
+      "name": "translate-markdown",
+      "module": "src/translate-markdown-jsnode-operation-package-specification.mjs",
+      "exportName": "translateMarkdownJsnodeOperationPackageSpecification",
+      "description": "Translate a Markdown work order into a package specification.",
+      "inputSchemaPath": "data/records/schema/translate-markdown-jsnode-operation-package-specification.input.schema.json",
+      "outputSchemaPath": "data/records/schema/translate-markdown-jsnode-operation-package-specification.output.schema.json"
+    }
+  ],
+  "cli": {
+    "path": "apps/jsnode-package-cli.mjs",
+    "name": "jsnode-package",
+    "description": "Fabricate a package from its specification."
+  },
+  "externalReferences": [
+    "../../../../../../../../../../computer-data-engineering-services-section/services/serialized-computer-data-engineering-services-section/services/json-services-section/src/index.mjs",
+    "../../../../../../../../../../computer-data-engineering-services-section/apps/computer-data-engine/src/validation.mjs",
+    "../../../../../../jsnode-engineering-services-section/services/apps/jsnode-engine/src/syntax.mjs",
+    "@red-cup-engineering/admit-javascript-node-command-execution-request-service",
+    "@red-cup-engineering/admit-jsnode-operation-package-creation-receipt-service",
+    "@red-cup-engineering/computer-data-engine",
+    "@red-cup-engineering/execute-javascript-node-command-service",
+    "@red-cup-engineering/inspect-installed-npm-package-service",
+    "@red-cup-engineering/is-absolute-filepath-service",
+    "@red-cup-engineering/javascript-node-services-section/argv",
+    "@red-cup-engineering/javascript-node-services-section/operation",
+    "@red-cup-engineering/jsnode-engine/syntax",
+    "@red-cup-engineering/json-services-section",
+    "@red-cup-engineering/npm-package-packing-service",
+    "@red-cup-engineering/npm-package-version-admission-service",
+    "@red-cup-engineering/npm-scoped-package-name-formation-service",
+    "@red-cup-engineering/nonempty-single-line-text-admission-service",
+    "@red-cup-engineering/publish-staged-directory-at-absent-path-service",
+    "@red-cup-engineering/read-javascript-file-export-documentation-service",
+    "@red-cup-engineering/read-javascript-file-export-documentation-service/description",
+    "@red-cup-engineering/read-javascript-node-standard-input-text-service",
+    "@red-cup-engineering/relative-posix-filepath-admission-service",
+    "@red-cup-engineering/remove-path-service",
+    "@red-cup-engineering/stage-text-file-creation-projections-service",
+    "@red-cup-engineering/text-file-creation-projection-admission-service",
+    "@red-cup-engineering/text-file-creation-projection-set-admission-service",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service",
+    "node:assert/strict",
+    "node:child_process",
+    "node:crypto",
+    "node:fs/promises",
+    "node:fs",
+    "node:path",
+    "node:test",
+    "node:url",
+    "typescript"
+  ]
+}

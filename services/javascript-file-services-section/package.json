@@ -1,0 +1,16 @@
+{
+  "name": "@red-cup-engineering/javascript-file-services-section",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    "./javascript-file-main-guard": "./scripts/javascript-file-main-guard.mjs",
+    "./read-javascript-file-main-guards": "./scripts/read-javascript-file-main-guards.mjs"
+  },
+  "dependencies": {
+    "@red-cup-engineering/computer-file-engineering-services-section": "workspace:*",
+    "@red-cup-engineering/javascript-node-services-section": "workspace:*"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}

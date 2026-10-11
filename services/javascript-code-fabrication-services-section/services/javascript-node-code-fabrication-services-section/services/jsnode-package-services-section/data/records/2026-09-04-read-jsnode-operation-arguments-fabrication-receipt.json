@@ -1,0 +1,79 @@
+{
+  "type": "MarkdownJsnodeOperationPackageFabricationReceipt",
+  "version": 1,
+  "recordedAt": "2026-09-04T22:44:08Z",
+  "workOrder": "lib/emsenn/services/561-group/services/engineering-services-section/services/computer-engineering-services-section/services/computer-code-engineering-services-section/services/javascript-engineering-services-section/services/javascript-code-fabrication-services-section/services/javascript-node-code-fabrication-services-section/services/jsnode-package-services-section/content/text/documents/specifications/read-jsnode-operation-arguments.md",
+  "sourceDigest": "sha256:813b55787cbd89dd5ece65e01da8268f10612ca9d2e5c0bdc45238728e33e999",
+  "specificationDigest": "sha256:87c1007b86a877edd23daba518e344e4a11a80c023b70af2a5f9b24387d00316",
+  "realizationDigest": "sha256:07c8693ae3a090a01be1e64c7d0259a70f3e9a20e6e0fe125248926b0a388f21",
+  "dependencies": {
+    "@red-cup-engineering/read-javascript-file-export-documentation-service": "0.1.3",
+    "typescript": "5.9.3"
+  },
+  "fabricatedBy": "jsnode-fabrication MCP face, session be3336b6-3478-4c9a-8123-588ec75b4209",
+  "registryPublication": "npm publish through the publish gate by the session (the line does not publish)",
+  "jsnodeOperationPackageCreationReceipt": {
+    "type": "JsnodeOperationPackageCreationReceipt",
+    "version": 1,
+    "packageName": "@red-cup-engineering/read-jsnode-operation-arguments-service",
+    "packageVersion": "0.1.0",
+    "destination": "lib/emsenn/services/561-group/services/engineering-services-section/services/computer-engineering-services-section/services/computer-code-engineering-services-section/services/javascript-engineering-services-section/services/javascript-code-fabrication-services-section/services/javascript-node-code-fabrication-services-section/services/jsnode-package-services-section/services/read-jsnode-operation-arguments-service",
+    "filesDigest": "sha256:cb2a1a3ed670785cb6249252dce0b43735de583ba9c1a320d285c4fb00afae93",
+    "assays": [
+      {
+        "type": "JsnodeOperationPackageAssay",
+        "version": 1,
+        "name": "staged-dependency-installation",
+        "status": "passed"
+      },
+      {
+        "type": "JsnodeOperationPackageAssay",
+        "version": 1,
+        "name": "syntax",
+        "status": "passed"
+      },
+      {
+        "type": "JsnodeOperationPackageAssay",
+        "version": 1,
+        "name": "the-rule",
+        "status": "passed"
+      },
+      {
+        "type": "JsnodeOperationPackageAssay",
+        "version": 1,
+        "name": "tests",
+        "status": "passed"
+      },
+      {
+        "type": "JsnodeOperationPackageAssay",
+        "version": 1,
+        "name": "pack",
+        "status": "passed"
+      },
+      {
+        "type": "JsnodeOperationPackageAssay",
+        "version": 1,
+        "name": "clean-installation",
+        "status": "passed"
+      },
+      {
+        "type": "JsnodeOperationPackageAssay",
+        "version": 1,
+        "name": "import-face",
+        "status": "passed"
+      },
+      {
+        "type": "JsnodeOperationPackageAssay",
+        "version": 1,
+        "name": "command-face",
+        "status": "passed"
+      },
+      {
+        "type": "JsnodeOperationPackageAssay",
+        "version": 1,
+        "name": "help",
+        "status": "passed"
+      }
+    ]
+  }
+}

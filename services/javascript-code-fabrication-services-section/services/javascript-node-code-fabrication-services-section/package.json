@@ -1,0 +1,13 @@
+{
+  "name": "@red-cup-engineering/javascript-node-code-fabrication-services-section",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Red Cup Engineering service section for javascript node code fabrication.",
+  "license": "UNLICENSED",
+  "exports": {
+    "./transform-json-schema-to-typescript": "./scripts/transform-json-schema-to-typescript.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}

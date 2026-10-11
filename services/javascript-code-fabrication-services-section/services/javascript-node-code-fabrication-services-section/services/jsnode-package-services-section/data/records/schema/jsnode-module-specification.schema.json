@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:red-cup:jsnode-module-specification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sources", "operations"],
+  "properties": {
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "text"],
+        "properties": {
+          "path": { "type": "string", "pattern": "^src/(?:[^/]+/)*[^/]+\\.mjs$" },
+          "text": { "type": "string" }
+        }
+      }
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "module", "exportName", "description"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "pattern": "^[a-z][a-z0-9-]*$" },
+          "module": { "type": "string", "pattern": "^src/(?:[^/]+/)*[^/]+\\.mjs$" },
+          "exportName": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$" },
+          "description": { "type": "string", "minLength": 1 },
+          "inputSchema": { "type": ["object", "boolean"] },
+          "inputSchemaPath": { "type": "string", "pattern": "^data/records/schema/(?:[^/]+/)*[^/]+\\.json$" },
+          "outputSchema": { "type": ["object", "boolean"] },
+          "outputSchemaPath": { "type": "string", "pattern": "^data/records/schema/(?:[^/]+/)*[^/]+\\.json$" }
+        }
+      }
+    },
+    "externalReferences": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "cli": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "name", "description"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^apps/(?:[^/]+/)*[^/]+\\.mjs$" },
+        "name": { "type": "string", "minLength": 1, "pattern": "^[a-z][a-z0-9-]*$" },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

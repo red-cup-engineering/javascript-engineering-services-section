@@ -1,0 +1,33 @@
+{
+  "name": "@red-cup-engineering/read-javascript-file-export-documentation-service",
+  "version": "0.1.3",
+  "description": "Reads standard JSDoc attached to exported functions in one JavaScript text-file reading.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": {
+    ".": "./scripts/read-javascript-file-export-documentation.mjs",
+    "./description": "./scripts/javascript-export-description.mjs"
+  },
+  "bin": {
+    "read-javascript-file-export-documentation": "scripts/read-javascript-file-export-documentation.mjs"
+  },
+  "files": [
+    "scripts",
+    "package.json"
+  ],
+  "dependencies": {
+    "@red-cup-engineering/computer-content-engineering-services-section": "workspace:*",
+    "@red-cup-engineering/computer-file-engineering-services-section": "workspace:*",
+    "@red-cup-engineering/jsonl-services-section": "workspace:*",
+    "@red-cup-engineering/javascript-node-services-section": "workspace:*"
+  },
+  "scripts": {
+    "check": "node --check scripts/*.mjs",
+    "test": "node --test test/*.test.mjs",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

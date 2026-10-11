@@ -1,0 +1,83 @@
+{
+  "name": "@red-cup-engineering/jsnode-package-services-section",
+  "version": "0.2.2",
+  "type": "module",
+  "description": "Shared JSNode module and schema projection with an optional package catalog and fabrication boundary.",
+  "license": "UNLICENSED",
+  "exports": {
+    "./fabrication-receipts": "./src/fabrication-receipts.mjs",
+    "./admit-jsnode-operation-package-specification": "./src/admit-jsnode-operation-package-specification.mjs",
+    "./project-jsnode-operation-package": "./src/project-jsnode-operation-package.mjs",
+    "./create-jsnode-operation-package": "./src/create-jsnode-operation-package.mjs",
+    "./jsnode-package-dialect": "./src/jsnode-package.mjs",
+    "./translate-markdown-jsnode-operation-package-specification": "./src/translate-markdown-jsnode-operation-package-specification.mjs",
+    "./admit-jsnode-operation-package-creation-receipt": "./src/admit-jsnode-operation-package-creation-receipt.mjs",
+    "./fabricate-markdown-jsnode-operation-package": "./src/fabricate-markdown-jsnode-operation-package.mjs",
+    "./fabrication-records": "./src/fabrication-records.mjs",
+    "./project-jsnode-operation-package-readme": "./src/project-jsnode-operation-package-readme.mjs",
+    "./project-jsnode-operation-tests": "./src/project-jsnode-operation-tests.mjs",
+    "./project-jsnode-modules": "./src/project-jsnode-modules.mjs",
+    "./project-jsnode-operation-source-from-arguments": "./src/project-jsnode-operation-source-from-arguments.mjs",
+    "./check-javascript-export-comment-discipline": "./scripts/check-javascript-export-comment-discipline.mjs",
+    "./workspace/bins": "./src/workspace/bins/index.mjs",
+    "./workspace/bins/script-catalog": "./src/workspace/bins/script-catalog.mjs",
+    "./workspace/exports": "./src/workspace/exports/index.mjs",
+    "./workspace/lockfile": "./src/workspace/lockfile.mjs",
+    "./workspace/package-manifest": "./src/workspace/package-manifest.mjs",
+    "./workspace/package-surface": "./src/workspace/package-surface.mjs",
+    "./workspace/pnpm-lockfile": "./src/workspace/pnpm-lockfile.mjs",
+    "./workspace/publication-status": "./src/workspace/publication-status.mjs",
+    "./workspace/schemas/admission": "./src/workspace/schemas/admission.mjs",
+    "./workspace/schemas/bins": "./src/workspace/schemas/bins.mjs",
+    "./workspace/schemas/exports": "./src/workspace/schemas/exports.mjs",
+    "./workspace/schemas/package-surface": "./src/workspace/schemas/package-surface.mjs",
+    "./workspace/schemas/publication-status": "./src/workspace/schemas/publication-status.mjs",
+    "./workspace/workspace-declaration": "./src/workspace/workspace-declaration.mjs",
+    "./derive-jsnode-package-from-closure": "./src/derive-jsnode-package-from-closure.mjs",
+    "./package-imports": "./src/package-imports.mjs",
+    "./sync-package-manifest": "./src/sync-package-manifest.mjs",
+    "./package-tree": "./src/package-tree.mjs"
+  },
+  "files": [
+    "apps",
+    "scripts",
+    "src",
+    "package.json",
+    "data/records/schema",
+    "data/records/jsnode-package-cli.specification.json"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "check": "node --check src/admit-jsnode-operation-package-specification.mjs && node --check src/project-jsnode-operation-package.mjs && node --check src/create-jsnode-operation-package.mjs && node --check src/stage-text-file-creation-projections.mjs && node --check src/translate-markdown-jsnode-operation-package-specification.mjs && node --check src/project-jsnode-modules.mjs && node --check src/project-jsnode-operation-package-readme.mjs && node --check src/project-jsnode-operation-tests.mjs && node --check src/admit-jsnode-operation-package-creation-receipt.mjs && node --check src/fabricate-markdown-jsnode-operation-package.mjs && node --check src/fabrication-records.mjs && node --check scripts/project-jsnode-package-cli.mjs && node --check apps/jsnode-package-cli.mjs && node --check apps/translate-markdown-cli.mjs && npm run check:generated",
+    "generate": "node scripts/project-jsnode-package-cli.mjs",
+    "check:generated": "node scripts/project-jsnode-package-cli.mjs --check",
+    "sync:manifest": "node scripts/sync-package-manifest.mjs --check"
+  },
+  "dependencies": {
+    "@red-cup-engineering/computer-content-engineering-services-section": "workspace:*",
+    "@red-cup-engineering/computer-filepath-engineering-services-section": "workspace:*",
+    "@red-cup-engineering/computer-text-content-engineering-services-section": "workspace:*",
+    "@red-cup-engineering/cryptographic-computer-data-engineering-services-section": "workspace:*",
+    "@red-cup-engineering/eavt-services-section": "workspace:*",
+    "@red-cup-engineering/execute-javascript-node-command-service": "workspace:*",
+    "@red-cup-engineering/computer-file-engineering-services-section": "workspace:*",
+    "@red-cup-engineering/inspect-installed-npm-package-service": "workspace:*",
+    "@red-cup-engineering/javascript-node-services-section": "workspace:*",
+    "@red-cup-engineering/json-schema-services-section": "workspace:*",
+    "@red-cup-engineering/json-services-section": "workspace:*",
+    "@red-cup-engineering/jsonl-services-section": "workspace:*",
+    "@red-cup-engineering/npm-package-services-section": "workspace:*",
+    "@red-cup-engineering/npm-workspace-publication-service": "workspace:*",
+    "@red-cup-engineering/read-javascript-file-export-documentation-service": "workspace:*",
+    "@red-cup-engineering/relating": "workspace:*",
+    "@red-cup-engineering/uri-services-section": "workspace:*",
+    "@red-cup-engineering/yaml-frontmatter-codec-service": "workspace:*",
+    "@red-cup-engineering/computer-data-engineering-services-section": "workspace:*"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "sync-package-manifest": "./scripts/sync-package-manifest.mjs"
+  }
+}
