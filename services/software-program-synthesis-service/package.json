@@ -29,7 +29,6 @@
     "@red-cup-engineering/a2a-rmn-task-client-service": "1.1.1",
     "@red-cup-engineering/coding-context-projection-service": "1.0.0",
     "@lenticule-science/hierarchical-circuit-equivalence-assay": "1.0.1",
-    "@red-cup-engineering/inference-work-lot-service": "4.0.1",
     "@red-cup-engineering/relation-model-notation-runtime": "8.0.0",
     "@red-cup-engineering/semantic-content-identify-service": "0.2.2",
     "@lenticule-science/witness-journal-rdf-projection-service": "workspace:*",
