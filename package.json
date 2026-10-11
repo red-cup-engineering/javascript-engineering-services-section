@@ -1,0 +1,38 @@
+{
+  "name": "@red-cup-engineering/javascript-engineering-services-section",
+  "version": "0.2.0",
+  "type": "module",
+  "description": "Services and scripts for working with Javascript computer code.",
+  "files": [
+    "src",
+    "scripts",
+    "test",
+    "package.json"
+  ],
+  "exports": {
+    "./import-lattice": "./src/javascript-import-lattice.mjs",
+    "./package-import-lattice": "./src/javascript-package-import-lattice.mjs",
+    "./executable-readiness": "./scripts/assess-javascript-executable-readiness.mjs",
+    "./project-capability-graph": "./scripts/project-561-group-javascript-capability-graph.mjs",
+    "./review-package": "./scripts/review-561-group-javascript-package.mjs"
+  },
+  "bin": {
+    "assess-javascript-executable-readiness": "./scripts/assess-javascript-executable-readiness.mjs",
+    "check-561-group-javascript-import-lattice": "./scripts/check-561-group-javascript-import-lattice.mjs",
+    "project-561-group-javascript-capability-graph": "./scripts/project-561-group-javascript-capability-graph.mjs",
+    "review-561-group-javascript-package": "./scripts/review-561-group-javascript-package.mjs"
+  },
+  "scripts": {
+    "check": "node --check scripts/*.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@red-cup-engineering/computer-content-graph-engineering-services-section": "workspace:*",
+    "@red-cup-engineering/javascript-file-import-services-section": "workspace:*",
+    "@red-cup-engineering/javascript-node-services-section": "workspace:*",
+    "@red-cup-engineering/javascript-normalization-services-section": "workspace:*"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

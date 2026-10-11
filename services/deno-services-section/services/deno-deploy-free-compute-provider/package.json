@@ -1,0 +1,19 @@
+{
+  "name": "@red-cup-engineering/deno-deploy-free-compute-provider",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Signed bounded edge compute admitted only while Deno reports the owning organization free_verified.",
+  "bin": {
+    "invoke-deno-free-compute": "./scripts/invoke-deno-free-compute.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/invocation.test.mjs && deno test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "LicenseRef-561Group-1.0",
+  "dependencies": {
+    "@red-cup-engineering/cryptographic-computer-data-engineering-services-section": "workspace:*"
+  }
+}

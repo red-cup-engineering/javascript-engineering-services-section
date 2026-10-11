@@ -1,0 +1,6 @@
+{
+  "name": "@red-cup-engineering/deno-services-section",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Authoritative home for services whose execution, tooling, or deployment contract depends on the Deno runtime."
+}

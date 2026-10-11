@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://red-cup-engineering.github.io/capability-cell-fabrication-services-section/schemas/capcell-spec.schema.json",
+  "title": "Capability Cell Profile v1 specification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profile", "identity", "capability"],
+  "properties": {
+    "profile": {"const": "org.red-cup-engineering.capcell.v1"},
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor", "account"],
+      "properties": {
+        "actor": {"type": "string", "pattern": "^urn:"},
+        "account": {"type": "string", "pattern": "^eip155:[0-9]+:0x[0-9a-f]{40}$"}
+      }
+    },
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^@[a-z0-9-]+/[a-z0-9-]+$"},
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"}
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "law", "kernel", "inputSchema", "outputSchema", "refusalSchema"],
+      "properties": {
+        "operation": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+        "law": {"type": "string", "pattern": "^ni:///sha-256;[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$"},
+        "kernel": {"type": "string", "pattern": "^\\./(?!.*\\.\\.)"},
+        "inputSchema": {"type": "string", "pattern": "^\\./(?!.*\\.\\.)"},
+        "outputSchema": {"type": "string", "pattern": "^\\./(?!.*\\.\\.)"},
+        "refusalSchema": {"type": "string", "pattern": "^\\./(?!.*\\.\\.)"}
+      }
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["package", "semanticId", "authority"],
+        "properties": {
+          "package": {"type": "string", "minLength": 1},
+          "semanticId": {"type": "string", "pattern": "^ni:///sha-256;[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$"},
+          "authority": {"const": "none"}
+        }
+      }
+    }
+  }
+}
