@@ -36,7 +36,9 @@
     "./derive-jsnode-package-from-closure": "./src/derive-jsnode-package-from-closure.mjs",
     "./package-imports": "./src/package-imports.mjs",
     "./sync-package-manifest": "./src/sync-package-manifest.mjs",
-    "./package-tree": "./src/package-tree.mjs"
+    "./package-tree": "./src/package-tree.mjs",
+    "./workspace/exports/resolve": "./src/workspace/exports/resolve.mjs",
+    "./workspace/package-interfaces": "./src/workspace/package-interfaces.mjs"
   },
   "files": [
     "apps",
@@ -51,7 +53,8 @@
     "check": "node --check src/admit-jsnode-operation-package-specification.mjs && node --check src/project-jsnode-operation-package.mjs && node --check src/create-jsnode-operation-package.mjs && node --check src/stage-text-file-creation-projections.mjs && node --check src/translate-markdown-jsnode-operation-package-specification.mjs && node --check src/project-jsnode-modules.mjs && node --check src/project-jsnode-operation-package-readme.mjs && node --check src/project-jsnode-operation-tests.mjs && node --check src/admit-jsnode-operation-package-creation-receipt.mjs && node --check src/fabricate-markdown-jsnode-operation-package.mjs && node --check src/fabrication-records.mjs && node --check scripts/project-jsnode-package-cli.mjs && node --check apps/jsnode-package-cli.mjs && node --check apps/translate-markdown-cli.mjs && npm run check:generated",
     "generate": "node scripts/project-jsnode-package-cli.mjs",
     "check:generated": "node scripts/project-jsnode-package-cli.mjs --check",
-    "sync:manifest": "node scripts/sync-package-manifest.mjs --check"
+    "sync:manifest": "node scripts/sync-package-manifest.mjs --check",
+    "check:interfaces": "node scripts/check-package-interfaces.mjs --check"
   },
   "dependencies": {
     "@red-cup-engineering/computer-content-engineering-services-section": "workspace:*",
@@ -78,6 +81,7 @@
     "node": ">=24"
   },
   "bin": {
-    "sync-package-manifest": "./scripts/sync-package-manifest.mjs"
+    "sync-package-manifest": "./scripts/sync-package-manifest.mjs",
+    "check-package-interfaces": "./scripts/check-package-interfaces.mjs"
   }
 }
