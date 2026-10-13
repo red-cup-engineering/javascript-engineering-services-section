@@ -26,6 +26,16 @@ async function exercise(sources){
  },judge:async(...args)=>judgments.push(args),isolatedAssayExecutor:controlledLocalAssayFixture});
  return {result,calls,judgments};
 }
+// A customer cannot cause supplier code to reach the ambient host process.
+// Without the host-composed isolated runner, the factory refuses *before*
+// purchasing or asking for any model output.
+let unauthorizedInferenceCalls=0;
+const noHost=await deriveJsnodeModules(order, {
+ infer: async () => { unauthorizedInferenceCalls++; throw new Error("unreachable"); },
+});
+assert.equal(noHost.type,"JsnodeModuleDerivationRefusal");
+assert.equal(noHost.code,"ISOLATED_ASSAY_UNAVAILABLE");
+assert.equal(unauthorizedInferenceCalls,0);
 const good=await exercise(valid);
 assert.equal(good.result.type,'JsnodeModuleProposal',JSON.stringify(good.result));
 assert.equal(good.result.files.filter(f=>f.path.startsWith('src/')).length,2);
