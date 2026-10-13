@@ -186,7 +186,7 @@ function validRequest(request) {
 }
 
 /** Admit the work order before spending inference; return a proposal, never acceptance. */
-export async function deriveMarkdownJsnodeOperationModules(source, { infer, judge = async () => undefined, dependencyProjectRoot } = {}) {
+export async function deriveMarkdownJsnodeOperationModules(source, { infer, judge = async () => undefined, dependencyProjectRoot, isolatedAssayExecutor } = {}) {
   let phase = "translation";
   let derivation;
   try {
@@ -209,7 +209,7 @@ export async function deriveMarkdownJsnodeOperationModules(source, { infer, judg
     if (translated.type === "MarkdownJsnodeOperationPackageClosureTranslation") {
       phase = "derivation";
       if (typeof infer !== "function") return refusal(phase, { code: "NO_DERIVATION_CARRIER", message: "a meaning-closure's sources are derived, and no inference carrier was composed" });
-      derivation = await deriveJsnodePackageFromClosure(workOrderSpecification, { infer, judge, dependencyProjectRoot });
+      derivation = await deriveJsnodePackageFromClosure(workOrderSpecification, { infer, judge, dependencyProjectRoot, isolatedAssayExecutor });
       if (derivation.type === "JsnodeClosureDerivationRefusal") return immutable({
         ...refusal(phase, derivation),
         message: derivation.question ?? derivation.evidence ?? `no delivery for ${derivation.operation} passed its examples`,
@@ -253,7 +253,7 @@ export async function deriveMarkdownJsnodeOperationModules(source, { infer, judg
  * @param {{infer?: Function, judge?: Function}} [carriers] For a closure: `infer({ taskClass, objective, messages, json })` resolving to { text, lot }, and `judge(lot, outcome, evidence)`.
  * @returns {Promise<object>} A MarkdownJsnodeOperationPackageFabricationReceipt or phase-specific refusal.
  */
-export async function fabricateMarkdownJsnodeOperationPackage(request, { infer, judge = async () => undefined, dependencyProjectRoot } = {}) {
+export async function fabricateMarkdownJsnodeOperationPackage(request, { infer, judge = async () => undefined, dependencyProjectRoot, isolatedAssayExecutor } = {}) {
   const invalid = validRequest(request);
   if (invalid) return refusal("request", { code: "INVALID_REQUEST", message: invalid });
   let phase = "translation";
@@ -267,7 +267,7 @@ export async function fabricateMarkdownJsnodeOperationPackage(request, { infer, 
     }
   };
   try {
-    const proposal = await deriveMarkdownJsnodeOperationModules(request.source, { infer, judge, dependencyProjectRoot });
+    const proposal = await deriveMarkdownJsnodeOperationModules(request.source, { infer, judge, dependencyProjectRoot, isolatedAssayExecutor });
     if (proposal.type !== "MarkdownJsnodeOperationModuleProposal") return proposal;
     const { artifactSpecification: specification, projection } = proposal;
     workOrderSpecification = proposal.workOrderSpecification;
