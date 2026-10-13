@@ -140,10 +140,11 @@ export function transformJsonSchemaToTypescript(schema, options = {}) {
   const definitions = isSchema(schema) && isSchema(schema.$defs) ? Object.entries(schema.$defs) : [];
   // JSON Schema definition names are arbitrary JSON strings, including slashes
   // and tildes. Only safe identifiers can be TS aliases; the rest are inlined.
-  const aliases = definitions.filter(([name]) => legalIdentifier(name))
-    .map(([name, definition]) => `export type ${name} = ${renderSchema(definition, schema, references)};`);
-  if (aliases.some((_, i) => definitions.filter(([name]) => legalIdentifier(name))[i][0] === typeName))
+  const aliasDefinitions = definitions.filter(([name]) => legalIdentifier(name));
+  if (aliasDefinitions.some(([name]) => name === typeName))
     throw new TypeError("duplicate TypeScript typeName and $defs alias: " + typeName);
+  const aliases = aliasDefinitions.map(([name, definition]) =>
+    `export type ${name} = ${renderSchema(definition, schema, references)};`);
   return [...aliases, `export type ${typeName} = ${renderSchema(schema, schema, references)};`, ""].join("\n");
 }
 
