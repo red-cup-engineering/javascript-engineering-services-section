@@ -30,7 +30,7 @@ import { admitArtifactFabricationSpecification, admitArtifactFabricationRealizat
 import { admitNpmPackageVersion } from "@red-cup-engineering/npm-package-services-section/admit-npm-package-version";
 import { projectJsnodeModules, projectJsnodeModulePaths } from "./project-jsnode-modules.mjs";
 import { channelOfPreAssayFailure, proofingOfDerivation } from "./assay-channels.mjs";
-import { admittedAssayNames, testRunCompletedAllAssays } from "./assay-completion.mjs";
+import { admittedAssayNames, receiveIsolatedAssayOutcome } from "./assay-completion.mjs";
 import { misfoldRefusal, misfoldsOfModule } from "./misfold.mjs";
 
 const TASK_CLASS = "code-fabrication";
@@ -359,22 +359,7 @@ export async function preAssayModules(closure, sources, derivedCases = [], depen
       }))),
       timeoutMs: 30000, network: false, writableHostWorkspace: false,
     }));
-    if (!run || run.isolated !== true || run.status === null ||
-        !Number.isInteger(run.status) || typeof run.stdout !== "string" ||
-        typeof run.stderr !== "string" || run.stdout.length > 2 * 1024 * 1024 ||
-        run.stderr.length > 2 * 1024 * 1024 || run.truncated === true ||
-        run.timedOut === true || run.signal)
-      return { passed: false, code: "ASSAY_EXECUTION_REFUSED",
-        failure: "isolated host did not provide a complete bounded execution outcome" };
-    if (run.status === 0 && testRunCompletedAllAssays(run.stdout, names))
-      return { passed: true };
-    if (run.status === 0) return { passed: false, code: "ASSAY_INCOMPLETE",
-      failure: "assay-incomplete: host runner exited zero without executing every admitted example and clause test" };
-    const lines = run.stdout.trim().split("\n");
-    const failureAt = lines.findIndex(line => line.startsWith("not ok"));
-    const said = failureAt >= 0 ? lines.slice(failureAt, failureAt + 16).join("\n")
-      : run.stderr.trim().split("\n").slice(-3).join(" ");
-    return { passed: false, code: "ASSAY_TEST_FAILED", failure: said.slice(0, 600) };
+    return receiveIsolatedAssayOutcome(run, names);
   } catch (error) {
     return { passed: false, code: "ASSAY_EXECUTION_REFUSED",
       failure: error instanceof Error ? error.message : String(error) };
