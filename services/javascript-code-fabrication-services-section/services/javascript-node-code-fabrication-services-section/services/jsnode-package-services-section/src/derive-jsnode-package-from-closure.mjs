@@ -21,9 +21,7 @@
  * Every attempt is recorded with the lot the market sold it under, so the fabrication receipt binds
  * the provider, and the caller judges the accepted lot once the whole pipeline has assayed it.
  */
-import { spawnSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { parseJsonValue } from "@red-cup-engineering/json-services-section";
 import { inspectInstalledNpmPackageResolution } from "@red-cup-engineering/inspect-installed-npm-package-service";
@@ -32,6 +30,7 @@ import { admitArtifactFabricationSpecification, admitArtifactFabricationRealizat
 import { admitNpmPackageVersion } from "@red-cup-engineering/npm-package-services-section/admit-npm-package-version";
 import { projectJsnodeModules, projectJsnodeModulePaths } from "./project-jsnode-modules.mjs";
 import { channelOfPreAssayFailure, proofingOfDerivation } from "./assay-channels.mjs";
+import { admittedAssayNames, receiveIsolatedAssayOutcome } from "./assay-completion.mjs";
 import { misfoldRefusal, misfoldsOfModule } from "./misfold.mjs";
 
 const TASK_CLASS = "code-fabrication";
@@ -307,50 +306,63 @@ export function moduleOfDelivery(text, member) {
 }
 
 /**
- * Run the entire declared module set on its examples and prior clause assays, without installing:
- * { passed: true } or { passed: false, failure }. Dependencies are exact installed
- * resolutions admitted before inference, not a reason to defer behavioral evidence.
+ * Build the complete connected source and independent test lot, then receive
+ * the outcome from the host's isolated execution capability.
+ *
+ * This Code Engineering module does NOT execute supplier-authored code. The
+ * runtime host must provide isolatedAssayExecutor from its own trusted service
+ * composition, not from the customer's JSON request. A temporary directory or
+ * Node --test child is NOT an isolation mechanism. No ambient fallback exists.
+ *
+ * The executor is responsible for making the supplied files available only in
+ * an ephemeral isolated workspace, mounting exact declared dependencies
+ * read-only, disabling network and host credentials, bounding resources and
+ * killing all descendants. This function checks behavior evidence afterward.
  */
-export function preAssayModules(closure, sources, derivedCases = [], dependencyResolutions = []) {
+export async function preAssayModules(closure, sources, derivedCases = [], dependencyResolutions = [], isolatedAssayExecutor) {
+  if (typeof isolatedAssayExecutor !== "function") return {
+    passed: false, code: "ISOLATED_ASSAY_UNAVAILABLE",
+    failure: "isolated execution capability was not composed by the host; candidate source was not executed",
+  };
   for (const [name, version] of Object.entries(closure.dependencies ?? {})) {
     const resolution = dependencyResolutions.find(item => item.expectedName === name);
     if (!resolution?.conformant || resolution.packageVersion !== version || !resolution.packageRoot) {
-      return { passed: false, failure: `no exact installed assay dependency: ${name}@${version}` };
+      return { passed: false, code: "ASSAY_CONTEXT_UNAVAILABLE",
+        failure: `no exact installed assay dependency: ${name}@${version}` };
     }
   }
-  const directory = mkdtempSync(path.join(tmpdir(), "jsnode-closure-"));
   try {
-    for (const resolution of dependencyResolutions) {
-      const link = path.join(directory, "node_modules", resolution.expectedName);
-      mkdirSync(path.dirname(link), { recursive: true });
-      symlinkSync(resolution.packageRoot, link, "dir");
-    }
-    // The existing projector admits paths, exports and local import closure
-    // before any supplier source is executed. Assay one connected artifact,
-    // never a sibling in isolation or a partially supplied source set.
-    const files = projectJsnodeModules({ sources: sources.map(({ path, text }) => ({ path, text })), operations: closure.operations });
-    for (const projection of files) {
-      const file = path.join(directory, projection.path);
-      mkdirSync(path.dirname(file), { recursive: true });
-      writeFileSync(file, projection.text);
-    }
-    const tests = testsOfClosure(closure, derivedCases);
-    const testPaths = tests.map(test => {
-      const testFile = path.join(directory, test.path);
-      mkdirSync(path.dirname(testFile), { recursive: true });
-      writeFileSync(testFile, test.text);
-      return testFile;
+    // Admission of paths, named exports and complete import closure happens
+    // BEFORE any executable provider is called.
+    const modules = projectJsnodeModules({
+      sources: sources.map(({ path, text }) => ({ path, text })),
+      operations: closure.operations,
     });
-    const run = spawnSync(process.execPath, ["--test", "--test-reporter=tap", ...testPaths], { cwd: directory, env: { TZ: "UTC" }, encoding: "utf8", timeout: 30_000 });
-    if (run.status === 0) return { passed: true };
-    const lines = run.stdout.trim().split("\n");
-    const failureAt = lines.findIndex(line => line.startsWith("not ok"));
-    const said = failureAt >= 0 ? lines.slice(failureAt, failureAt + 16).join("\n") : run.stderr.trim().split("\n").slice(-3).join(" ");
-    return { passed: false, failure: said.slice(0, 600) };
+    const assays = testsOfClosure(closure, derivedCases);
+    const names = admittedAssayNames(closure, derivedCases);
+    const files = Object.freeze([...modules, ...assays.map(({ path, text }) => ({ path, text }))].map(file =>
+      Object.freeze({ path: file.path, text: file.text })));
+    const testPaths = Object.freeze(assays.map(({ path }) => path));
+    const allPaths = files.map(file => file.path);
+    if (new Set(allPaths).size !== allPaths.length ||
+        files.length > 128 || files.some(file => file.text.length > 1024 * 1024) ||
+        files.reduce((size, file) => size + Buffer.byteLength(file.text, "utf8"), 0) > 4 * 1024 * 1024)
+      return { passed: false, code: "ASSAY_INPUT_UNBOUNDED",
+        failure: "connected module assay input has duplicate paths or exceeds the bounded source profile" };
+
+    const run = await isolatedAssayExecutor(Object.freeze({
+      kind: "jsnode.connected-module-pre-assay", version: 1,
+      files, testPaths, expectedAssays: names,
+      dependencies: Object.freeze(dependencyResolutions.map(item => Object.freeze({
+        expectedName: item.expectedName, packageVersion: item.packageVersion,
+        packageRoot: item.packageRoot,
+      }))),
+      timeoutMs: 30000, network: false, writableHostWorkspace: false,
+    }));
+    return receiveIsolatedAssayOutcome(run, names);
   } catch (error) {
-    return { passed: false, failure: error.message };
-  } finally {
-    rmSync(directory, { recursive: true, force: true });
+    return { passed: false, code: "ASSAY_EXECUTION_REFUSED",
+      failure: error instanceof Error ? error.message : String(error) };
   }
 }
 
@@ -361,7 +373,7 @@ export function preAssayModules(closure, sources, derivedCases = [], dependencyR
  * Returns { sources, tests, derivations } or a JsnodeClosureDerivationRefusal naming the operation,
  * the open question when the order is not closed, and every attempt.
  */
-export async function deriveJsnodePackageFromClosure(workOrder, { infer, judge = async () => undefined, dependencyProjectRoot } = {}) {
+export async function deriveJsnodePackageFromClosure(workOrder, { infer, judge = async () => undefined, dependencyProjectRoot, isolatedAssayExecutor } = {}) {
   // The native path uses one admitted order for both the providers and assays.
   // A lower-level closure remains usable by code callers without claiming admission.
   const closure = workOrder.type === "ArtifactFabricationSpecification"
@@ -370,6 +382,13 @@ export async function deriveJsnodePackageFromClosure(workOrder, { infer, judge =
         constraints: workOrder.constraints, openQuestions: workOrder.openQuestions }
     : workOrder;
   if (typeof infer !== "function") throw new TypeError("a closure's sources are derived by an inference carrier the caller composes");
+  // Do not purchase inference or materialize source when the host cannot
+  // actually run and receive the complete hidden/declared test lot safely.
+  if (typeof isolatedAssayExecutor !== "function")
+    return Object.freeze({ type: "JsnodeClosureDerivationRefusal", version: 1,
+      code: "ISOLATED_ASSAY_UNAVAILABLE",
+      evidence: "the host did not compose an isolated code-execution capability",
+      derivations: Object.freeze([]) });
   const told = async (lot, outcome, evidence) => {
     try { await judge(lot, outcome, evidence); return outcome; } catch (error) { return `${outcome} (untold: ${String(error?.message ?? error).slice(0, 200)})`; }
   };
@@ -471,7 +490,7 @@ export async function deriveJsnodePackageFromClosure(workOrder, { infer, judge =
     return refused("ASSAY_CONTEXT_CHANGED", undefined, { scope: "module-set" });
   }
   dependencyResolutions = currentDependencies;
-  const assay = preAssayModules(closure, sources, assayCases.cases, dependencyResolutions);
+  const assay = await preAssayModules(closure, sources, assayCases.cases, dependencyResolutions, isolatedAssayExecutor);
   if (!assay.passed) {
     // The whole composition failed. Do not attribute an interaction failure
     // to an arbitrarily selected module or purchase automatic repairs.
