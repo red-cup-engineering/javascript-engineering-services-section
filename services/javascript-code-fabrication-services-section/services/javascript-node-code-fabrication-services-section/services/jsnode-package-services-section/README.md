@@ -190,3 +190,8 @@ An incomplete or failing composition is refused as a whole, without automatic
 repair purchases or attributing an interaction failure to one arbitrary supplier.
 The result retains the original order, source lots and assay evidence; it remains
 a proposal for an independent receiver, not accepted or deployed software.
+
+The bounded workspace lockfile codec accepts a document ending at its importer
+section. End of input terminates dependency and importer walks; it is never a
+blank line to skip. `cutPnpmLockfile` preserves every unnamed importer and the
+existing registry closure.

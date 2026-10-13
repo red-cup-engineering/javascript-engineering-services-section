@@ -19,7 +19,7 @@ function indentOf(line) {
 }
 
 function isBlank(line) {
-  return line === undefined || line.trim() === "";
+  return line !== undefined && line.trim() === "";
 }
 
 function unquoteKey(token) {
