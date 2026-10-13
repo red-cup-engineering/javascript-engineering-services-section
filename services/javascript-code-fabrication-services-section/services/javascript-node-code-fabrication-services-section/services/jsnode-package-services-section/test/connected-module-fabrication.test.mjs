@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {deriveJsnodeModules} from '../src/derive-jsnode-package-from-closure.mjs';
+import { controlledLocalAssayFixture } from './fixtures/controlled-local-assay.mjs';
 import {translateMarkdownJsnodeOperationPackageSpecification} from '../src/translate-markdown-jsnode-operation-package-specification.mjs';
 
 // A controlled capability demonstration, not an allocated enterprise demand.
@@ -22,7 +23,7 @@ async function exercise(sources){
  const result=await deriveJsnodeModules(order,{infer:async request=>{
   calls.push(request);const module=JSON.parse(request.messages[1].content).selectedModule;
   return {text:JSON.stringify(module===undefined?{cases,question:null}:{source:sources[module],question:null}),lot:{id:'controlled:'+calls.length}};
- },judge:async(...args)=>judgments.push(args)});
+ },judge:async(...args)=>judgments.push(args),isolatedAssayExecutor:controlledLocalAssayFixture});
  return {result,calls,judgments};
 }
 const good=await exercise(valid);
