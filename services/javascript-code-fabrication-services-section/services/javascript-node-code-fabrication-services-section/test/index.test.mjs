@@ -266,3 +266,19 @@ test("generated value/type bindings cannot collide across independent schema ent
     type:"object",$defs:{ A:{ type:"number" } }
   }}], {runtimeBinding}), /duplicate generated TypeScript type/u);
 });
+
+test("unresolved local mathematical references and unsafe pointer traversals fail rather than weaken types", () => {
+  for (const pointer of [
+    "#/properties/missing",
+    "#/properties/known/items/1",
+    "#/properties/__proto__",
+    "#/properties/known/items/00",
+  ]) {
+    assert.throws(() => transformJsonSchemaToTypescript({
+      type:"object", properties:{
+        known:{ type:"array",items:[{type:"integer"}],additionalItems:false },
+        projected:{ $ref:pointer },
+      },
+    }, { typeName:"Rejected" }), /unresolved local JSON Schema reference/u);
+  }
+});
