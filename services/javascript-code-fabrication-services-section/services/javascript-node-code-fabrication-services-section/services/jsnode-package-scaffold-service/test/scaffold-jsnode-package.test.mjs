@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { symlinkSync, mkdirSync } from "node:fs";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -119,4 +121,89 @@ test("refuses absent or invalid scaffold material", async () => {
   await assert.rejects(() => scaffoldJsnodePackage({ name: "Bad Name", owner: "x", directory: "/tmp", description: "d." }), /lower-kebab-case/u);
   await assert.rejects(() => scaffoldJsnodePackage({ name: "widget-service", owner: "Bad Owner", directory: "/tmp", description: "d." }), /owner/u);
   await assert.rejects(() => scaffoldJsnodePackage({ name: "widget-service", owner: "x", directory: "/tmp", layer: "nowhere", description: "d." }), /layer/u);
+});
+
+test("fabricated package executes its generated source and tests, for services and apps", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "jsnode-scaffold-exec-"));
+  try {
+    for (const layer of ["services","apps"]) {
+      const name = layer === "apps" ? "generated-example-app" : "generated-example-service";
+      const artifact = await scaffoldJsnodePackage({
+        name, owner:"red-cup-engineering", layer, directory,
+        description:"Executable fabrication smoke test.", apply:true,
+      });
+      for (const file of artifact.files.filter(file => file.path.endsWith(".mjs"))) {
+        const checked = spawnSync(process.execPath, ["--check",file.path],{
+          cwd:artifact.packageDir,encoding:"utf8",
+        });
+        assert.equal(checked.status,0,checked.stderr);
+      }
+      const behavioral = spawnSync(process.execPath, ["--test",`test/${name.replace(/-(app|service)$/u,"")}.test.mjs`],{
+        cwd:artifact.packageDir,encoding:"utf8",
+      });
+      assert.equal(behavioral.status,0,behavioral.stderr+"\n"+behavioral.stdout);
+      if (layer === "apps") {
+        const invoked = spawnSync(process.execPath,[`bin/${name.replace(/-app$/u,"")}.mjs`],{
+          cwd:artifact.packageDir,encoding:"utf8",
+        });
+        assert.equal(invoked.status,0,invoked.stderr);
+        assert.equal(JSON.parse(invoked.stdout).type,"GeneratedExample");
+      }
+    }
+  } finally {
+    await rm(directory,{recursive:true,force:true});
+  }
+});
+
+test("entryName cannot escape directories, generate invalid syntax or inject identifiers", async () => {
+  const directory = await mkdtemp(join(tmpdir(),"jsnode-invalid-entry-"));
+  const basis = {name:"widget-service",owner:"red-cup-engineering",
+    description:"Generate a valid package.",directory,apply:true};
+  try {
+    for (const entryName of ["../outside","../../escape","name;process.exit(1)","bad--entry",
+      "bad-","-bad","bad/name","bad.name","bad space","bad\\\\path"]) {
+      await assert.rejects(()=>scaffoldJsnodePackage({...basis,entryName}),/entryName/);
+    }
+    for (const name of ["bad--package","trailing-","bad-1--name"]) {
+      await assert.rejects(()=>scaffoldJsnodePackage({...basis,name}),/lower-kebab-case/);
+    }
+    assert.equal(existsSync(join(directory,"services","widget-service")),false);
+  } finally {
+    await rm(directory,{recursive:true,force:true});
+  }
+});
+
+test("apply does not follow dangling package paths or symlinked fabrication layers", async () => {
+  const directory = await mkdtemp(join(tmpdir(),"jsnode-symlink-"));
+  const outside = await mkdtemp(join(tmpdir(),"jsnode-external-"));
+  const basis={name:"widget-service",owner:"red-cup-engineering",
+    description:"Confined fixture.",directory,apply:true};
+  try {
+    mkdirSync(join(directory,"services"));
+    symlinkSync(join(outside,"missing"),join(directory,"services","widget-service"));
+    await assert.rejects(()=>scaffoldJsnodePackage(basis),/already exists/);
+    await rm(join(directory,"services","widget-service"));
+    await rm(join(directory,"services"),{recursive:true,force:true});
+    symlinkSync(outside,join(directory,"services"));
+    await assert.rejects(()=>scaffoldJsnodePackage(basis),/canonical directory/);
+    assert.equal(existsSync(join(outside,"widget-service")),false);
+  } finally {
+    await rm(directory,{recursive:true,force:true});
+    await rm(outside,{recursive:true,force:true});
+  }
+});
+
+test("failed scaffolding creates no half-complete published package", async () => {
+  const directory = await mkdtemp(join(tmpdir(),"jsnode-valid-scaffold-"));
+  const basis={name:"valid-service",owner:"red-cup-engineering",directory,
+    description:"First published version.",apply:true};
+  try {
+    const first = await scaffoldJsnodePackage(basis);
+    await assert.rejects(()=>scaffoldJsnodePackage(basis),/already exists/);
+    const retained=await readFile(join(first.packageDir,"package.json"),"utf8");
+    assert.equal(JSON.parse(retained).description,"First published version.");
+    assert.equal(existsSync(join(directory,"services","valid-service","src","valid.mjs")),true);
+  } finally {
+    await rm(directory,{recursive:true,force:true});
+  }
 });
