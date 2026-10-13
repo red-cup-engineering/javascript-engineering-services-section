@@ -125,3 +125,107 @@ test("generates native ESM and matching declarations from shared carrier schemas
   assert.doesNotMatch(javascript, /export type| as const/);
   assert.throws(() => renderJsonSchemaModule(entries, { format: "unsupported" }), /format must/);
 });
+
+test("fabricates proof-motion types through nested local JSON pointers", () => {
+  const schema = {
+    $id: "https://schemas.561.group/math/proof-motion.json",
+    type: "object",
+    required: ["stages", "edges"],
+    properties: {
+      stages: { type: "array", items: { type: "integer" } },
+      edges: { type: "array", items: { type: "object",
+        required: ["parent", "child"],
+        properties: {
+          parent: { $ref: "#/properties/stages/items" },
+          child: { $ref: "#/properties/stages/items" },
+        },
+      } },
+    },
+  };
+  const projected = transformJsonSchemaToTypescript(schema, { typeName: "ProofMotion" });
+  assert.equal(projected, 'export type ProofMotion = { readonly "stages": readonly number[]; readonly "edges": readonly { readonly "parent": number; readonly "child": number; }[]; };\n');
+  assert.doesNotMatch(projected, /"parent": unknown|"child": unknown/u);
+});
+
+test("JSON Pointer projection traverses tuple indices and escaped and percent-encoded keys", () => {
+  const schema = {
+    type: "object",
+    $defs: {
+      "edge/evidence": { type: "string" },
+      "charge~four": { type: "number" },
+    },
+    properties: {
+      tuple: { type: "array", prefixItems: [{ type: "boolean" }, { type: "integer" }], minItems: 2, items: false },
+      first: { $ref: "#/properties/tuple/prefixItems/0" },
+      escaped: { $ref: "#/$defs/edge~1evidence" },
+      charge: { $ref: "#/$defs/charge~0four" },
+      percent: { $ref: "#/%24defs/edge~1evidence" },
+    },
+  };
+  const projected = transformJsonSchemaToTypescript(schema, { typeName: "MotionCell" });
+  for (const [field, kind] of [
+    ['"first"?: boolean;', "tuple index"], ['"escaped"?: string;', "slash token"],
+    ['"charge"?: number;', "tilde token"], ['"percent"?: string;', "percent encoding"],
+  ]) assert.ok(projected.includes(field), kind + ": " + projected);
+});
+
+test("relative references into a separately supplied schema retain nested types", () => {
+  const entries = [
+    { exportName: "motionSchema", typeName: "Motion", schema: {
+      $id: "https://schemas.561.group/motion/root.json", type: "object",
+      properties: { rank: { $ref: "values.json#/$defs/Rank" } },
+    }},
+    { exportName: "valuesSchema", typeName: "Values", schema: {
+      $id: "https://schemas.561.group/motion/values.json",
+      $defs: { Rank: { type: "integer" } }, type: "object",
+    }},
+  ];
+  const text = renderJsonSchemaModule(entries);
+  assert.match(text, /export type Motion = \{ readonly "rank"\?: number; \}/u);
+});
+
+test("nullable structured carriers retain their constrained fields", () => {
+  const schema = { type: ["object", "null"], required: ["side"],
+    properties: { side: { enum: ["for", "against"] } } };
+  const text = transformJsonSchemaToTypescript(schema, { typeName: "SignedCell" });
+  assert.equal(text, 'export type SignedCell = { readonly "side": "for" | "against"; } | null;\n');
+});
+
+test("impossible finite tuple lower bounds generate never", () => {
+  const impossible = [
+    { type: "array", prefixItems: [{ type: "string" }], minItems: 2, items: false },
+    { type: "array", items: false, minItems: 1 },
+    { type: "array", items: [{ type: "string" }], additionalItems: false, minItems: 2 },
+  ];
+  for (const schema of impossible)
+    assert.equal(transformJsonSchemaToTypescript(schema, { typeName: "Impossible" }), "export type Impossible = never;\n");
+});
+
+test("named recursive proof cells stay expressible; anonymous cycles explicitly refuse", () => {
+  const named = transformJsonSchemaToTypescript({
+    type: "object",
+    $defs: { Node: { type: "object", properties: {
+      next: { $ref: "#/$defs/Node" },
+    } } },
+    properties: { root: { $ref: "#/$defs/Node" } },
+  }, { typeName: "Graph" });
+  assert.match(named, /export type Node = \{ readonly "next"\?: Node; \};/u);
+  assert.match(named, /"root"\?: Node/u);
+  const anonymous = { type: "object", properties: { loop: { $ref: "#" } } };
+  assert.throws(() => transformJsonSchemaToTypescript(anonymous, { typeName: "Cyclic" }), /recursive schema reference/);
+});
+
+test("native generated JavaScript retains the exact math carrier schema", async () => {
+  const schema = {
+    $id: "https://schemas.561.group/motion-event", type: "object",
+    required: ["cell", "side"],
+    properties: { cell: { type: "string" }, side: { enum: ["for", "against"] },
+      parentIndices: { type: "array", items: { type: "integer" } } },
+  };
+  const javascript = renderJsonSchemaModule([{ exportName: "eventSchema", typeName: "Event", schema }],
+    { format: "javascript" });
+  const generated = await import("data:text/javascript;base64," + Buffer.from(javascript).toString("base64"));
+  assert.deepEqual(generated.eventSchema, schema);
+  assert.match(transformJsonSchemaToTypescript(schema, { typeName: "Event" }),
+    /"parentIndices"\?: readonly number\[\]/u);
+});
