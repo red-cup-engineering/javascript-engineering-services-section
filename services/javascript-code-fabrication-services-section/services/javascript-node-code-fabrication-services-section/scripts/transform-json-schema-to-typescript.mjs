@@ -118,7 +118,11 @@ export function transformJsonSchemaToTypescript(schema, options = {}) {
   const typeName = identifier(options.typeName ?? (isSchema(schema) && typeof schema.title === "string" ? schema.title : "Schema"), "typeName");
   const references = Array.isArray(options.references) ? options.references : [];
   const definitions = isSchema(schema) && isSchema(schema.$defs) ? Object.entries(schema.$defs) : [];
-  const aliases = definitions.map(([name, definition]) => `export type ${identifier(name, "$defs key")} = ${renderSchema(definition, schema, references)};`);
+  // JSON Schema definition names are arbitrary JSON strings, including slashes
+  // and tildes. Only identifier-compatible names can become TypeScript aliases;
+  // all others are expanded at their actual JSON Pointer target.
+  const aliases = definitions.filter(([name]) => /^[A-Za-z_$][A-Za-z0-9_$]*$/u.test(name))
+    .map(([name, definition]) => `export type ${name} = ${renderSchema(definition, schema, references)};`);
   return [...aliases, `export type ${typeName} = ${renderSchema(schema, schema, references)};`, ""].join("\n");
 }
 
