@@ -6,8 +6,25 @@
 
 const isSchema = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 
+// Exported names are emitted into TypeScript and/or executable JavaScript.
+// A textual identifier spelling is insufficient: keywords cannot be bindings.
+const reserved = new Set([
+  "await", "break", "case", "catch", "class", "const", "continue",
+  "debugger", "default", "delete", "do", "else", "enum", "export",
+  "extends", "false", "finally", "for", "function", "if", "import",
+  "in", "instanceof", "new", "null", "return", "super", "switch",
+  "this", "throw", "true", "try", "typeof", "var", "void", "while",
+  "with", "yield", "let", "static", "implements", "interface",
+  "package", "private", "protected", "public", "arguments", "eval",
+  "as", "asserts", "infer", "is", "keyof", "module", "namespace",
+  "number", "object", "readonly", "require", "satisfies", "string",
+  "symbol", "type", "unique", "unknown", "never", "any", "boolean",
+]);
+const legalIdentifier = value => typeof value === "string" &&
+  /^[A-Za-z_$][A-Za-z0-9_$]*$/u.test(value) && !reserved.has(value);
 function identifier(value, label) {
-  if (typeof value !== "string" || !/^[A-Za-z_$][A-Za-z0-9_$]*$/u.test(value)) throw new TypeError(`${label} must be a valid TypeScript identifier`);
+  if (!legalIdentifier(value))
+    throw new TypeError(`${label} must be a non-reserved TypeScript/JavaScript identifier`);
   return value;
 }
 const quoted = (value) => JSON.stringify(value);
@@ -84,9 +101,12 @@ function renderSchema(schema, root, references = [], inheritedBase = resolvedBas
   if (typeof schema.$ref === "string") {
     const resolved = resolveReference(schema.$ref, root, references, base);
     const local = /^#\/\$defs\/([A-Za-z_$][A-Za-z0-9_$]*)$/u.exec(schema.$ref);
-    if (local && resolved?.local && isSchema(root.$defs) && Object.hasOwn(root.$defs, local[1])) return local[1];
+    if (local && legalIdentifier(local[1]) && resolved?.local && isSchema(root.$defs) && Object.hasOwn(root.$defs, local[1])) return local[1];
     const target = resolved === undefined ? undefined : atPointer(resolved.schema, resolved.fragment);
-    if (target === undefined) return "unknown";
+    if (target === undefined) {
+      if (resolved?.local) throw new TypeError("unresolved local JSON Schema reference: " + schema.$ref);
+      return "unknown"; // Preserve documented lossy behavior for absent external schemas.
+    }
     if (resolved.fragment === "" && resolved.entry?.internal !== true) return resolved.entry.typeName;
     return renderSchema(target, resolved.schema, references, resolvedBase(resolved.schema), nextActive);
   }
@@ -119,10 +139,11 @@ export function transformJsonSchemaToTypescript(schema, options = {}) {
   const references = Array.isArray(options.references) ? options.references : [];
   const definitions = isSchema(schema) && isSchema(schema.$defs) ? Object.entries(schema.$defs) : [];
   // JSON Schema definition names are arbitrary JSON strings, including slashes
-  // and tildes. Only identifier-compatible names can become TypeScript aliases;
-  // all others are expanded at their actual JSON Pointer target.
-  const aliases = definitions.filter(([name]) => /^[A-Za-z_$][A-Za-z0-9_$]*$/u.test(name))
+  // and tildes. Only safe identifiers can be TS aliases; the rest are inlined.
+  const aliases = definitions.filter(([name]) => legalIdentifier(name))
     .map(([name, definition]) => `export type ${name} = ${renderSchema(definition, schema, references)};`);
+  if (aliases.some((_, i) => definitions.filter(([name]) => legalIdentifier(name))[i][0] === typeName))
+    throw new TypeError("duplicate TypeScript typeName and $defs alias: " + typeName);
   return [...aliases, `export type ${typeName} = ${renderSchema(schema, schema, references)};`, ""].join("\n");
 }
 
@@ -140,18 +161,31 @@ export function renderJsonSchemaModule(entries, options = {}) {
   const format = options.format ?? "typescript";
   if (!["typescript", "javascript", "declaration"].includes(format)) throw new TypeError("format must be typescript, javascript, or declaration");
   const runtimeBinding = options.runtimeBinding === undefined ? undefined : options.runtimeBinding;
-  if (runtimeBinding !== undefined && (!isSchema(runtimeBinding) || typeof runtimeBinding.from !== "string" || runtimeBinding.from === "" || typeof runtimeBinding.name !== "string" || runtimeBinding.name === "")) throw new TypeError("runtimeBinding must name an import");
-  const names = new Set();
+  if (runtimeBinding !== undefined && (!isSchema(runtimeBinding) || typeof runtimeBinding.from !== "string" || runtimeBinding.from === ""))
+    throw new TypeError("runtimeBinding must name an import");
+  if (runtimeBinding !== undefined) identifier(runtimeBinding.name, "runtimeBinding.name");
+  const names = new Set(runtimeBinding === undefined ? [] : [runtimeBinding.name]);
+  const typeNames = new Set();
   const ordered = [...entries].map((entry) => {
     if (!isSchema(entry) || !isSchema(entry.schema)) throw new TypeError("each entry must contain a schema object");
     const exportName = identifier(entry.exportName, "exportName");
-    if (names.has(exportName)) throw new TypeError(`duplicate exportName ${exportName}`);
+    if (names.has(exportName)) throw new TypeError(`duplicate generated JavaScript binding ${exportName}`);
     names.add(exportName);
     const runtimeName = entry.runtimeName === undefined ? undefined : identifier(entry.runtimeName, "runtimeName");
+    if (runtimeName !== undefined) {
+      if (names.has(runtimeName)) throw new TypeError(`duplicate generated JavaScript binding ${runtimeName}`);
+      names.add(runtimeName);
+    }
+    const typeName = identifier(entry.typeName, "typeName");
+    const localAliases = isSchema(entry.schema.$defs) ? Object.keys(entry.schema.$defs).filter(legalIdentifier) : [];
+    for (const type of [typeName, ...localAliases]) {
+      if (typeNames.has(type)) throw new TypeError(`duplicate generated TypeScript type ${type}`);
+      typeNames.add(type);
+    }
     const aliases = entry.aliases === undefined ? [] : entry.aliases;
     if (!Array.isArray(aliases) || !aliases.every((name) => typeof name === "string")) throw new TypeError("aliases must contain strings");
     if (runtimeName !== undefined && runtimeBinding === undefined) throw new TypeError("runtimeName requires runtimeBinding");
-    return { exportName, typeName: identifier(entry.typeName, "typeName"), schema: entry.schema, runtimeName, aliases, internal: entry.internal === true };
+    return { exportName, typeName, schema: entry.schema, runtimeName, aliases, internal: entry.internal === true };
   }).sort((left, right) => left.exportName.localeCompare(right.exportName));
   const runtimeReferences = (entry) => {
     const found = new Set();
