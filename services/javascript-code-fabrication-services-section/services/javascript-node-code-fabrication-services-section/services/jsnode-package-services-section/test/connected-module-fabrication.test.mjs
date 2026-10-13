@@ -44,6 +44,12 @@ assert.equal(good.result.derivation.proofing.independentBehavioralChannels,0);
 assert.equal(bad.result.cause.proofing.catches.length,1);
 assert.ok(['clause-assays','admitted-examples'].includes(bad.result.cause.proofing.catches[0].method),JSON.stringify(bad.result.cause.proofing.catches));
 assert.ok(bad.result.cause.proofing.catches[0].caughtBy);
+// A source module can call process.exit(0) at import time; the Node test
+// runner can then pass its file-wrapper without executing even one assay.
+const skipped=await exercise({...valid,'src/double.mjs':'process.exit(0); export function doubleValue(n){return n+n;}'});
+assert.equal(skipped.result.type,'JsnodeModuleDerivationRefusal');
+assert.equal(skipped.result.cause.scope,'module-set');
+assert.match(skipped.result.cause.evidence,/assay-incomplete/);
 const missing=await exercise({...valid,'src/increment.mjs':'import {doubleValue} from "./undeclared.mjs"; export function incrementValue(n){return doubleValue(n)+1;}' });
 assert.equal(missing.result.cause.scope,'module-set');
 assert.match(missing.result.cause.evidence,/unresolvable projected import/);
