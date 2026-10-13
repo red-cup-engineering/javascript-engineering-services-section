@@ -46,8 +46,12 @@ test("emits optional prefix and union tail tuples", () => {
 
 test("refuses non-schema inputs and unsafe TypeScript names", () => {
   assert.throws(() => transformJsonSchemaToTypescript(null), /schema must/u);
-  assert.throws(() => transformJsonSchemaToTypescript({}, { typeName: "not-a-name" }), /valid TypeScript identifier/u);
-  assert.throws(() => transformJsonSchemaToTypescript({ $defs: { "not-a-name": {} } }), /\$defs key/u);
+  assert.throws(() => transformJsonSchemaToTypescript({}, { typeName: "not-a-name" }), /TypeScript\/JavaScript identifier/u);
+  const nonAlias = transformJsonSchemaToTypescript({ type: "object", $defs: {
+    "not-a-name": { type: "string" },
+  }, properties: { mark: { $ref: "#/$defs/not-a-name" } } });
+  assert.match(nonAlias, /"mark"\?: string/u);
+  assert.doesNotMatch(nonAlias, /export type not-a-name/u);
 });
 
 test("emits intersections and homogeneous arrays with correct precedence", () => {
@@ -228,4 +232,37 @@ test("native generated JavaScript retains the exact math carrier schema", async 
   assert.deepEqual(generated.eventSchema, schema);
   assert.match(transformJsonSchemaToTypescript(schema, { typeName: "Event" }),
     /"parentIndices"\?: readonly number\[\]/u);
+});
+
+test("generated code refuses runtime import injection and reserved symbols", () => {
+  const entries = [{ exportName:"evidenceSchema", typeName:"Evidence", schema:{ type:"object" } }];
+  for (const name of ["x }; import 'attacker'; //", "default", "class", "with-hyphen", "read\nme"]) {
+    assert.throws(() => renderJsonSchemaModule(entries, {
+      format:"javascript", runtimeBinding:{ name, from:"./schemas.mjs" }
+    }), /identifier/u);
+  }
+  for (const entry of [
+    { ...entries[0], exportName:"function" },
+    { ...entries[0], typeName:"interface" },
+    { ...entries[0], runtimeName:"await" },
+  ]) {
+    assert.throws(() => renderJsonSchemaModule([entry], {
+      format:"javascript", runtimeBinding:{ name:"schemaFrom", from:"./schemas.mjs" }
+    }), /identifier/u);
+  }
+});
+
+test("generated value/type bindings cannot collide across independent schema entries", () => {
+  const a = { exportName:"aSchema", typeName:"A", runtimeName:"aType", schema:{type:"number"} };
+  const b = { exportName:"bSchema", typeName:"B", runtimeName:"bType", schema:{type:"string"} };
+  const runtimeBinding={name:"schemaFrom",from:"./schemas.mjs"};
+  assert.throws(() => renderJsonSchemaModule([a, { ...b, exportName:"aType" }],
+    {runtimeBinding}), /duplicate generated JavaScript binding/u);
+  assert.throws(() => renderJsonSchemaModule([a, { ...b, typeName:"A" }],
+    {runtimeBinding}), /duplicate generated TypeScript type/u);
+  assert.throws(() => renderJsonSchemaModule([a, { ...b, runtimeName:"schemaFrom" }],
+    {runtimeBinding}), /duplicate generated JavaScript binding/u);
+  assert.throws(() => renderJsonSchemaModule([a, { ...b, schema:{
+    type:"object",$defs:{ A:{ type:"number" } }
+  }}], {runtimeBinding}), /duplicate generated TypeScript type/u);
 });
