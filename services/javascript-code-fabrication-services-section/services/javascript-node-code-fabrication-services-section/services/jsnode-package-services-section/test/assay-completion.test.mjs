@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { admittedAssayNames, testRunCompletedAllAssays } from "../src/assay-completion.mjs";
+import { admittedAssayNames, testRunCompletedAllAssays, receiveIsolatedAssayOutcome } from "../src/assay-completion.mjs";
 
 const expected = ["double-value: positive", "double-value: clause assay negative"];
 const run = source => {
@@ -87,4 +87,41 @@ test("expected labels are derived from the actual example and clause-test genera
   ]);
   assert.equal(Object.isFrozen(admittedAssayNames(closure,cases)),true);
   assert.equal(testRunCompletedAllAssays("TAP version 13\n# tests 0\n# pass 0\n",[]),false);
+});
+
+test("the host's claimed success must also carry every actual complete assay", () => {
+  const observed = run(`import test from "node:test";
+test("double-value: positive",()=>{});
+test("double-value: clause assay negative",()=>{});`);
+  const record = { isolated: true, status: observed.status, signal: observed.signal,
+    stdout: observed.stdout, stderr: observed.stderr, truncated: false, timedOut: false };
+  assert.deepEqual(receiveIsolatedAssayOutcome(record,expected), {passed:true});
+  for (const changed of [
+    { isolated: false }, { isolated: null }, { status: null },
+    { status: 0, stdout: "TAP version 13\\n# pass 0\\n" },
+    { timedOut: true }, { truncated: true }, { signal: "SIGKILL" },
+    { stdout: "x".repeat(2 * 1024 * 1024 + 1) },
+  ]) {
+    const result = receiveIsolatedAssayOutcome({...record,...changed},expected);
+    assert.equal(result.passed,false);
+    assert.notEqual(result.code,undefined);
+  }
+});
+
+test("the actual Node exit-zero bypass remains refused even with a purported host result", () => {
+  const observed = run("process.exit(0);");
+  const record = { isolated: true, status: observed.status, signal: observed.signal,
+    stdout: observed.stdout, stderr: observed.stderr };
+  assert.equal(receiveIsolatedAssayOutcome(record,expected).code,"ASSAY_INCOMPLETE");
+});
+
+test("a failing host test is rejected without inventing a passing code-generation outcome", () => {
+  const observed = run(`import test from "node:test";
+test("double-value: positive",()=>{throw new Error("incorrect source");});
+test("double-value: clause assay negative",()=>{});`);
+  const result = receiveIsolatedAssayOutcome({isolated:true,status:observed.status,
+    stdout:observed.stdout,stderr:observed.stderr,signal:observed.signal}, expected);
+  assert.equal(result.passed,false);
+  assert.equal(result.code,"ASSAY_TEST_FAILED");
+  assert.match(result.failure,/not ok/u);
 });
