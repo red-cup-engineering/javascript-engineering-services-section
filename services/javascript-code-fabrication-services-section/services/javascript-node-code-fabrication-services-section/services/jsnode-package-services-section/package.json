@@ -38,7 +38,8 @@
     "./sync-package-manifest": "./src/sync-package-manifest.mjs",
     "./package-tree": "./src/package-tree.mjs",
     "./workspace/exports/resolve": "./src/workspace/exports/resolve.mjs",
-    "./workspace/package-interfaces": "./src/workspace/package-interfaces.mjs"
+    "./workspace/package-interfaces": "./src/workspace/package-interfaces.mjs",
+    "./plan-jsnode-modules": "./src/plan-jsnode-modules.mjs"
   },
   "files": [
     "apps",
@@ -85,3 +86,4 @@
     "check-package-interfaces": "./scripts/check-package-interfaces.mjs"
   }
 }
+
