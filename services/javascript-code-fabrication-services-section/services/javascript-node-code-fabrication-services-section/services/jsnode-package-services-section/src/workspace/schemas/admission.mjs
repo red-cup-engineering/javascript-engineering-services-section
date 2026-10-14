@@ -10,7 +10,7 @@
  * services, not here.
  */
 
-import { schemaFrom } from "@red-cup-engineering/relating/carriers/schema";
+import { schemaFrom } from "@red-cup-engineering/json-schema-services-section/contracts";
 
 /** A package manifest host mark admitted into the package phase. */
 export const packageManifestAdmissionSchema = {
