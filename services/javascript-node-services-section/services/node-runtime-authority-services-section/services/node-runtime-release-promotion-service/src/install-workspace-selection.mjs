@@ -412,6 +412,20 @@ function selectedSourceProjection(tree, selected) {
 /** Receive recorded selected Gitlinks; acquisition is allowed only during requested installation. */
 export async function receiveSelectedSources({ root, importerIds, environment, onOutput, materialize = false }) {
   const git = (cwd, ...args) => execute("git", args, { cwd, environment });
+  async function extendLiteralProjection(repository, patterns) {
+    const held = (await git(repository, "sparse-checkout", "list")).trim().split("\n").filter(Boolean);
+    // Exclusions can override a positive ancestor. Only infer coverage for the
+    // additive, literal projections this receiver owns; preserve custom policy.
+    const positive = held.some(pattern => pattern.startsWith("!")) ? [] : held;
+    const covered = (pattern, candidates) => candidates.some(candidate =>
+      candidate === pattern || candidate.endsWith("/") && pattern.startsWith(candidate));
+    const missing = [...new Set(patterns)].filter(pattern => !covered(pattern, positive));
+    const minimal = missing.filter(pattern => !covered(pattern, missing.filter(candidate => candidate !== pattern)));
+    if (!minimal.length) return;
+    // add inherits the existing non-cone mode. --no-cone is not an add option;
+    // Git accepts it as a stray pattern instead of changing the mode.
+    await git(repository, "sparse-checkout", "add", "--skip-checks", "--", ...minimal);
+  }
   const sparse = await git(root, "config", "--bool", "core.sparseCheckout").catch((error) => {
     if (error.exitCode === 1) return "false"; throw error;
   });
@@ -424,7 +438,12 @@ export async function receiveSelectedSources({ root, importerIds, environment, o
     for (const asset of assets) {
       if (!asset || !contained(root, resolve(root, asset))) throw new Error("root package files require bounded paths within the selected checkout");
     }
-    await git(root, "sparse-checkout", "add", "--skip-checks", "--", ...importerIds.filter(id => id !== "."), ...assets);
+    const paths = [...importerIds.filter(id => id !== "."), ...assets];
+    const cone = await git(root, "config", "--bool", "core.sparseCheckoutCone").catch(error => {
+      if (error.exitCode === 1) return "false"; throw error;
+    });
+    if (cone.trim() === "true") await git(root, "sparse-checkout", "add", "--skip-checks", "--", ...paths);
+    else await extendLiteralProjection(root, paths.map(path => "/" + path.replace(/([*?\[\] ])/gu, "\\$1")));
   }
   const mounts = [];
   async function receiveAttributes(repository, paths) {
@@ -515,7 +534,7 @@ export async function receiveSelectedSources({ root, importerIds, environment, o
           const { patterns } = selectedSourceProjection(await git(target, "ls-tree", "-r", "-z", match[1]), selected);
           // Extend this recorded source owner; never repin, reset or discard
           // already received paths when a later selection needs another face.
-          await git(target,"sparse-checkout","add","--no-cone","--",...patterns);
+          await extendLiteralProjection(target, patterns);
           assert.equal((await git(target,"rev-parse","HEAD")).trim(),match[1],"sparse expansion changed selected source");
         }
       }
@@ -623,7 +642,7 @@ export async function readWorkspaceSelectionLock({workspace, tooling}) {
  */
 export async function installWorkspaceSelection({
   workspace, expectedCommit, selector, importerIds: requestedImporters, materializeSources = false, planOnly = false, stateDirectory, pnpm = "pnpm", storeDirectory,
-  prepareOnly = false, environment = process.env, onOutput = (chunk) => process.stderr.write(chunk),
+  prepareOnly = false, sourceEntries = [], environment = process.env, onOutput = (chunk) => process.stderr.write(chunk),
 }) {
   if ((selector !== undefined) === (requestedImporters !== undefined)) throw new TypeError("choose a pnpm selector or explicit importer paths");
   if (selector !== undefined && (typeof selector !== "string" || !selector.trim() || selector.startsWith("-"))) throw new TypeError("one nonempty pnpm selector is required");
@@ -723,6 +742,18 @@ export async function installWorkspaceSelection({
     // Even already-materialized and selector-based installs record the same
     // committed mount custody which later build/pack commands must re-receive.
     if (!materializeSources) sourceMounts = await receiveSelectedSources({ root, importerIds, environment });
+    // Assess exact current source interfaces before application dependencies are
+    // installed. Unknown registry/TS interfaces remain explicit receiving work;
+    // known missing owned bindings/carriers refuse before the expensive install.
+    const { assessSourceInterfaces } = await import("./assess-source-interfaces.mjs");
+    const sourceAssessment = await assessSourceInterfaces({ workspace: root, commit, importerIds, entries: sourceEntries, environment });
+    const sourceAssessmentPath = join(state, "source-interfaces-" + commit + ".json");
+    await writeFile(sourceAssessmentPath, json(sourceAssessment));
+    if (sourceAssessment.status === "refused") {
+      const error = new Error("selected authored interfaces require reconciliation before installation: " + sourceAssessment.missing.length);
+      error.sourceAssessmentPath = sourceAssessmentPath;
+      throw error;
+    }
     const workspaceArgs = importerIds.map((id) => "--workspace-packages=" + id);
     const exactFilters = exactImporterFilterArgs(importerIds);
     const scopedProjects = JSON.parse(await runPnpm([...workspaceArgs, ...exactFilters, "list", "--recursive", "--depth=-1", "--json"]));
@@ -740,7 +771,7 @@ export async function installWorkspaceSelection({
     const command = [...storeArgs, "--lockfile-dir=" + artifact, ...workspaceArgs, ...(selector === undefined ? exactFilters : ["--filter", selector]), "install", "--frozen-lockfile", "--ignore-scripts"];
     receipt = {
       type: "NodeRuntimeWorkspaceSelectionInstallReceipt", version: 1, ...identity,
-      recordedAt: new Date().toISOString(), artifact, tooling, importerIds, sourceMounts, selectionElapsedMilliseconds: Date.now() - startedAt,
+      recordedAt: new Date().toISOString(), artifact, tooling, importerIds, sourceMounts, sourceAssessment: { path: sourceAssessmentPath, sha256: digest(Buffer.from(json(sourceAssessment))), interfaceAdmissionComplete: sourceAssessment.interfaceAdmissionComplete }, selectionElapsedMilliseconds: Date.now() - startedAt,
       sourceImporterCount: Object.keys(sourceLock.importers).length,
       selectedPackageSnapshots: Object.keys(scopedLock.packages ?? {}).length,
       sourcePackageSnapshots: Object.keys(sourceLock.packages ?? {}).length,
