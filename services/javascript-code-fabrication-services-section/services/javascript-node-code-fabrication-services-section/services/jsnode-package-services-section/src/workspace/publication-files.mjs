@@ -20,7 +20,7 @@ export function publicationFilesExclusionsOf(manifest, targets) {
   const excluded = manifest.files.filter(value => value.startsWith('!')).map(value => normalized(value.slice(1)));
   return Object.freeze([...new Set(targets)].filter(value => {
     const target = normalized(value);
-    if (automatic.has(target) || /^(?:readme|licen[cs]e)(?:\..*)?$/iu.test(target)) return false;
+    if (automatic.has(target) || (!target.includes('/') && /^(?:readme|licen[cs]e)(?:\..*)?$/iu.test(target))) return false;
     // A wildcard's concrete members still need actual packing/compilation receiving.
     if (target.includes('*')) return false;
     return !included.some(entry => covers(entry, target)) || excluded.some(entry => covers(entry, target));
