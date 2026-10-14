@@ -15,7 +15,7 @@ export function publicationFilesExclusionsOf(manifest, targets) {
   if (!Array.isArray(manifest.files) || manifest.files.some(value => typeof value !== 'string' || !value))
     throw new TypeError('publication files must be an array of nonempty patterns');
   const bins = typeof manifest.bin === 'string' ? [manifest.bin] : Object.values(manifest.bin ?? {});
-  const automatic = new Set(['package.json', manifest.main ?? 'index.js', ...bins].filter(value => typeof value === 'string').map(normalized));
+  const automatic = new Set(['package.json', manifest.main, ...bins].filter(value => typeof value === 'string').map(normalized));
   const included = manifest.files.filter(value => !value.startsWith('!')).map(normalized);
   const excluded = manifest.files.filter(value => value.startsWith('!')).map(value => normalized(value.slice(1)));
   return Object.freeze([...new Set(targets)].filter(value => {
