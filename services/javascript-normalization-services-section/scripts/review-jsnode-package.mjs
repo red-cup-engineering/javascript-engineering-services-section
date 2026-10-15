@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import { existsSync, readdirSync, readFileSync, realpathSync } from "node:fs";
+import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync } from "node:fs";
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 import { canonical, parse } from "@red-cup-engineering/json-services-section";
 import { normalizeJsnodePackageManifest } from "@red-cup-engineering/npm-package-manifest-normalization-service";
 import { readJavascriptFileImports } from "@red-cup-engineering/javascript-file-import-services-section/read-javascript-file-imports";
@@ -103,9 +104,10 @@ export function distPresentDeviation(packageDirectory) {
   return existsSync(join(packageDirectory, "dist")) ? { code: "dist-present", detail: "dist" } : undefined;
 }
 
-/** "lockfile-present": a package-manager lockfile checked in beside the manifest. */
-export function lockfilePresentDeviations(packageDirectory) {
-  return LOCKFILE_NAMES.filter((name) => existsSync(join(packageDirectory, name))).map((name) => ({ code: "lockfile-present", detail: name }));
+/** An unbound package-manager lock beside the manifest; a received source root may own its native lock. */
+export function lockfilePresentDeviations(packageDirectory, artifact) {
+  const source = artifact?.kind === "source-workspace" ? sourceWorkspaceReview(packageDirectory, artifact) : undefined;
+  return LOCKFILE_NAMES.filter((name) => existsSync(join(packageDirectory, name)) && resolve(packageDirectory, name) !== source?.lockPath).map((name) => ({ code: "lockfile-present", detail: name }));
 }
 
 /** "typescript-source": a .ts/.mts/.cts file that is not a .d.* declaration. */
@@ -203,7 +205,8 @@ function barrelDeviations(packageDirectory, files, manifest) {
 
 /**
  * Reviews one jsnode package: normalizes its manifest and reports deviations from
- * standard form. Pure: takes the manifest value and the package's relative file paths.
+ * standard form. Pure by default; explicit source-workspace context verifies its
+ * actual package directory, full source inventory and native evidence carriers.
  *
  * @param {object} input
  * @param {object} input.manifest The parsed package.json value.
@@ -211,7 +214,7 @@ function barrelDeviations(packageDirectory, files, manifest) {
  * @param {string} [input.packageDirectory] Package path used to assay custody and naming.
  * @returns {{ normalizedManifest: object, deviations: { code: string, detail: string }[] }}
  */
-export function reviewJsnodePackage({ manifest, files = [], packageDirectory } = {}) {
+export function reviewJsnodePackage({ manifest, files = [], packageDirectory, artifact } = {}) {
   if (manifest === null || typeof manifest !== "object" || Array.isArray(manifest)) {
     throw new TypeError("manifest must be a parsed package.json object");
   }
@@ -221,7 +224,9 @@ export function reviewJsnodePackage({ manifest, files = [], packageDirectory } =
   if (packageDirectory !== undefined && typeof packageDirectory !== "string") {
     throw new TypeError("packageDirectory must be a string when provided");
   }
-  const deviations = [];
+  const source = artifact?.kind === "source-workspace" ? sourceWorkspaceReview(packageDirectory, artifact, manifest) : undefined;
+  const deviations = [...(source?.deviations ?? [])];
+  if (artifact !== undefined && !["registry-package", "source-workspace"].includes(artifact?.kind)) deviations.push({ code: "artifact-context-inadmissible", detail: "artifact kind must be registry-package or source-workspace" });
   let normalizedManifest = manifest;
   try {
     normalizedManifest = normalizeJsnodePackageManifest({ manifest, identity: { name: manifest.name } });
@@ -286,15 +291,152 @@ export function reviewJsnodePackage({ manifest, files = [], packageDirectory } =
     const dependencies = manifest[field];
     if (dependencies === null || typeof dependencies !== "object" || Array.isArray(dependencies)) continue;
     for (const [name, specifier] of Object.entries(dependencies)) {
-      if (typeof specifier === "string" && LOCAL_DEPENDENCY.test(specifier)) {
+      if (typeof specifier === "string" && LOCAL_DEPENDENCY.test(specifier) && !source?.admitted.has(field + "." + name)) {
         deviations.push({ code: "local-dependency-specifier", detail: `${field}.${name}: ${specifier}` });
       }
-      if (EXACT_HOUSE_DEPENDENCY_FIELDS.has(field) && typeof specifier === "string" && HOUSE_SCOPES.has(packageNameScope(name)) && !isExactVersion(specifier)) {
+      if (EXACT_HOUSE_DEPENDENCY_FIELDS.has(field) && typeof specifier === "string" && HOUSE_SCOPES.has(packageNameScope(name)) && !isExactVersion(specifier) && !source?.admitted.has(field + "." + name)) {
         deviations.push({ code: "nonexact-house-dependency", detail: `${field}.${name}: ${specifier}` });
       }
     }
   }
-  return { normalizedManifest, deviations };
+  return { normalizedManifest, deviations, ...(source ? { evidenceBinding: source.evidenceBinding } : {}) };
+}
+
+// This is evidence binding, not a package resolver or an installer. The caller
+// separately admits the recorded native command results. Default review is pure.
+function sourceWorkspaceReview(packageDirectory, artifact, suppliedManifest) {
+  const admitted = new Set();
+  const evidenceBinding = { kind: "source-workspace", sourceVerified: false, nativeRecordBound: false, executionVerified: false, provenanceVerified: false };
+  try {
+    if (typeof packageDirectory !== "string") throw new TypeError("source review requires its actual selected package directory");
+    const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
+    const hash = (value) => typeof value === "string" && /^[a-f0-9]{64}$/u.test(value);
+    const oid = (value) => typeof value === "string" && /^[a-f0-9]{40}$/u.test(value);
+    const path = (value, dot = false) => typeof value === "string" && (dot && value === "." || value && !isAbsolute(value) && !value.includes("\\") && !value.includes("\0") && value.split("/").every(part => part && part !== "." && part !== ".."));
+    const root = artifact.workspace;
+    if (typeof root !== "string" || !isAbsolute(root) || resolve(root) !== root || realpathSync(root) !== root || !lstatSync(root).isDirectory()) throw new TypeError("workspace must name its actual canonical directory");
+    const absolute = (value) => {
+      if (!path(value, true)) throw new TypeError("source paths must be canonical workspace-relative paths");
+      return resolve(root, value);
+    };
+    const regular = (file) => {
+      if (!lstatSync(file).isFile() || realpathSync(file) !== resolve(file)) throw new Error("source or evidence carrier is redirected or not a regular file: " + file);
+      return readFileSync(file);
+    };
+    const carrier = (record, inside = false) => {
+      if (!record || !hash(record.sha256) || typeof record.path !== "string") throw new TypeError("evidence carrier needs path and SHA-256");
+      const file = inside ? absolute(record.path) : record.path;
+      if (!isAbsolute(file) || resolve(file) !== file) throw new TypeError("evidence carrier must name its canonical file");
+      const bytes = regular(file);
+      if (digest(bytes) !== record.sha256) throw new Error("evidence carrier hash differs: " + file);
+      return bytes;
+    };
+    const inventory = parse(carrier(artifact.inventory).toString("utf8"));
+    if (!["development", "production"].includes(inventory.purpose) || !Array.isArray(inventory.sources) || !inventory.sources.length || !Array.isArray(inventory.packages) || !inventory.packages.length || !Array.isArray(inventory.files) || !inventory.files.length || !Array.isArray(inventory.generatedRoots)) throw new TypeError("source inventory needs purpose, sources, packages, files and explicit generated roots");
+    const sources = new Map();
+    for (const source of inventory.sources) {
+      if (!source || !/^[\w.-]+\/[\w.-]+$/u.test(source.repository) || !oid(source.revision) || !path(source.workspacePath, true) || sources.has(source.repository)) throw new TypeError("source selection needs a unique repository, immutable commit and canonical workspace root");
+      const directory = absolute(source.workspacePath);
+      if (!lstatSync(directory).isDirectory() || realpathSync(directory) !== directory) throw new Error("selected source root is redirected or missing");
+      for (const other of sources.values()) if (pathIsInside(other.directory, directory) || pathIsInside(directory, other.directory)) throw new Error("selected repository roots overlap");
+      sources.set(source.repository, { ...source, directory });
+    }
+    const packages = new Map();
+    const directories = new Map();
+    for (const row of inventory.packages) {
+      const source = sources.get(row?.repository);
+      if (!source || row.revision !== source.revision || !path(row.path, true) || !path(row.workspacePath, true) || typeof row.name !== "string" || !isExactVersion(row.version) || packages.has(row.name) || directories.has(row.workspacePath)) throw new TypeError("selected package identity is absent, duplicate or inadmissible");
+      if (resolve(source.directory, row.path) !== absolute(row.workspacePath)) throw new Error("package path differs from selected repository path");
+      const manifest = parse(regular(join(absolute(row.workspacePath), "package.json")).toString("utf8"));
+      if (manifest.name !== row.name || manifest.version !== row.version) throw new Error("selected package name/version differs from its genuine manifest");
+      packages.set(row.name, { ...row, manifest }); directories.set(row.workspacePath, row.name);
+    }
+    const selectedPath = relative(root, resolve(packageDirectory)).split(sep).join("/") || ".";
+    const selected = packages.get(directories.get(selectedPath));
+    if (!selected || realpathSync(packageDirectory) !== resolve(packageDirectory)) throw new Error("review target is not the actual selected package directory");
+    if (suppliedManifest !== undefined && canonical(suppliedManifest) !== canonical(selected.manifest)) throw new Error("review manifest differs from the selected source manifest");
+    const generatedAllowed = new Set(["node_modules", ...inventory.packages.map(row => row.workspacePath === "." ? "node_modules" : row.workspacePath + "/node_modules"), ...inventory.sources.map(row => row.workspacePath === "." ? ".git" : row.workspacePath + "/.git")]);
+    const generated = new Set();
+    for (const item of inventory.generatedRoots) {
+      if (!path(item) || !generatedAllowed.has(item) || generated.has(item)) throw new Error("generated exclusion is not an identified installation or Git metadata root");
+      generated.add(item);
+    }
+    const files = new Map();
+    for (const row of inventory.files) {
+      const source = sources.get(row?.repository);
+      if (!source || row.revision !== source.revision || !path(row.path) || !path(row.workspacePath) || !oid(row.gitBlob) || !hash(row.sha256) || !["100644", "100755"].includes(row.mode) || files.has(row.workspacePath)) throw new TypeError("source file inventory is incomplete, duplicate or inadmissible");
+      const file = absolute(row.workspacePath);
+      if (resolve(source.directory, row.path) !== file || [...generated].some(item => pathIsInside(absolute(item), file))) throw new Error("authored source overlaps a generated exclusion or differs from its repository path");
+      const bytes = regular(file);
+      const blob = createHash("sha1").update(Buffer.from("blob " + bytes.length + "\0")).update(bytes).digest("hex");
+      const mode = lstatSync(file).mode & 0o111 ? "100755" : "100644";
+      if (digest(bytes) !== row.sha256 || blob !== row.gitBlob || mode !== row.mode) throw new Error("selected authored source changed: " + row.workspacePath);
+      files.set(row.workspacePath, row);
+    }
+    for (const row of packages.values()) {
+      const name = row.workspacePath === "." ? "package.json" : row.workspacePath + "/package.json";
+      if (!files.has(name)) throw new Error("selected manifest is absent from the source inventory: " + name);
+    }
+    if (artifact.configuration?.path !== "pnpm-workspace.yaml" || artifact.lockfile?.path !== "pnpm-lock.yaml") throw new TypeError("this source review supports the native PNPM workspace configuration and lock at the selected root");
+    carrier(artifact.configuration, true); carrier(artifact.lockfile, true);
+    const compositionFiles = new Set([artifact.configuration.path, artifact.lockfile.path]);
+    const seen = new Set();
+    const walk = (directory) => {
+      for (const entry of readdirSync(directory, { withFileTypes: true })) {
+        const file = join(directory, entry.name), name = relative(root, file).split(sep).join("/");
+        if (generated.has(name)) continue;
+        if (entry.isSymbolicLink()) throw new Error("selected source contains an unreceived symlink: " + name);
+        if (entry.isDirectory()) walk(file);
+        else if (entry.isFile()) {
+          if (!files.has(name) && !compositionFiles.has(name)) throw new Error("selected source contains an unlisted authored file: " + name);
+          seen.add(name);
+        } else throw new Error("selected source contains a nonregular carrier: " + name);
+      }
+    };
+    // Native resolution also observes the composition envelope, not just repo roots.
+    // Reject added root manifests/configuration and unselected sibling source.
+    walk(root);
+    if ([...files.keys()].some(name => !seen.has(name))) throw new Error("selected source inventory is not closed over its materialized roots");
+    for (const row of packages.values()) for (const field of DEPENDENCY_FIELDS) {
+      if (field === "devDependencies" && inventory.purpose === "production") continue;
+      for (const [name, specifier] of Object.entries(row.manifest[field] ?? {})) {
+        const local = typeof specifier === "string" && LOCAL_DEPENDENCY.test(specifier);
+        const provider = packages.get(name);
+        const house = HOUSE_SCOPES.has(packageNameScope(name));
+        if (!local && !house && !provider) continue; // external resolution is the native lock's responsibility
+        if (!provider) throw new Error("selected closure omits a declared " + field + " supplier: " + name);
+        if (specifier === "workspace:*") { /* the exact unique source provider is bound above */ }
+        else if (typeof specifier === "string" && /^(?:file:|link:)/u.test(specifier)) {
+          const target = resolve(absolute(row.workspacePath), specifier.slice(specifier.indexOf(":") + 1));
+          if (!pathIsInside(root, target) || target !== absolute(provider.workspacePath) || realpathSync(target) !== target || !lstatSync(target).isDirectory()) throw new Error("local dependency is not the selected contained directory: " + name);
+        } else if (!isExactVersion(specifier) || specifier !== provider.version) throw new Error("source dependency form/version is unsupported or unreceived: " + name + " " + specifier);
+        if (row.name === selected.name) admitted.add(field + "." + name);
+      }
+    }
+    evidenceBinding.sourceVerified = true; // Native-record association remains a distinct fact.
+    const native = parse(carrier(artifact.nativeReceiving).toString("utf8"));
+    const frozenPnpmInstall = (command) => {
+      const args = command?.argv;
+      if (command?.exitCode !== 0 || !Array.isArray(args) || args.some(value => typeof value !== "string" || !value) || args[0] !== "pnpm") return false;
+      if (typeof command.cwd !== "string" || !isAbsolute(command.cwd) || resolve(command.cwd) !== command.cwd) return false;
+      let at = 1;
+      if (args[at] === "--dir") { if (args[at + 1] !== root) return false; at += 2; }
+      else if (command.cwd !== root) return false;
+      if (args[at++] !== "install") return false;
+      let frozen = 0;
+      for (; at < args.length; at++) {
+        if (args[at] === "--frozen-lockfile") frozen++;
+        else if (args[at] === "--store-dir" && args[at + 1] && !args[at + 1].startsWith("-")) at++;
+        else return false; // No conflicting frozen flags, alternate commands or policy switches.
+      }
+      return frozen === 1;
+    };
+    if (!native.tools || !isExactVersion(native.tools.node) || !isExactVersion(native.tools.pnpm) || !native.provenance || ["kind", "recordedBy", "observedAt"].some(key => typeof native.provenance[key] !== "string" || !native.provenance[key])) throw new Error("native receiving record needs Node/PNPM versions and recorded provenance");
+    if (native.sourceInventorySha256 !== artifact.inventory.sha256 || native.workspaceConfigurationSha256 !== artifact.configuration.sha256 || native.lockSha256 !== artifact.lockfile.sha256 || !Array.isArray(native.commands) || !native.commands.some(frozenPnpmInstall)) throw new Error("native receiving record does not bind this source/configuration/lock and frozen command result");
+    return { admitted, lockPath: absolute(artifact.lockfile.path), deviations: [], evidenceBinding: { ...evidenceBinding, sourceVerified: true, nativeRecordBound: true, inventorySha256: artifact.inventory.sha256, lockSha256: artifact.lockfile.sha256, nativeReceivingSha256: artifact.nativeReceiving.sha256, provenance: native.provenance } };
+  } catch (error) {
+    return { admitted: new Set(), deviations: [{ code: "source-workspace-unreceived", detail: error instanceof Error ? error.message : String(error) }], evidenceBinding };
+  }
 }
 
 function pathIsInside(root, candidate) {
@@ -437,14 +579,14 @@ export function listPackageFiles(packageDirectory) {
 }
 
 /** Reviews the package at a directory, reading its manifest and file list. `informational` carries findings, such as "deliberate-entry", that are reported but never counted as deviations. */
-export function reviewJsnodePackageDirectory(packageDirectory) {
+export function reviewJsnodePackageDirectory(packageDirectory, { artifact } = {}) {
   const manifest = parse(readFileSync(join(packageDirectory, "package.json"), "utf8"));
   const files = listPackageFiles(packageDirectory);
-  const review = reviewJsnodePackage({ manifest, files, packageDirectory });
+  const review = reviewJsnodePackage({ manifest, files, packageDirectory, artifact });
   const barrels = barrelDeviations(packageDirectory, files, manifest);
   const shapeDeviations = [
     distPresentDeviation(packageDirectory),
-    ...lockfilePresentDeviations(packageDirectory),
+    ...lockfilePresentDeviations(packageDirectory, artifact),
     ...typescriptSourceDeviations(files),
     ...exportTargetMissingDeviations(manifest, packageDirectory),
     ...barrels.deviations,
@@ -459,7 +601,7 @@ export function reviewJsnodePackageDirectory(packageDirectory) {
 }
 
 /** Reviews every discovered package, rooted at `root`; a package whose directory has no package.json is skipped. */
-export function reviewJsnodePackageTree({ root, map }) {
+export function reviewJsnodePackageTree({ root, map, artifact }) {
   const reports = [];
   const census = {};
   let findings = 0;
@@ -468,15 +610,15 @@ export function reviewJsnodePackageTree({ root, map }) {
     if (!existsSync(join(packageDirectory, "package.json"))) continue;
     let review;
     try {
-      review = reviewJsnodePackageDirectory(packageDirectory);
+      review = reviewJsnodePackageDirectory(packageDirectory, { artifact });
     } catch (error) {
-      review = { deviations: [{ code: "review-error", detail: error instanceof Error ? error.message : String(error) }] };
+      review = { deviations: [{ code: "review-error", detail: error instanceof Error ? error.message : String(error) }], ...(artifact?.kind === "source-workspace" ? { evidenceBinding: { kind: "source-workspace", sourceVerified: false, nativeRecordBound: false, executionVerified: false, provenanceVerified: false } } : {}) };
     }
     for (const deviation of review.deviations) census[deviation.code] = (census[deviation.code] ?? 0) + 1;
     findings += review.deviations.length;
-    reports.push({ package: name, packageDirectory: directory, deviations: review.deviations, informational: review.informational ?? [] });
+    reports.push({ package: name, packageDirectory: directory, deviations: review.deviations, informational: review.informational ?? [], ...(review.evidenceBinding ? { evidenceBinding: review.evidenceBinding } : {}) });
   }
-  return { reports, findings, census };
+  return { reports, findings, census, ...(artifact?.kind === "source-workspace" ? { evidenceBindings: reports.map(report => ({ package: report.package, ...report.evidenceBinding })) } : {}) };
 }
 
 // Every javascript-node audit in the sibling package (audit-hull-kernel.mjs, audit-phantom-
@@ -485,14 +627,18 @@ export function reviewJsnodePackageTree({ root, map }) {
 // as those audits) alongside `--all` and the pre-existing positional-directories form, which keeps
 // working unchanged: a writer who reaches for the audits' own flags gets the audits' own answer.
 if (import.meta.main) {
-  const args = process.argv.slice(2);
+  const rawArgs = process.argv.slice(2);
+  const artifactAt = rawArgs.indexOf("--artifact");
+  if (artifactAt !== -1 && !rawArgs[artifactAt + 1]) throw new TypeError("--artifact requires an evidence-context JSON file");
+  const artifact = artifactAt === -1 ? undefined : parse(readFileSync(rawArgs[artifactAt + 1], "utf8"));
+  const args = artifactAt === -1 ? rawArgs : rawArgs.filter((_, index) => index !== artifactAt && index !== artifactAt + 1);
 
   if (args.includes("--all")) {
     const root = resolve(argument("--root", args) || process.cwd());
     const map = discoverHousePackages(root);
-    const { reports, findings, census } = reviewJsnodePackageTree({ root, map });
+    const { reports, findings, census, evidenceBindings } = reviewJsnodePackageTree({ root, map, artifact });
     if (args.includes("--summary")) {
-      process.stdout.write(`${canonical({ packages: reports.length, findings, census })}\n`);
+      process.stdout.write(`${canonical({ packages: reports.length, findings, census, ...(evidenceBindings ? { evidenceBindings } : {}) })}\n`);
     } else {
       for (const report of reports) process.stdout.write(`${canonical(report)}\n`);
     }
@@ -503,13 +649,13 @@ if (import.meta.main) {
       ? args
       : [resolve(argument("--root", args) || process.cwd(), packageFlag)];
     if (directories.length === 0) {
-      process.stderr.write("usage: review-jsnode-package PACKAGE_DIR [PACKAGE_DIR ...] | --package <dir> [--root /home/emsenn/info] | --all [--root /home/emsenn/info] [--summary]\n");
+      process.stderr.write("usage: review-jsnode-package PACKAGE_DIR [PACKAGE_DIR ...] | --package <dir> [--root /home/emsenn/info] | --all [--root /home/emsenn/info] [--summary] [--artifact <context.json>]\n");
       process.exit(1);
     }
     let hasDeviations = false;
     for (const directory of directories) {
-      const review = reviewJsnodePackageDirectory(directory);
-      process.stdout.write(`${canonical({ packageDirectory: directory, deviations: review.deviations })}\n`);
+      const review = reviewJsnodePackageDirectory(directory, { artifact });
+      process.stdout.write(`${canonical({ packageDirectory: directory, deviations: review.deviations, ...(review.evidenceBinding ? { evidenceBinding: review.evidenceBinding } : {}) })}\n`);
       hasDeviations ||= review.deviations.length > 0;
     }
     if (hasDeviations) process.exitCode = 2;
