@@ -1,6 +1,6 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
-import { basename, dirname, extname, join, relative, resolve } from "node:path";
+import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { address, cell } from "@red-cup-engineering/signcell/cell";
 
 // Ported from the legacy organizing-with-jsnode conformance/{check,kind,layer}.mts
@@ -145,30 +145,52 @@ function hasFallbackArray(value) {
   return Array.isArray(value) || !!(value && typeof value === "object" && Object.values(value).some(hasFallbackArray));
 }
 
-function checkM3(dir, manifest) {
+
+/** One source-owned observation shared by the checker and its SignCell witness.
+ * A directory, missing target, or symlink crossing package ownership is not
+ * a verified installed export. Wildcard expansion remains unobserved here.
+ */
+function insidePackage(root, candidate) {
+  const displaced = relative(root, candidate);
+  return displaced !== ".." && !displaced.startsWith(".." + sep) && !isAbsolute(displaced);
+}
+
+function observeExportTarget(dir, target) {
+  const requested = resolve(dir, target);
+  if (!target.startsWith("./") || !insidePackage(dir, requested))
+    return Object.freeze({ target, withinPackage: false, exists: false });
+  if (target.includes("*"))
+    return Object.freeze({ target, withinPackage: true, exists: null });
+  try {
+    const actual = realpathSync(requested);
+    const withinPackage = insidePackage(realpathSync(dir), actual);
+    return Object.freeze({ target, withinPackage, exists: withinPackage && statSync(actual).isFile() });
+  } catch (error) {
+    if (error?.code === "ENOENT" || error?.code === "ENOTDIR")
+      return Object.freeze({ target, withinPackage: true, exists: false });
+    throw error;
+  }
+}
+
+function checkM3(dir, manifest, observations) {
   const exp = manifest.exports;
   if (exp === undefined) return finding("M3", "adapted", "violation", "no exports field");
   const isMap = exp !== null && typeof exp === "object" && !Array.isArray(exp);
   if (typeof exp !== "string" && !isMap && !Array.isArray(exp))
     return finding("M3", "adapted", "violation", "exports field is neither a string, array nor a map");
-  const targets = rootExportTargets(exp);
-  if (targets.length === 0)
+  if (observations.length === 0)
     return finding("M3", "adapted", "informational", "declared exports have no file targets whose presence was inspected");
-  const invalid = targets.filter((target) => {
-    if (!target.startsWith("./")) return true;
-    const displaced = relative(dir, resolve(dir, target));
-    return displaced === ".." || displaced.startsWith("../") || displaced.startsWith("..\\");
-  });
+  const invalid = observations.filter((read) => !read.withinPackage).map((read) => read.target);
   if (invalid.length > 0)
-    return finding("M3", "adapted", "violation", `export target escapes its package or is not package-relative: ${invalid.join(", ")}`);
+    return finding("M3", "adapted", "violation", "export target escapes its package or is not package-relative: " + invalid.join(", "));
   if (hasFallbackArray(exp))
     return finding("M3", "adapted", "informational", "export fallback arrays were not resolved; a missing alternative is not yet a proven failure");
-  const missing = targets.filter((target) => !target.includes("*") && !existsSync(resolve(dir, target)));
+  const missing = observations.filter((read) => read.exists === false).map((read) => read.target);
   if (missing.length > 0)
-    return finding("M3", "adapted", "violation", `export targets missing on disk: ${missing.join(", ")}`);
-  if (targets.some((target) => target.includes("*")))
+    return finding("M3", "adapted", "violation", "export targets missing or not regular files: " + missing.join(", "));
+  if (observations.some((read) => read.exists === null))
     return finding("M3", "adapted", "informational", "declared exports have wildcard targets; their expansion has not been inspected");
-  return finding("M3", "adapted", "clean", `${targets.length} declared export target(s) exist on disk`);
+  return finding("M3", "adapted", "clean", observations.length + " declared export target(s) exist as files inside the package");
 }
 
 function checkM4(manifest, kind) {
@@ -324,23 +346,12 @@ function checkD1(dir) {
  * Each subject pins the checked manifest, inspected source content, observed
  * exported-file existence, and the checker source itself.
  */
-function witnessedPackageCells(findings, { dir, layer, kind, manifest, manifestSource, texts, checkerSource }) {
+function witnessedPackageCells(findings, { dir, layer, kind, manifest, manifestSource, texts, checkerSource, exportTargets }) {
   const manifestField = (key) => Object.hasOwn(manifest, key) ? manifest[key] : null;
   const scannedSources = texts.map(({ file, text }) => Object.freeze({
     path: relative(dir, file),
     contentId: address(cell("jsnode.source-bytes", relative(dir, file), text)),
   }));
-  const exportTargets = rootExportTargets(manifest.exports).map((target) => {
-    const displaced = target.startsWith("./") ? relative(dir, resolve(dir, target)) : null;
-    const inside = displaced !== null && displaced !== ".." && !displaced.startsWith("../") && !displaced.startsWith("..\\");
-    return Object.freeze({
-      target,
-      withinPackage: inside,
-      // A wildcard's matched set, and a conditional fallback's selected branch,
-      // require further observation. File existence alone does not prove importability.
-      exists: inside && !target.includes("*") ? existsSync(resolve(dir, target)) : null,
-    });
-  });
   const revision = address(cell(dir, "jsnode.inspected-source", {
     manifestSource,
     scannedSources,
@@ -403,11 +414,13 @@ export async function checkJsnodePackage({ directory } = {}) {
   const files = kind === "jsnode" && existsSync(srcDir) ? await sourceFiles(srcDir) : [];
   const texts = await Promise.all(files.map(async (file) => ({ file, text: await readFile(file, "utf8") })));
 
+  const exportTargets = Object.freeze(rootExportTargets(manifest.exports).map((target) => observeExportTarget(dir, target)));
+
   const findings = [
     checkM1(dir, manifest),
     checkM2(manifest, kind),
     checkM2SideEffects(manifest, kind),
-    checkM3(dir, manifest),
+    checkM3(dir, manifest, exportTargets),
     checkM4(manifest, kind),
     checkM5(manifest),
     checkL1(manifest, layer),
@@ -433,6 +446,6 @@ export async function checkJsnodePackage({ directory } = {}) {
     findings: Object.freeze(findings),
     violationCount,
     byConvention: Object.freeze(byConvention),
-    cells: witnessedPackageCells(findings, { dir, layer, kind, manifest, manifestSource, texts, checkerSource }),
+    cells: witnessedPackageCells(findings, { dir, layer, kind, manifest, manifestSource, texts, checkerSource, exportTargets }),
   });
 }

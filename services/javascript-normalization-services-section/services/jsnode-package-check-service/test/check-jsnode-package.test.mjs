@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -258,5 +258,35 @@ test("unknown exports and an irrelevant waiver cannot manufacture conformance", 
     assert.deepEqual([m3.for.length, m3.against.length], [0, 0]);
     const s1 = report.cells.find((item) => item.object === "S1");
     assert.deepEqual([s1.for.length, s1.against.length], [0, 0]);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("M3 examines real file type and symlink owner through the same SignCell witness", async () => {
+  const root = await mkdtemp(join(tmpdir(), "jsnode-check-real-target-"));
+  try {
+    const dir = join(root, "services", "actual-exports");
+    const target = join(dir, "src", "entry.mjs");
+    await mkdir(join(dir, "src"), { recursive: true });
+    await writeFile(join(root, "external.mjs"), "export const external = true;\n");
+    await writeManifest(dir, {
+      name: "@owner/actual-exports", private: true, type: "module",
+      exports: "./src/entry.mjs",
+      scripts: { check: "node --check src/entry.mjs", test: "node --test", verify: "npm test" },
+    });
+    await mkdir(target);
+    let read = await checkJsnodePackage({ directory: dir });
+    assert.equal(read.findings.find((f) => f.invariantId === "M3").status, "violation", "directory not file");
+    assert.equal(read.cells.find((c) => c.object === "M3").against[0].observed.exportTargets[0].exists, false);
+    await rm(target, { recursive: true });
+    await symlink(join(root, "external.mjs"), target);
+    read = await checkJsnodePackage({ directory: dir });
+    assert.equal(read.findings.find((f) => f.invariantId === "M3").status, "violation", "symlink escapes package");
+    assert.equal(read.cells.find((c) => c.object === "M3").against[0].observed.exportTargets[0].withinPackage, false);
+    await rm(target);
+    await writeFile(join(dir, "src", "real.mjs"), "export const internal = true;\n");
+    await symlink(join(dir, "src", "real.mjs"), target);
+    read = await checkJsnodePackage({ directory: dir });
+    assert.equal(read.findings.find((f) => f.invariantId === "M3").status, "clean", "in-package file symlink");
+    assert.equal(read.cells.find((c) => c.object === "M3").for[0].observed.exportTargets[0].exists, true);
   } finally { await rm(root, { recursive: true, force: true }); }
 });
