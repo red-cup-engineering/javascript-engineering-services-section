@@ -2,7 +2,7 @@
 import path from "node:path";
 import { schemaFromGraph } from "@red-cup-engineering/json-schema-services-section/contracts";
 import { admitArtifactFabricationSpecification, admitArtifactFabricationRealizationPlan } from "@red-cup-engineering/computer-data-engineering-services-section/artifact-fabrication";
-import { admitNpmPackageVersion } from "@red-cup-engineering/npm-package-services-section/admit-npm-package-version";
+import { admitNpmPackageVersion } from "@red-cup-engineering/npm-package-version-admission-service";
 import { projectJsnodeModulePaths } from "./project-jsnode-module-paths.mjs";
 
 // Each example is judged in its own explicit schema universe. Earlier plans
@@ -138,4 +138,3 @@ export function testsOfClosure(closure, derivedCases = []) {
     });
   });
 }
-

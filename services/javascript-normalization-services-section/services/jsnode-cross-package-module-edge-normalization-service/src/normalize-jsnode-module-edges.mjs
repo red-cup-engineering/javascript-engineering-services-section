@@ -3,15 +3,6 @@ import { dirname, join, relative, resolve, sep } from "node:path";
 
 const SPECIFIER = /(?<!["'])((?:\bfrom\s*|\bimport\s*(?:\(\s*)?|\brequire\s*\()\s*)(["'])(\.{1,2}\/[^"']+)\2/gu;
 function slash(path) { return path.split(sep).join("/"); }
-function withExport(prior, key) {
-  let result;
-  if (prior === undefined) result = {};
-  else if (typeof prior === "string" || Array.isArray(prior) || (prior && typeof prior === "object" && !Object.keys(prior).some((name) => name.startsWith(".")))) result = { ".": prior };
-  else result = { ...prior };
-  result[key] = key;
-  return result;
-}
-
 async function moduleTarget(path) {
   for (const candidate of [path, path + ".js", path + ".mjs", path + ".cjs", path + ".json", join(path, "index.js"), join(path, "index.mjs"), join(path, "index.cjs")]) {
     try { await access(candidate); return candidate; } catch (error) { if (error?.code !== "ENOENT") throw error; }
@@ -42,14 +33,15 @@ export async function normalizeJsnodeModuleEdges({ root, path, source, carriers 
     const provider = target ? carrierOf(target) : null;
     if (!provider || provider.directory === consumer.directory) continue;
     const subpath = "./" + slash(relative(provider.directory, target));
-    output += source.slice(cursor, match.index) + match[1] + match[2] + provider.name + "/" + subpath.slice(2) + match[2];
+    const release = provider.registryRelease;
+    const exportTarget = (value) => typeof value === "string" ? value : value?.import ?? value?.default;
+    const publicEntries = typeof release?.exports === "string" ? [[".", release.exports]] : Object.entries(release?.exports ?? {});
+    const publicFace = publicEntries.find(([, value]) => exportTarget(value) === subpath)?.[0];
+    if (release?.name !== provider.name || !release.dist?.integrity || !release.dist?.tarball || !publicFace) throw new Error(`cross-package import requires a published export for ${provider.name}${subpath.slice(1)}`);
+    const specifier = publicFace === "." ? provider.name : provider.name + publicFace.slice(1);
+    output += source.slice(cursor, match.index) + match[1] + match[2] + specifier + match[2];
     cursor = match.index + match[0].length;
-    dependencies[provider.name] = provider.version;
-    const prior = exports.find((value) => value.providerPath === provider.path)?.exports ?? provider.exports;
-    const next = { providerPath: provider.path, exports: withExport(prior, subpath) };
-    const priorIndex = exports.findIndex((value) => value.providerPath === provider.path);
-    if (priorIndex >= 0) exports[priorIndex] = next;
-    else exports.push(next);
+    dependencies[provider.name] = release.version;
     edges.push(consumer.name + "->" + provider.name + ":" + subpath);
   }
   if (cursor) output += source.slice(cursor);
