@@ -421,8 +421,15 @@ export async function checkJsnodePackage({ directory } = {}) {
   const kind = detectPackageKind(dir, manifest);
 
   const srcDir = join(dir, "src");
-  const sourceInventory = kind === "jsnode" && existsSync(srcDir)
-    ? await sourceFiles(srcDir) : { files: [], uninspected: [] };
+  // Never traverse a src-root symlink outside this package. Ordinary
+  // readdir() follows such a link, so it could inspect unrelated/private
+  // source while claiming this package's own closed scan.
+  const sourceRootAdmitted = existsSync(srcDir) &&
+    insidePackage(realpathSync(dir), realpathSync(srcDir)) &&
+    statSync(srcDir).isDirectory();
+  const sourceInventory = kind === "jsnode" && sourceRootAdmitted
+    ? await sourceFiles(srcDir)
+    : { files: [], uninspected: kind === "jsnode" && existsSync(srcDir) ? [srcDir] : [] };
   const uninspectedSourceEntries = Object.freeze(sourceInventory.uninspected.map((file) => relative(dir, file)));
   const texts = await Promise.all(sourceInventory.files.map(async (file) => ({ file, text: await readFile(file, "utf8") })));
   const checkedA3 = checkA3(texts);

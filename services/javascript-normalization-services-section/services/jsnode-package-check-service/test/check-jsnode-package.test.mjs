@@ -317,3 +317,28 @@ test("an uninspected source symlink does not turn a partial A3 scan into clean c
       "source inventory omissions change the declared inspection identity");
   } finally { await rm(root, { recursive: true, force: true }); }
 });
+
+test("source-root symlinks outside package never enter a package's evidence scan", async () => {
+  const root = await mkdtemp(join(tmpdir(), "jsnode-src-root-boundary-"));
+  try {
+    const dir = join(root, "services", "boundary");
+    await mkdir(dir, { recursive: true });
+    const outside = join(root, "private-source");
+    await mkdir(outside);
+    await writeFile(join(outside, "secret.mjs"), 'export const x = { type: "SecretRecord" };\n');
+    await writeManifest(dir, {
+      name: "@owner/boundary", type: "module", private: true,
+      exports: { ".": null },
+      scripts: { check: "node --check src/entry.mjs", test: "node --test", verify: "npm test" },
+    });
+    await symlink(outside, join(dir, "src"));
+    const report = await checkJsnodePackage({ directory: dir });
+    const a3 = report.findings.find((entry) => entry.invariantId === "A3");
+    assert.equal(a3.status, "informational");
+    const a3Cell = report.cells.find((entry) => entry.object === "A3");
+    assert.equal(a3Cell.for.length, 0);
+    assert.equal(a3Cell.against.length, 0);
+    assert.deepEqual(a3Cell.subject.revision.startsWith("ni:"), true);
+    assert.deepEqual(report.cells[0].subject.revision, a3Cell.subject.revision);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
