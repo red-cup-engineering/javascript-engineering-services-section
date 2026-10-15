@@ -4,7 +4,6 @@
   "type": "module",
   "dependencies": {
     "@pnpm/lockfile.filtering": "1100.2.10",
-    "@pnpm/lockfile.fs": "1100.2.10",
-    "pnpm": "11.28.5"
+    "@pnpm/lockfile.fs": "1100.2.10"
   }
 }

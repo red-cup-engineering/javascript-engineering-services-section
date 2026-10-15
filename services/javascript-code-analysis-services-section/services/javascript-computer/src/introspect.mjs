@@ -1,4 +1,3 @@
-import { declarationBindings } from './declaration-bindings.mjs';
 // Read explicitly authored type/function contracts and their source coordinates.
 // JavaScript carries its contracts in JSDoc: `@param` and `@returns` types give a
 // function's domain and codomain, `@typedef` names a type alias, and a class
@@ -6,7 +5,7 @@ import { declarationBindings } from './declaration-bindings.mjs';
 import path from "node:path";
 import { readFileSync } from "node:fs";
 import { discoverJavaScriptSourceFiles } from "./source-files.mjs";
-import { bindJavaScript, jsdocOf, lineColumnOf, parseJavaScript, parseJsdoc } from "@red-cup-engineering/javascript-node-services-section/javascript-parser";
+import { jsdocOf, lineColumnOf, parseJavaScript, parseJsdoc } from "@red-cup-engineering/javascript-node-services-section/javascript-parser";
 import { typeCatalog, jsType, jsFn } from "@red-cup-engineering/javascript-algebra";
 
 const FUNCTION_TYPES = new Set(["FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression"]);
@@ -59,7 +58,6 @@ export function introspectDeclarationsByFile(entryFiles) {
       locations.push({ name, line: start.line, column: start.column, endLine: end.line });
     };
     const declarations = new Map();
-    const binding = bindJavaScript(program);
     const record = (name, declaration, docNode) => {
       if (declaration.type === "ClassDeclaration" || declaration.type === "ClassExpression") {
         types.push(jsType(name, "class"));
@@ -88,13 +86,12 @@ export function introspectDeclarationsByFile(entryFiles) {
         record("default", declaration, statement);
       } else if (declaration.type === "VariableDeclaration") {
         for (const declarator of declaration.declarations) {
-          for (const item of declarationBindings(program, declarator.id, binding)) {
-            declarations.set(item.binding.name, { declaration: declarator.id.type === 'Identifier' ? declarator : item.identifier, docNode: statement });
-            if (exported) {
-              locate(item.binding.name, declarator.id.type === 'Identifier' ? declarator : item.identifier);
-              exports.push({ name: item.binding.name, local: item.binding.name });
-              if (declarator.id.type === 'Identifier') record(item.binding.name, declarator, statement);
-            }
+          if (declarator.id.type !== "Identifier") continue;
+          declarations.set(declarator.id.name, { declaration: declarator, docNode: statement });
+          if (exported) {
+            locate(declarator.id.name, declarator);
+            exports.push({ name: declarator.id.name, local: declarator.id.name });
+            record(declarator.id.name, declarator, statement);
           }
         }
       }
