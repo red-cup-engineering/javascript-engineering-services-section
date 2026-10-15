@@ -207,3 +207,56 @@ test("M3 distinguishes root conditional sugar and unexamined fallback arrays", a
     assert.equal(report.findings.find((f) => f.invariantId === "M3").status, "informational", "fallback resolution not observed");
   } finally { await rm(root, { recursive: true, force: true }); }
 });
+
+test("emits native SignCell source-revision cells without inventing a FOUR evaluator", async () => {
+  const root = await mkdtemp(join(tmpdir(), "jsnode-check-signcell-"));
+  try {
+    const dir = join(root, "services", "observed-package");
+    await mkdir(join(dir, "src"), { recursive: true });
+    const manifest = {
+      name: "@owner/observed-package", type: "module", private: true,
+      exports: "./src/entry.mjs",
+      scripts: { check: "node --check src/entry.mjs", test: "node --test", verify: "npm test" },
+    };
+    await writeManifest(dir, manifest);
+    await writeFile(join(dir, "src/entry.mjs"), "export const datum = true;\n", "utf8");
+    const a = await checkJsnodePackage({ directory: dir });
+    assert.equal(a.cells.length, a.findings.length);
+    const m3 = a.cells.find((item) => item.object === "M3");
+    assert.equal(m3.predicate, "conforms-to-jsnode-rule");
+    assert.equal(m3.for.length, 1);
+    assert.equal(m3.against.length, 0);
+    assert.equal(m3.for[0].observed.exportTargets[0].exists, true);
+    assert.match(m3.subject.revision, /^ni:/u);
+    assert.match(m3.subject.checkerRevision, /^ni:/u);
+    const dead = a.cells.find((item) => item.object === "S1");
+    assert.equal(dead.for.length, 0, "retired rule is not a positive witness");
+    assert.equal(dead.against.length, 0, "retired rule is not negative without evidence");
+    await rm(join(dir, "src/entry.mjs"));
+    const b = await checkJsnodePackage({ directory: dir });
+    const missing = b.cells.find((item) => item.object === "M3");
+    assert.equal(missing.for.length, 0);
+    assert.equal(missing.against.length, 1);
+    assert.equal(missing.against[0].observed.exportTargets[0].exists, false);
+    assert.notEqual(missing.subject.revision, m3.subject.revision, "a changed source-existence observation changes source identity");
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("unknown exports and an irrelevant waiver cannot manufacture conformance", async () => {
+  const root = await mkdtemp(join(tmpdir(), "jsnode-check-unknown-evidence-"));
+  try {
+    const dir = join(root, "services", "uncertain-package");
+    await mkdir(join(dir, "src"), { recursive: true });
+    await writeManifest(dir, {
+      name: "@owner/uncertain-package", type: "module", private: true,
+      exports: { "./x": "./src/*.mjs" },
+      scripts: { check: "node --check src/entry.mjs", test: "node --test", verify: "npm test" },
+    });
+    await writeFile(join(dir, "src/entry.mjs"), "// law-allow: unrelated\nexport const datum = true;\n", "utf8");
+    const report = await checkJsnodePackage({ directory: dir });
+    const m3 = report.cells.find((item) => item.object === "M3");
+    assert.deepEqual([m3.for.length, m3.against.length], [0, 0]);
+    const s1 = report.cells.find((item) => item.object === "S1");
+    assert.deepEqual([s1.for.length, s1.against.length], [0, 0]);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});

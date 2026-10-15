@@ -15,5 +15,8 @@
   },
   "devDependencies": {
     "@red-cup-engineering/jsnode-package-services-section": "workspace:*"
+  },
+  "dependencies": {
+    "@red-cup-engineering/signcell": "0.2.0"
   }
 }

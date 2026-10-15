@@ -1,12 +1,13 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
+import { address, cell } from "@red-cup-engineering/signcell/cell";
 
 // Ported from the legacy organizing-with-jsnode conformance/{check,kind,layer}.mts
-// trio. The legacy checker scored findings through an external witness/charge
-// framework (@emsenn/relating/analysis, @emsenn/561-group-conformance-algebra)
-// that does not exist in this tree, so this port carries the invariant *list*
-// but reports each finding as a plain frozen record instead.
+// trio. The legacy checker used a private charge framework. This owner keeps
+// its existing findings for old consumers and now also emits source-qualified
+// SignCell witness cells. FOUR belongs to the shared Data/Metrologic substrate,
+// not to a local status-to-charge table.
 //
 // Every finding carries a `convention` tag a caller can filter on:
 //   "live"    - the legacy rule was verified to still hold in this tree.
@@ -313,6 +314,77 @@ function checkD1(dir) {
     : "no README.md (this family does not use per-package README.md files)");
 }
 
+
+/**
+ * Preserve the actual read boundary for witnessed package claims.
+ *
+ * This is not a FOUR evaluator. SignCell derives the charge from the for/against
+ * witness sets. Rules that the existing checker did not actually evaluate
+ * stay without witnesses (unknown), even if a legacy report has prose about them.
+ * Each subject pins the checked manifest, inspected source content, observed
+ * exported-file existence, and the checker source itself.
+ */
+function witnessedPackageCells(findings, { dir, layer, kind, manifest, manifestSource, texts, checkerSource }) {
+  const manifestField = (key) => Object.hasOwn(manifest, key) ? manifest[key] : null;
+  const scannedSources = texts.map(({ file, text }) => Object.freeze({
+    path: relative(dir, file),
+    contentId: address(cell("jsnode.source-bytes", relative(dir, file), text)),
+  }));
+  const exportTargets = rootExportTargets(manifest.exports).map((target) => {
+    const displaced = target.startsWith("./") ? relative(dir, resolve(dir, target)) : null;
+    const inside = displaced !== null && displaced !== ".." && !displaced.startsWith("../") && !displaced.startsWith("..\\");
+    return Object.freeze({
+      target,
+      withinPackage: inside,
+      // A wildcard's matched set, and a conditional fallback's selected branch,
+      // require further observation. File existence alone does not prove importability.
+      exists: inside && !target.includes("*") ? existsSync(resolve(dir, target)) : null,
+    });
+  });
+  const revision = address(cell(dir, "jsnode.inspected-source", {
+    manifestSource,
+    scannedSources,
+    exportTargets,
+  }));
+  const checkerRevision = address(cell("jsnode-package-check-service", "checker-source", checkerSource));
+  const subject = Object.freeze({
+    type: "JsnodePackageSourceRevision",
+    directory: dir,
+    revision,
+    checkerRevision,
+  });
+  const observed = {
+    M1: { name: manifestField("name"), directoryName: basename(dir) },
+    M2: { private: manifestField("private"), type: manifestField("type"), packageKind: kind },
+    M3: { exports: manifestField("exports"), exportTargets },
+    M4: { scripts: manifestField("scripts"), packageKind: kind },
+    L1: { layer, dependencies: manifestField("dependencies") },
+    L4: { layer, directoryName: basename(dir), dependencies: manifestField("dependencies") },
+    L5: { dependencies: manifestField("dependencies") },
+    A3: { files: scannedSources, coverage: "recursive src, admitted JS/TS extensions, excluding test files" },
+  };
+  return Object.freeze(findings.map((finding) => {
+    const basis = observed[finding.invariantId];
+    // Informational, dead-convention, skipped and uninspected rules do not
+    // establish either conformity or violation. Never translate them to pass.
+    const warranted = basis !== undefined && finding.status !== "informational" &&
+      finding.convention !== "dead";
+    const witness = warranted ? Object.freeze({
+      type: "JsnodePackageRuleObservation",
+      rule: finding.invariantId,
+      convention: finding.convention,
+      sourceRevision: revision,
+      checkerRevision,
+      observed: basis,
+      reported: finding.message,
+    }) : null;
+    return cell(subject, "conforms-to-jsnode-rule", finding.invariantId, {
+      for: witness && finding.status === "clean" ? [witness] : [],
+      against: witness && finding.status === "violation" ? [witness] : [],
+    });
+  }));
+}
+
 /**
  * Check one package directory against house package invariants and return
  * frozen findings. Read-only: never writes to the package or its manifest.
@@ -323,7 +395,8 @@ export async function checkJsnodePackage({ directory } = {}) {
   const layer = layerOf(dir);
   const manifestPath = join(dir, "package.json");
   if (!existsSync(manifestPath)) throw new TypeError(`no package.json at ${manifestPath}`);
-  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  const [manifestSource, checkerSource] = await Promise.all([readFile(manifestPath, "utf8"), readFile(new URL(import.meta.url), "utf8")]);
+  const manifest = JSON.parse(manifestSource);
   const kind = detectPackageKind(dir, manifest);
 
   const srcDir = join(dir, "src");
@@ -360,5 +433,6 @@ export async function checkJsnodePackage({ directory } = {}) {
     findings: Object.freeze(findings),
     violationCount,
     byConvention: Object.freeze(byConvention),
+    cells: witnessedPackageCells(findings, { dir, layer, kind, manifest, manifestSource, texts, checkerSource }),
   });
 }
