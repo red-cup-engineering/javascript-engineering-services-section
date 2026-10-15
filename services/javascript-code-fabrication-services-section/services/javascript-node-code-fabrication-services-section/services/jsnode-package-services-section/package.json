@@ -39,6 +39,7 @@
     "./package-tree": "./src/package-tree.mjs",
     "./workspace/exports/resolve": "./src/workspace/exports/resolve.mjs",
     "./workspace/package-interfaces": "./src/workspace/package-interfaces.mjs",
+    "./workspace/publication-files": "./src/workspace/publication-files.mjs",
     "./plan-jsnode-modules": "./src/plan-jsnode-modules.mjs"
   },
   "files": [
@@ -72,7 +73,6 @@
     "@red-cup-engineering/npm-package-services-section": "workspace:*",
     "@red-cup-engineering/npm-workspace-publication-service": "workspace:*",
     "@red-cup-engineering/read-javascript-file-export-documentation-service": "workspace:*",
-    "@red-cup-engineering/relating": "workspace:*",
     "@red-cup-engineering/uri-services-section": "workspace:*",
     "@red-cup-engineering/yaml-frontmatter-codec-service": "workspace:*",
     "@red-cup-engineering/computer-data-engineering-services-section": "workspace:*",
@@ -86,4 +86,3 @@
     "check-package-interfaces": "./scripts/check-package-interfaces.mjs"
   }
 }
-
