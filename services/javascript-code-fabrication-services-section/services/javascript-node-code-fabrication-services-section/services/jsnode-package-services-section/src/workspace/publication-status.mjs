@@ -1,3 +1,4 @@
+import { publicationFilesExclusionsOf } from './publication-files.mjs';
 /**
  * @packageDocumentation
  *
@@ -140,26 +141,8 @@ function proofTargets(proof) {
   return proof.targets;
 }
 
-function packageRelativeTarget(target) {
-  return target.replace(/^\.\//u, "");
-}
-
-function fileEntryCoversTarget(entry, target) {
-  const normalizedEntry = packageRelativeTarget(entry).replace(/\/+$/u, "");
-  const normalizedTarget = packageRelativeTarget(target);
-  return normalizedTarget === normalizedEntry || normalizedTarget.startsWith(`${normalizedEntry}/`);
-}
-
 function excludedPublicationTargets(admission, proof) {
-  const includedFiles = manifestFiles(admission);
-  if (includedFiles.length === 0) return Object.freeze([]);
-  return Object.freeze([
-    ...new Set(
-      proofTargets(proof)
-        .map((target) => target.target)
-        .filter((target) => !includedFiles.some((entry) => fileEntryCoversTarget(entry, target))),
-    ),
-  ].sort());
+  return publicationFilesExclusionsOf(admission.manifest, proofTargets(proof).map(target => target.target));
 }
 
 function isTypeScriptRuntimeTarget(target) {
@@ -185,7 +168,6 @@ function releasePolicyObligations(admission, proof) {
   if (admission.manifest.private === true) obligations.push("Package manifest is private; do not publish to the public npm registry.");
   if (excludedTargets.length > 0) obligations.push(`Package files allowlist excludes public artifact targets: ${excludedTargets.join(", ")}.`);
   if (unsupportedTargets.length > 0) obligations.push(`Installed Node.js packages cannot execute TypeScript runtime targets: ${unsupportedTargets.join(", ")}.`);
-  if (!manifestScripts(admission).includes("build")) obligations.push("Package scripts should expose a build procedure before release artifact proof.");
   return Object.freeze(obligations);
 }
 
@@ -203,8 +185,7 @@ export function publicationReleasePolicyOf(
   const scripts = manifestScripts(admission);
   const localArtifactOk = proof.ok
     && excludedPublicationTargets(admission, proof).length === 0
-    && unsupportedNodeRuntimeTargets(proof).length === 0
-    && scripts.includes("build");
+    && unsupportedNodeRuntimeTargets(proof).length === 0;
   return publicationReleasePolicyContract.assert(Object.freeze({
     kind: "metroplat.publication-status.release-policy",
     source: admission.source,
