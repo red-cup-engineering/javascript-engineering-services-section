@@ -14,7 +14,7 @@
  * same evidence collapse to one channel. A carrier the market lot does not name cannot be shown to
  * differ from another, so it is taken as the same carrier: independence is claimed only on evidence.
  */
-import { semanticId } from "@red-cup-engineering/computer-content-engineering-services-section/semiotic-content-address";
+import { semanticId } from "@red-cup-engineering/computer-content-address-engineering-services-section/semiotic-content-address";
 
 /** The carrier a market lot names, or the one a deterministic procedure is. */
 export function carrierOfLot(lot) {

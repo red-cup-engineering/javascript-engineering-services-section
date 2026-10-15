@@ -1,8 +1,0 @@
-{
-  "name": "package-backed-capcell-fabrication-service",
-  "main": "src/worker.mjs",
-  "compatibility_date": "2026-07-27",
-  "workers_dev": true,
-  "routes": [{"pattern": "package-backed-capcell-fabrication.actions.561.group", "custom_domain": true}],
-  "vars": {"FABRICATE_ACTION": "https://capcell-manifest-fabrication.actions.561.group/invoke"}
-}

@@ -12,7 +12,8 @@ import { projectJsnodeOperationModules } from "./project-jsnode-operation-packag
 import { deriveJsnodePackageFromClosure } from "./derive-jsnode-package-from-closure.mjs";
 import { writeTextFile } from "@red-cup-engineering/computer-file-engineering-services-section/write-text-file";
 import { admitMarkdownJsnodeOperationPackageFabricationReceipt } from "@red-cup-engineering/jsnode-package-services-section/fabrication-receipts";
-import { semanticId } from "@red-cup-engineering/computer-content-engineering-services-section/semiotic-content-address";
+import { semanticId } from "@red-cup-engineering/computer-content-address-engineering-services-section/semiotic-content-address";
+import { dataKindDirectory } from "@red-cup-engineering/eavt-services-section/data-artifact-address";
 
 const DEFAULT_JOURNAL_ROOT_SUFFIX = "lib/emsenn/services/561-group/services/engineering-services-section";
 
@@ -31,14 +32,14 @@ export function operationNameFromDestination(destination) {
 }
 
 /**
- * Computes the absolute path at which one fabrication's disk receipt is written, per the FROG admission convention: `<destination>/data/records/<YYYY-MM-DD>-<operation-name>-fabrication-receipt.json`.
+ * Computes the absolute path at which one fabrication's disk receipt is written: a record of its kind, `<destination>/data/records/fabrication-receipt-records/<YYYY-MM-DD>-<operation-name>-fabrication-receipt.json`.
  * @param {string} destination An absolute path to a born package directory.
  * @param {Date} recordedAt The instant the receipt is recorded, used only for its UTC calendar date.
  * @returns {string} The absolute receipt file path.
  */
 export function fabricationReceiptDiskPath(destination, recordedAt) {
   const date = recordedAt.toISOString().slice(0, 10);
-  return path.join(destination, "data", "records", `${date}-${operationNameFromDestination(destination)}-fabrication-receipt.json`);
+  return path.join(dataKindDirectory(destination, "record", "fabrication-receipt"), `${date}-${operationNameFromDestination(destination)}-fabrication-receipt.json`);
 }
 
 /**
@@ -185,7 +186,7 @@ function validRequest(request) {
 }
 
 /** Admit the work order before spending inference; return a proposal, never acceptance. */
-export async function deriveMarkdownJsnodeOperationModules(source, { infer, judge = async () => undefined, dependencyProjectRoot } = {}) {
+export async function deriveMarkdownJsnodeOperationModules(source, { infer, judge = async () => undefined, dependencyProjectRoot, isolatedAssayExecutor } = {}) {
   let phase = "translation";
   let derivation;
   try {
@@ -208,7 +209,7 @@ export async function deriveMarkdownJsnodeOperationModules(source, { infer, judg
     if (translated.type === "MarkdownJsnodeOperationPackageClosureTranslation") {
       phase = "derivation";
       if (typeof infer !== "function") return refusal(phase, { code: "NO_DERIVATION_CARRIER", message: "a meaning-closure's sources are derived, and no inference carrier was composed" });
-      derivation = await deriveJsnodePackageFromClosure(workOrderSpecification, { infer, judge, dependencyProjectRoot });
+      derivation = await deriveJsnodePackageFromClosure(workOrderSpecification, { infer, judge, dependencyProjectRoot, isolatedAssayExecutor });
       if (derivation.type === "JsnodeClosureDerivationRefusal") return immutable({
         ...refusal(phase, derivation),
         message: derivation.question ?? derivation.evidence ?? `no delivery for ${derivation.operation} passed its examples`,
@@ -252,7 +253,7 @@ export async function deriveMarkdownJsnodeOperationModules(source, { infer, judg
  * @param {{infer?: Function, judge?: Function}} [carriers] For a closure: `infer({ taskClass, objective, messages, json })` resolving to { text, lot }, and `judge(lot, outcome, evidence)`.
  * @returns {Promise<object>} A MarkdownJsnodeOperationPackageFabricationReceipt or phase-specific refusal.
  */
-export async function fabricateMarkdownJsnodeOperationPackage(request, { infer, judge = async () => undefined, dependencyProjectRoot } = {}) {
+export async function fabricateMarkdownJsnodeOperationPackage(request, { infer, judge = async () => undefined, dependencyProjectRoot, isolatedAssayExecutor } = {}) {
   const invalid = validRequest(request);
   if (invalid) return refusal("request", { code: "INVALID_REQUEST", message: invalid });
   let phase = "translation";
@@ -266,7 +267,7 @@ export async function fabricateMarkdownJsnodeOperationPackage(request, { infer, 
     }
   };
   try {
-    const proposal = await deriveMarkdownJsnodeOperationModules(request.source, { infer, judge, dependencyProjectRoot });
+    const proposal = await deriveMarkdownJsnodeOperationModules(request.source, { infer, judge, dependencyProjectRoot, isolatedAssayExecutor });
     if (proposal.type !== "MarkdownJsnodeOperationModuleProposal") return proposal;
     const { artifactSpecification: specification, projection } = proposal;
     workOrderSpecification = proposal.workOrderSpecification;

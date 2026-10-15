@@ -39,8 +39,10 @@
     "./package-tree": "./src/package-tree.mjs",
     "./workspace/exports/resolve": "./src/workspace/exports/resolve.mjs",
     "./workspace/package-interfaces": "./src/workspace/package-interfaces.mjs",
-    "./standardize-package-tests": "./src/standardize-package-tests.mjs",
-    "./package-test-plan": "./src/package-test-plan.mjs"
+    "./workspace/publication-files": "./src/workspace/publication-files.mjs",
+    "./plan-jsnode-modules": "./src/plan-jsnode-modules.mjs",
+    "./package-test-plan": "./src/package-test-plan.mjs",
+    "./standardize-package-tests": "./src/standardize-package-tests.mjs"
   },
   "files": [
     "apps",
@@ -48,7 +50,8 @@
     "src",
     "package.json",
     "data/records/schema",
-    "data/records/jsnode-package-cli.specification.json"
+    "data/records/jsnode-package-cli.specification.json",
+    "test"
   ],
   "scripts": {
     "test": "node scripts/run-package-tests.mjs",
@@ -59,7 +62,6 @@
     "check:interfaces": "node scripts/check-package-interfaces.mjs --check"
   },
   "dependencies": {
-    "@red-cup-engineering/computer-content-engineering-services-section": "workspace:*",
     "@red-cup-engineering/computer-filepath-engineering-services-section": "workspace:*",
     "@red-cup-engineering/computer-text-content-engineering-services-section": "workspace:*",
     "@red-cup-engineering/cryptographic-computer-data-engineering-services-section": "workspace:*",
@@ -74,10 +76,10 @@
     "@red-cup-engineering/npm-package-services-section": "workspace:*",
     "@red-cup-engineering/npm-workspace-publication-service": "workspace:*",
     "@red-cup-engineering/read-javascript-file-export-documentation-service": "workspace:*",
-    "@red-cup-engineering/relating": "workspace:*",
     "@red-cup-engineering/uri-services-section": "workspace:*",
     "@red-cup-engineering/yaml-frontmatter-codec-service": "workspace:*",
-    "@red-cup-engineering/computer-data-engineering-services-section": "workspace:*"
+    "@red-cup-engineering/computer-data-engineering-services-section": "workspace:*",
+    "@red-cup-engineering/computer-content-address-engineering-services-section": "workspace:*"
   },
   "engines": {
     "node": ">=24"
@@ -85,8 +87,8 @@
   "bin": {
     "sync-package-manifest": "./scripts/sync-package-manifest.mjs",
     "check-package-interfaces": "./scripts/check-package-interfaces.mjs",
-    "standardize-package-tests": "./scripts/standardize-package-tests.mjs",
     "run-package-tests": "./scripts/run-package-tests.mjs",
-    "check-package-syntax": "./scripts/check-package-syntax.mjs"
+    "check-package-syntax": "./scripts/check-package-syntax.mjs",
+    "standardize-package-tests": "./scripts/standardize-package-tests.mjs"
   }
 }

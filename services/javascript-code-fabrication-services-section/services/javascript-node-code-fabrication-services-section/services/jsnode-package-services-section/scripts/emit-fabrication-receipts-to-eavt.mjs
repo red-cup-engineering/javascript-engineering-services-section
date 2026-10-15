@@ -7,10 +7,10 @@ import { walkPosixPaths } from "@red-cup-engineering/computer-filepath-engineeri
 import { readTextFile } from "@red-cup-engineering/computer-file-engineering-services-section/read-text-file";
 import { runJavascriptNodeOperation } from "@red-cup-engineering/javascript-node-services-section/operation";
 
-const RECEIPT_PATH_PATTERN = /\/data\/records\/\d{4}-\d{2}-\d{2}-.*fabrication-receipt\.json$/u;
+const RECEIPT_PATH_PATTERN = /\/data\/records\/fabrication-receipt-records\/\d{4}-\d{2}-\d{2}-.*fabrication-receipt\.json$/u;
 
 /**
- * Walks `root` for dated fabrication-receipt.json files under any data/records/ directory and
+ * Walks `root` for dated fabrication-receipt.json files under any data/records/fabrication-receipt-records/ directory and
  * appends world rows only for complete receipts whose fabrication evidence admits. Historical
  * creation-only records remain discoverable on disk but cannot create receiver rows.
  * @param {{root: string, tracePath: string}} args
