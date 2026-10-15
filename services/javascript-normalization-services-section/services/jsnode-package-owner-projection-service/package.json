@@ -1,9 +1,10 @@
 {
   "name": "@red-cup-engineering/jsnode-package-owner-projection-service",
-  "version": "1.0.0",
-  "private": true,
+  "version": "0.1.0",
+  "private": false,
   "type": "module",
   "description": "Projects one explicit repository package path to the currently declared npm owner policy.",
+  "files": ["src"],
   "exports": "./src/project-jsnode-package-owner.mjs",
   "scripts": {
     "check": "node --check src/project-jsnode-package-owner.mjs",
