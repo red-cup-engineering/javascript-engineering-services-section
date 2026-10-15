@@ -7,10 +7,17 @@
     "./read-javascript-file-main-guards": "./scripts/read-javascript-file-main-guards.mjs"
   },
   "dependencies": {
-    "@red-cup-engineering/computer-file-engineering-services-section": "workspace:*",
-    "@red-cup-engineering/javascript-node-services-section": "workspace:*"
+    "@red-cup-engineering/computer-file-engineering-services-section": "0.4.0",
+    "@red-cup-engineering/javascript-node-services-section": "0.3.1"
   },
   "scripts": {
     "test": "node --test test/*.test.mjs"
-  }
+  },
+  "private": false,
+  "files": [
+    "package.json",
+    "README*",
+    "LICENSE*",
+    "scripts"
+  ]
 }

@@ -7,12 +7,21 @@
     "./review-jsnode-package": "./scripts/review-jsnode-package.mjs"
   },
   "dependencies": {
-    "@red-cup-engineering/javascript-file-import-services-section": "workspace:*",
-    "@red-cup-engineering/javascript-node-services-section": "workspace:*",
-    "@red-cup-engineering/json-services-section": "workspace:*",
-    "@red-cup-engineering/npm-package-manifest-normalization-service": "workspace:*"
+    "@red-cup-engineering/javascript-file-import-services-section": "0.1.0",
+    "@red-cup-engineering/javascript-node-services-section": "0.3.1",
+    "@red-cup-engineering/json-services-section": "0.4.0",
+    "@red-cup-engineering/npm-package-manifest-normalization-service": "0.1.0"
   },
   "scripts": {
     "test": "node --test test/*.test.mjs"
-  }
+  },
+  "private": false,
+  "files": [
+    "package.json",
+    "README*",
+    "LICENSE*",
+    "scripts",
+    "apps",
+    "!apps/jsnode-package-body-normalization-app/**"
+  ]
 }

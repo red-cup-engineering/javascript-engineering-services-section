@@ -1,6 +1,6 @@
 {
   "name": "@red-cup-engineering/jsnode-package-services-section",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "type": "module",
   "description": "Shared JSNode module and schema projection with an optional package catalog and fabrication boundary.",
   "license": "UNLICENSED",
@@ -59,24 +59,24 @@
     "check:interfaces": "node scripts/check-package-interfaces.mjs --check"
   },
   "dependencies": {
-    "@red-cup-engineering/computer-filepath-engineering-services-section": "workspace:*",
-    "@red-cup-engineering/computer-text-content-engineering-services-section": "workspace:*",
-    "@red-cup-engineering/cryptographic-computer-data-engineering-services-section": "workspace:*",
-    "@red-cup-engineering/eavt-services-section": "workspace:*",
-    "@red-cup-engineering/execute-javascript-node-command-service": "workspace:*",
-    "@red-cup-engineering/computer-file-engineering-services-section": "workspace:*",
-    "@red-cup-engineering/inspect-installed-npm-package-service": "workspace:*",
-    "@red-cup-engineering/javascript-node-services-section": "workspace:*",
-    "@red-cup-engineering/json-schema-services-section": "workspace:*",
-    "@red-cup-engineering/json-services-section": "workspace:*",
-    "@red-cup-engineering/jsonl-services-section": "workspace:*",
-    "@red-cup-engineering/npm-package-services-section": "workspace:*",
-    "@red-cup-engineering/npm-workspace-publication-service": "workspace:*",
-    "@red-cup-engineering/read-javascript-file-export-documentation-service": "workspace:*",
-    "@red-cup-engineering/uri-services-section": "workspace:*",
-    "@red-cup-engineering/yaml-frontmatter-codec-service": "workspace:*",
-    "@red-cup-engineering/computer-data-engineering-services-section": "workspace:*",
-    "@red-cup-engineering/computer-content-address-engineering-services-section": "workspace:*"
+    "@red-cup-engineering/computer-filepath-engineering-services-section": "0.1.0",
+    "@red-cup-engineering/computer-text-content-engineering-services-section": "0.1.0",
+    "@red-cup-engineering/cryptographic-computer-data-engineering-services-section": "0.3.1",
+    "@red-cup-engineering/eavt-services-section": "0.10.4",
+    "@red-cup-engineering/execute-javascript-node-command-service": "0.3.0",
+    "@red-cup-engineering/computer-file-engineering-services-section": "0.4.0",
+    "@red-cup-engineering/inspect-installed-npm-package-service": "0.3.1",
+    "@red-cup-engineering/javascript-node-services-section": "0.3.1",
+    "@red-cup-engineering/json-schema-services-section": "0.5.0",
+    "@red-cup-engineering/json-services-section": "0.4.0",
+    "@red-cup-engineering/jsonl-services-section": "0.1.0",
+    "@red-cup-engineering/npm-package-services-section": "0.1.1",
+    "@red-cup-engineering/npm-workspace-publication-service": "0.13.0",
+    "@red-cup-engineering/read-javascript-file-export-documentation-service": "0.1.4",
+    "@red-cup-engineering/uri-services-section": "0.1.1",
+    "@red-cup-engineering/yaml-frontmatter-codec-service": "0.1.6",
+    "@red-cup-engineering/computer-data-engineering-services-section": "0.2.0",
+    "@red-cup-engineering/computer-content-address-engineering-services-section": "0.2.0"
   },
   "engines": {
     "node": ">=24"
@@ -84,5 +84,6 @@
   "bin": {
     "sync-package-manifest": "./scripts/sync-package-manifest.mjs",
     "check-package-interfaces": "./scripts/check-package-interfaces.mjs"
-  }
+  },
+  "private": false
 }
