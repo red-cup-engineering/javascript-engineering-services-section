@@ -123,3 +123,87 @@ test("refuses a directory without a package.json", async () => {
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test("M3 checks actual files advertised by root export maps, including conditional branches", async () => {
+  const root = await mkdtemp(join(tmpdir(), "jsnode-check-exports-"));
+  try {
+    const dir = join(root, "services", "exported-widget");
+    await mkdir(join(dir, "src"), { recursive: true });
+    const manifest = {
+      name: "@owner/exported-widget", private: true, type: "module",
+      exports: { ".": { import: "./src/widget.mjs", require: "./src/widget.cjs" } },
+      scripts: { check: "node --check src/widget.mjs", test: "node --test", verify: "npm test" },
+    };
+    await writeManifest(dir, manifest);
+    await writeFile(join(dir, "src/widget.mjs"), "export const ready = true;\n", "utf8");
+    let report = await checkJsnodePackage({ directory: dir });
+    assert.equal(report.findings.find((f) => f.invariantId === "M3").status, "violation",
+      "a missing conditional export target is not clean");
+
+    await writeFile(join(dir, "src/widget.cjs"), "exports.ready = true;\n", "utf8");
+    report = await checkJsnodePackage({ directory: dir });
+    assert.equal(report.findings.find((f) => f.invariantId === "M3").status, "clean",
+      "all checked root export targets now exist");
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("M3 refuses out-of-package paths and does not certify uninspected wildcard or null exports", async () => {
+  const root = await mkdtemp(join(tmpdir(), "jsnode-check-exports-refusal-"));
+  try {
+    const dir = join(root, "services", "exported-widget");
+    await mkdir(join(dir, "src"), { recursive: true });
+    const manifest = {
+      name: "@owner/exported-widget", private: true, type: "module",
+      exports: { ".": "./../unowned.mjs" },
+      scripts: { check: "node --check src/widget.mjs", test: "node --test", verify: "npm test" },
+    };
+    await writeManifest(dir, manifest);
+    const verdict = async (exp) => {
+      await writeManifest(dir, { ...manifest, exports: exp });
+      const report = await checkJsnodePackage({ directory: dir });
+      return report.findings.find((f) => f.invariantId === "M3").status;
+    };
+    assert.equal(await verdict({ ".": "./../unowned.mjs" }), "violation");
+    assert.equal(await verdict({ ".": "./src/*.mjs" }), "informational");
+    assert.equal(await verdict({ ".": null }), "informational");
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("M3 accepts fully present subpath-only exports, as used by SignChain", async () => {
+  const root = await mkdtemp(join(tmpdir(), "jsnode-check-subpaths-"));
+  try {
+    const dir = join(root, "services", "subpath-only");
+    await mkdir(join(dir, "src"), { recursive: true });
+    const manifest = {
+      name: "@owner/subpath-only", private: true, type: "module",
+      exports: { "./package.json": "./package.json", "./tool": "./src/tool.mjs" },
+      scripts: { check: "node --check src/tool.mjs", test: "node --test", verify: "npm test" },
+    };
+    await writeManifest(dir, manifest);
+    let report = await checkJsnodePackage({ directory: dir });
+    assert.equal(report.findings.find((f) => f.invariantId === "M3").status, "violation", "the missing subpath target is real");
+    await writeFile(join(dir, "src/tool.mjs"), "export const tool = true;\n", "utf8");
+    report = await checkJsnodePackage({ directory: dir });
+    assert.equal(report.findings.find((f) => f.invariantId === "M3").status, "clean", "no root export required");
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("M3 distinguishes root conditional sugar and unexamined fallback arrays", async () => {
+  const root = await mkdtemp(join(tmpdir(), "jsnode-check-conditions-"));
+  try {
+    const dir = join(root, "services", "conditional-root");
+    await mkdir(join(dir, "src"), { recursive: true });
+    const manifest = {
+      name: "@owner/conditional-root", private: true, type: "module",
+      exports: { import: "./src/widget.mjs" },
+      scripts: { check: "node --check src/widget.mjs", test: "node --test", verify: "npm test" },
+    };
+    await writeFile(join(dir, "src/widget.mjs"), "export const widget = true;\n", "utf8");
+    await writeManifest(dir, manifest);
+    let report = await checkJsnodePackage({ directory: dir });
+    assert.equal(report.findings.find((f) => f.invariantId === "M3").status, "clean");
+    await writeManifest(dir, { ...manifest, exports: [ "./src/nonexistent.mjs", "./src/widget.mjs" ] });
+    report = await checkJsnodePackage({ directory: dir });
+    assert.equal(report.findings.find((f) => f.invariantId === "M3").status, "informational", "fallback resolution not observed");
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
