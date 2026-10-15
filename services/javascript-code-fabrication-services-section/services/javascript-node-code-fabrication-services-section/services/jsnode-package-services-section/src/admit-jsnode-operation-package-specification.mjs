@@ -1,9 +1,9 @@
 import path from "node:path";
 import { freezeJson } from "@red-cup-engineering/json-services-section";
 import { isJsonValue } from "@red-cup-engineering/json-services-section";
-import { admitNpmPackageVersion } from "@red-cup-engineering/npm-package-services-section/admit-npm-package-version";
+import { admitNpmPackageVersion } from "@red-cup-engineering/npm-package-version-admission-service";
 import { admitNonemptySingleLineText } from "@red-cup-engineering/computer-text-content-engineering-services-section/admit-nonempty-single-line-text";
-import { formNpmScopedPackageName } from "@red-cup-engineering/npm-package-services-section/form-npm-scoped-package-name";
+import { formNpmScopedPackageName } from "@red-cup-engineering/npm-scoped-package-name-formation-service";
 import { readJavascriptFileExportDocumentation } from "@red-cup-engineering/read-javascript-file-export-documentation-service";
 import { admitJavascriptExportDescription } from "@red-cup-engineering/read-javascript-file-export-documentation-service/description";
 import { admitRelativePosixFilepath } from "@red-cup-engineering/computer-filepath-engineering-services-section/admit-relative-posix-filepath";
