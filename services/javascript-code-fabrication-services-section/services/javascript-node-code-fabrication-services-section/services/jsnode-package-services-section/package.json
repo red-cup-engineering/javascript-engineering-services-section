@@ -39,7 +39,8 @@
     "./package-tree": "./src/package-tree.mjs",
     "./workspace/exports/resolve": "./src/workspace/exports/resolve.mjs",
     "./workspace/package-interfaces": "./src/workspace/package-interfaces.mjs",
-    "./workspace/publication-files": "./src/workspace/publication-files.mjs"
+    "./workspace/publication-files": "./src/workspace/publication-files.mjs",
+    "./plan-jsnode-modules": "./src/plan-jsnode-modules.mjs"
   },
   "files": [
     "apps",
