@@ -13,5 +13,12 @@
   },
   "devDependencies": {
     "@red-cup-engineering/jsnode-package-services-section": "workspace:*"
-  }
+  },
+  "files": [
+    "scripts",
+    "test",
+    "content",
+    "README.md",
+    "package.json"
+  ]
 }
