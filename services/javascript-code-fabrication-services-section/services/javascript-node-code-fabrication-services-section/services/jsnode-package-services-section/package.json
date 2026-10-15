@@ -40,7 +40,9 @@
     "./workspace/exports/resolve": "./src/workspace/exports/resolve.mjs",
     "./workspace/package-interfaces": "./src/workspace/package-interfaces.mjs",
     "./workspace/publication-files": "./src/workspace/publication-files.mjs",
-    "./plan-jsnode-modules": "./src/plan-jsnode-modules.mjs"
+    "./plan-jsnode-modules": "./src/plan-jsnode-modules.mjs",
+    "./package-test-plan": "./src/package-test-plan.mjs",
+    "./standardize-package-tests": "./src/standardize-package-tests.mjs"
   },
   "files": [
     "apps",
@@ -48,11 +50,12 @@
     "src",
     "package.json",
     "data/records/schema",
-    "data/records/jsnode-package-cli.specification.json"
+    "data/records/jsnode-package-cli.specification.json",
+    "test"
   ],
   "scripts": {
-    "test": "node --test test/*.test.mjs",
-    "check": "node --check src/admit-jsnode-operation-package-specification.mjs && node --check src/project-jsnode-operation-package.mjs && node --check src/create-jsnode-operation-package.mjs && node --check src/stage-text-file-creation-projections.mjs && node --check src/translate-markdown-jsnode-operation-package-specification.mjs && node --check src/project-jsnode-modules.mjs && node --check src/project-jsnode-operation-package-readme.mjs && node --check src/project-jsnode-operation-tests.mjs && node --check src/admit-jsnode-operation-package-creation-receipt.mjs && node --check src/fabricate-markdown-jsnode-operation-package.mjs && node --check src/fabrication-records.mjs && node --check scripts/project-jsnode-package-cli.mjs && node --check apps/jsnode-package-cli.mjs && node --check apps/translate-markdown-cli.mjs && npm run check:generated",
+    "test": "node scripts/run-package-tests.mjs",
+    "check": "node scripts/check-package-syntax.mjs && npm run check:generated",
     "generate": "node scripts/project-jsnode-package-cli.mjs",
     "check:generated": "node scripts/project-jsnode-package-cli.mjs --check",
     "sync:manifest": "node scripts/sync-package-manifest.mjs --check",
@@ -83,6 +86,9 @@
   },
   "bin": {
     "sync-package-manifest": "./scripts/sync-package-manifest.mjs",
-    "check-package-interfaces": "./scripts/check-package-interfaces.mjs"
+    "check-package-interfaces": "./scripts/check-package-interfaces.mjs",
+    "run-package-tests": "./scripts/run-package-tests.mjs",
+    "check-package-syntax": "./scripts/check-package-syntax.mjs",
+    "standardize-package-tests": "./scripts/standardize-package-tests.mjs"
   }
 }
