@@ -1,7 +1,7 @@
 {
   "name": "@red-cup-engineering/jsnode-package-dependency-normalization-service",
-  "version": "1.0.0",
-  "private": true,
+  "version": "0.1.0",
+  "private": false,
   "type": "module",
   "description": "Pure normalization of dependency edges in one npm package manifest.",
   "exports": "./src/normalize-jsnode-package-dependencies.mjs",
@@ -12,5 +12,8 @@
   },
   "engines": {
     "node": ">=22"
-  }
+  },
+  "files": [
+    "src"
+  ]
 }
