@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
-import { basename, dirname, extname, join, resolve } from "node:path";
+import { basename, dirname, extname, join, relative, resolve } from "node:path";
 
 // Ported from the legacy organizing-with-jsnode conformance/{check,kind,layer}.mts
 // trio. The legacy checker scored findings through an external witness/charge
@@ -131,21 +131,43 @@ function checkM2SideEffects(manifest, kind) {
     : `sideEffects is ${JSON.stringify(value)}`);
 }
 
+// Read locally checkable root export targets, including conditional branches,
+// without treating an unchecked branch or a null export as an observed file.
+function rootExportTargets(value) {
+  if (typeof value === "string") return [value];
+  if (Array.isArray(value)) return value.flatMap(rootExportTargets);
+  if (value && typeof value === "object") return Object.values(value).flatMap(rootExportTargets);
+  return [];
+}
+
+function hasFallbackArray(value) {
+  return Array.isArray(value) || !!(value && typeof value === "object" && Object.values(value).some(hasFallbackArray));
+}
+
 function checkM3(dir, manifest) {
   const exp = manifest.exports;
   if (exp === undefined) return finding("M3", "adapted", "violation", "no exports field");
-  if (typeof exp === "string") {
-    const target = resolve(dir, exp);
-    return existsSync(target)
-      ? finding("M3", "adapted", "clean", `exports "${exp}" resolves to an existing file`)
-      : finding("M3", "adapted", "violation", `exports "${exp}" does not resolve to an existing file`);
-  }
-  if (typeof exp === "object" && exp !== null) {
-    return "." in exp
-      ? finding("M3", "adapted", "clean", `exports map declares ${Object.keys(exp).length} boundary point(s)`)
-      : finding("M3", "adapted", "violation", 'exports map is missing a "." entry');
-  }
-  return finding("M3", "adapted", "violation", "exports field is neither a string nor a map");
+  const isMap = exp !== null && typeof exp === "object" && !Array.isArray(exp);
+  if (typeof exp !== "string" && !isMap && !Array.isArray(exp))
+    return finding("M3", "adapted", "violation", "exports field is neither a string, array nor a map");
+  const targets = rootExportTargets(exp);
+  if (targets.length === 0)
+    return finding("M3", "adapted", "informational", "declared exports have no file targets whose presence was inspected");
+  const invalid = targets.filter((target) => {
+    if (!target.startsWith("./")) return true;
+    const displaced = relative(dir, resolve(dir, target));
+    return displaced === ".." || displaced.startsWith("../") || displaced.startsWith("..\\");
+  });
+  if (invalid.length > 0)
+    return finding("M3", "adapted", "violation", `export target escapes its package or is not package-relative: ${invalid.join(", ")}`);
+  if (hasFallbackArray(exp))
+    return finding("M3", "adapted", "informational", "export fallback arrays were not resolved; a missing alternative is not yet a proven failure");
+  const missing = targets.filter((target) => !target.includes("*") && !existsSync(resolve(dir, target)));
+  if (missing.length > 0)
+    return finding("M3", "adapted", "violation", `export targets missing on disk: ${missing.join(", ")}`);
+  if (targets.some((target) => target.includes("*")))
+    return finding("M3", "adapted", "informational", "declared exports have wildcard targets; their expansion has not been inspected");
+  return finding("M3", "adapted", "clean", `${targets.length} declared export target(s) exist on disk`);
 }
 
 function checkM4(manifest, kind) {
