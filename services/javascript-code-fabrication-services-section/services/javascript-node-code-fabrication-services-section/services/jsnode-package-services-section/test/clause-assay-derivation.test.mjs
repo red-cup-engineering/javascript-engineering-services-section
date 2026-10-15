@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import {admitClauseAssayDerivation} from '../src/fabrication-receipts.mjs';
 import {deriveJsnodePackageFromClosure} from '../src/derive-jsnode-package-from-closure.mjs';
+import { controlledLocalAssayFixture } from './fixtures/controlled-local-assay.mjs';
 const closure={packageName:'fixture',packageVersion:'0.0.0',license:'MIT',dependencies:{},constraints:[],requirements:[{id:'successor',statement:'Return n plus one.'}],prohibitions:[{id:'negative',statement:'Refuse negative n with RangeError.'}],operations:[{name:'successor',module:'src/successor.mjs',exportName:'successor',description:'Return successor of nonnegative n.',inputSchema:{type:'object',required:['n'],properties:{n:{type:'integer'}},additionalProperties:false},outputSchema:{type:'integer',minimum:1}}],examples:[{name:'zero',operation:'successor',input:{n:0},output:1}]};
 const cases=[{operation:'successor',name:'hidden-case-two',clauses:['successor'],input:{n:2},output:3,throws:null},{operation:'successor',name:'negative',clauses:['negative'],input:{n:-1},output:null,throws:'RangeError'}];
-async function run(source,assays=cases){let calls=[];const result=await deriveJsnodePackageFromClosure(closure,{infer:async request=>{calls.push(request);return {text:JSON.stringify(calls.length===1?{cases:assays,question:null}:{source,question:null})};}});return {result,calls};}
+async function run(source,assays=cases){let calls=[];const result=await deriveJsnodePackageFromClosure(closure,{infer:async request=>{calls.push(request);return {text:JSON.stringify(calls.length===1?{cases:assays,question:null}:{source,question:null})};},isolatedAssayExecutor:controlledLocalAssayFixture});return {result,calls};}
 const bad=await run('export function successor(){return 1;}');
 assert.equal(bad.result.code,'DERIVATION_REJECTED');
 assert.equal(bad.calls[0].taskClass,'code-fabrication-assays');

@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { admitOperationMeaningClosure } from "@red-cup-engineering/computer-data-engineering-services-section/artifact-fabrication";
 import { deriveJsnodePackageFromClosure, jsnodeClosureOfOperationClosure } from "../src/derive-jsnode-package-from-closure.mjs";
+import { controlledLocalAssayFixture } from "./fixtures/controlled-local-assay.mjs";
 
 // Fabrication line stage 2: one language-neutral order, bound to Node by convention, fabricated by the
 // jsnode line with its examples unchanged.
@@ -27,7 +28,7 @@ test("the bound order is fabricated: examples assay the derived source", async (
   const infer = async (request) => (request.taskClass === "code-fabrication-assays"
     ? { text: JSON.stringify({ cases: [{ operation: "double-value", name: "double-two", clauses: ["double-result"], input: 2, output: 4, throws: null }], question: null }), lot: { id: "a", model: "assayer" } }
     : { text: JSON.stringify({ source: "export function doubleValue(n) { return n + n; }", question: null }), lot: { id: "w", model: "writer" } });
-  const derived = await deriveJsnodePackageFromClosure(closure, { infer });
+  const derived = await deriveJsnodePackageFromClosure(closure, { infer, isolatedAssayExecutor: controlledLocalAssayFixture });
   assert.equal(derived.type, undefined, JSON.stringify(derived).slice(0, 500));
   assert.equal(derived.sources[0].path, "src/double-value.mjs");
   assert.equal(derived.proofing.independentBehavioralChannels, 1, "a different named assayer on the order is one independent channel");

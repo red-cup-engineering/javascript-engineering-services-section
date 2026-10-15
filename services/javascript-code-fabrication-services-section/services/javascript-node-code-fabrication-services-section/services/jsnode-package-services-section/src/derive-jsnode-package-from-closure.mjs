@@ -21,106 +21,20 @@
  * Every attempt is recorded with the lot the market sold it under, so the fabrication receipt binds
  * the provider, and the caller judges the accepted lot once the whole pipeline has assayed it.
  */
-import { spawnSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
 import path from "node:path";
 import { parseJsonValue } from "@red-cup-engineering/json-services-section";
 import { inspectInstalledNpmPackageResolution } from "@red-cup-engineering/inspect-installed-npm-package-service";
 import { schemaFrom } from "@red-cup-engineering/json-schema-services-section/contracts";
-import { admitArtifactFabricationSpecification, admitArtifactFabricationRealizationPlan, bindOperationMeaningClosure } from "@red-cup-engineering/computer-data-engineering-services-section/artifact-fabrication";
-import { admitNpmPackageVersion } from "@red-cup-engineering/npm-package-services-section/admit-npm-package-version";
-import { projectJsnodeModules, projectJsnodeModulePaths } from "./project-jsnode-modules.mjs";
+import { bindOperationMeaningClosure } from "@red-cup-engineering/computer-data-engineering-services-section/artifact-fabrication";
+import { projectJsnodeModules } from "./project-jsnode-modules.mjs";
 import { channelOfPreAssayFailure, proofingOfDerivation } from "./assay-channels.mjs";
+import { admittedAssayNames, receiveIsolatedAssayOutcome } from "./assay-completion.mjs";
 import { misfoldRefusal, misfoldsOfModule } from "./misfold.mjs";
 
+import { moduleMeaningClosure, moduleFabricationPlan, testsOfClosure } from "./plan-jsnode-modules.mjs";
+export { JSNODE_MODULE_MEANING_CLOSURE_SCHEMA, planJsnodeModules, testsOfClosure } from "./plan-jsnode-modules.mjs";
+
 const TASK_CLASS = "code-fabrication";
-
-// The module projector already owns operation names, export bindings and paths.
-// A meaning closure supplies examples and exact dependencies, never source,
-// tests, an npm identity, a destination, or a publication instruction.
-const moduleSchema = JSON.parse(readFileSync(new URL("../data/records/schema/jsnode-module-specification.schema.json", import.meta.url), "utf8"));
-export const JSNODE_MODULE_MEANING_CLOSURE_SCHEMA = Object.freeze({
-  type: "object", additionalProperties: false,
-  required: ["operations", "examples", "dependencies"],
-  properties: {
-    operations: { ...moduleSchema.properties.operations, minItems: 1, items: {
-      ...moduleSchema.properties.operations.items,
-      required: [...moduleSchema.properties.operations.items.required, "inputSchema", "outputSchema"],
-    } },
-    examples: { type: "array", minItems: 1, items: {
-      type: "object", additionalProperties: false,
-      required: ["name", "operation", "input", "output"],
-      properties: { name: { type: "string", minLength: 1 }, operation: { type: "string", minLength: 1 }, input: {}, output: {} },
-    } },
-    dependencies: { type: "object", additionalProperties: {
-      type: "string", pattern: "^[0-9]+\\.[0-9]+\\.[0-9]+$",
-    } },
-  },
-});
-const moduleMeaningClosure = schemaFrom(JSNODE_MODULE_MEANING_CLOSURE_SCHEMA);
-
-function moduleFabricationPlan(candidate) {
-  let phase = "artifact-specification-admission", workOrder;
-  const refuse = cause => Object.freeze({
-    type: "JsnodeModuleDerivationRefusal", version: 1, phase,
-    code: cause.code ?? "FABRICATION_FAILED", message: cause.question ?? cause.evidence ?? cause.message ?? String(cause),
-    cause, ...(workOrder ? { workOrderSpecificationDigest: workOrder.specificationDigest, source: workOrder.source } : {}),
-  });
-  try {
-    workOrder = admitArtifactFabricationSpecification(candidate);
-    if (workOrder.type !== "ArtifactFabricationSpecification") return refuse(workOrder);
-    phase = "module-meaning-closure-admission";
-    const projection = workOrder.projections[0];
-    if (workOrder.artifact.kind !== "jsnode-modules" || workOrder.projections.length !== 1
-        || projection.id !== "jsnode-modules"
-        || projection.target !== "@red-cup-engineering/jsnode-package-services-section/derive-jsnode-package-from-closure") {
-      return refuse({ code: "INVALID_MODULE_PROJECTION", message: "one jsnode-modules projection to the module fabricator is required" });
-    }
-    const closure = moduleMeaningClosure.assert(projection.configuration);
-    const names = new Set(), bindings = new Set(), examples = new Set();
-    for (const op of closure.operations) {
-      for (const schemaPath of [op.inputSchemaPath, op.outputSchemaPath].filter(value => value !== undefined)) {
-        if (!schemaPath.startsWith("data/") || schemaPath.includes("\\") || schemaPath.split("/").some(part => part === "." || part === "..")) throw new TypeError("schema path must stay beneath data");
-      }
-      if (op.module.split("/").some(part => part === "." || part === "..") || op.module.includes("\\")) throw new TypeError("module path must stay beneath src");
-      if (names.has(op.name) || bindings.has(op.module + ":" + op.exportName)) throw new TypeError("duplicate operation name or module export");
-      names.add(op.name); bindings.add(op.module + ":" + op.exportName);
-      if (!closure.examples.some(example => example.operation === op.name)) throw new TypeError("every operation needs an admitted example");
-    }
-    for (const example of closure.examples) {
-      const op = closure.operations.find(op => op.name === example.operation);
-      if (!op || examples.has(example.operation + ":" + example.name)) throw new TypeError("unknown operation or duplicate example");
-      examples.add(example.operation + ":" + example.name);
-      schemaFrom(op.inputSchema).assert(example.input);
-      schemaFrom(op.outputSchema).assert(example.output);
-    }
-    for (const [name, version] of Object.entries(closure.dependencies)) {
-      if (!/^(?:@[a-z0-9._-]+\/)?[a-z0-9][a-z0-9._-]*$/u.test(name)) throw new TypeError("invalid dependency name");
-      admitNpmPackageVersion(version);
-    }
-    phase = "realization-plan-preflight";
-    const plan = admitArtifactFabricationRealizationPlan(workOrder, {
-      type: "ArtifactFabricationRealizationPlanCandidate", version: 1,
-      artifactId: workOrder.artifact.id, specificationDigest: workOrder.specificationDigest,
-      projectionIds: [projection.id], acceptanceObligationIds: workOrder.acceptanceObligations.map(item => item.id),
-    });
-    if (plan.type !== "ArtifactFabricationRealizationPlan") return refuse(plan);
-    return {workOrder, closure, plan};
-  } catch (error) { return refuse({name: error.name, message: error.message}); }
-}
-
-/** Admit the original order and project every output path without inference or filesystem effects. */
-export function planJsnodeModules(candidate) {
-  const admitted = moduleFabricationPlan(candidate);
-  if (admitted.type === "JsnodeModuleDerivationRefusal") return admitted;
-  const {workOrder, closure, plan} = admitted;
-  const paths = [...projectJsnodeModulePaths(closure), ...testsOfClosure(closure).map(test => test.path)];
-  if (new Set(paths).size !== paths.length) throw new TypeError("fabrication output paths are duplicated");
-  return Object.freeze({type: "JsnodeModuleFabricationPlan", version: 1,
-    workOrderSpecificationDigest: workOrder.specificationDigest, realizationPlan: plan,
-    paths: Object.freeze(paths.sort((left, right) => left.localeCompare(right)))});
-}
 
 /** Fabricate module proposals from canonical work data, without package birth. */
 export async function deriveJsnodeModules(candidate, carriers = {}) {
@@ -163,45 +77,6 @@ export const MODULE_DELIVERY_SCHEMA = Object.freeze({
 });
 const moduleDelivery = schemaFrom(MODULE_DELIVERY_SCHEMA);
 
-
-const examplesOf = (closure, operation) => closure.examples.filter((example) => example.operation === operation.name);
-
-/**
- * The tests a closure's examples determine: for each operation, one test per admitted example,
- * importing the operation's module and holding its result to the admitted output.
- */
-export function testsOfClosure(closure, derivedCases = []) {
-  return closure.operations.map((operation) => {
-    const relative = path.posix.relative("test", operation.module);
-    const cases = examplesOf(closure, operation).map((example) => [
-      `test(${JSON.stringify(`${operation.name}: ${example.name}`)}, async () => {`,
-      `  assert.deepStrictEqual(await ${operation.exportName}(${JSON.stringify(example.input)}), ${JSON.stringify(example.output)});`,
-      "});",
-    ].join("\n"));
-    for (const item of derivedCases.filter(item => item.operation === operation.name)) {
-      cases.push([
-        `test(${JSON.stringify(operation.name + ": clause assay " + item.name)}, async () => {`,
-        item.throws === null
-          ? `  assert.deepStrictEqual(await ${operation.exportName}(${JSON.stringify(item.input)}), ${JSON.stringify(item.output)});`
-          : `  await assert.rejects(async () => await ${operation.exportName}(${JSON.stringify(item.input)}), { name: ${JSON.stringify(item.throws)} });`,
-        "});",
-      ].join("\n"));
-    }
-    return Object.freeze({
-      type: "JavascriptNodeOperationTestSource",
-      path: `test/${operation.name}-examples.test.mjs`,
-      text: [
-        "// Derived from the work order's admitted examples, before the operation's source was derived.",
-        'import assert from "node:assert/strict";',
-        'import test from "node:test";',
-        `import { ${operation.exportName} } from ${JSON.stringify(relative.startsWith(".") ? relative : `./${relative}`)};`,
-        "",
-        ...cases,
-        "",
-      ].join("\n"),
-    });
-  });
-}
 
 /**
  * The Node binding of a language-neutral operation closure (artifact-fabrication
@@ -307,50 +182,63 @@ export function moduleOfDelivery(text, member) {
 }
 
 /**
- * Run the entire declared module set on its examples and prior clause assays, without installing:
- * { passed: true } or { passed: false, failure }. Dependencies are exact installed
- * resolutions admitted before inference, not a reason to defer behavioral evidence.
+ * Build the complete connected source and independent test lot, then receive
+ * the outcome from the host's isolated execution capability.
+ *
+ * This Code Engineering module does NOT execute supplier-authored code. The
+ * runtime host must provide isolatedAssayExecutor from its own trusted service
+ * composition, not from the customer's JSON request. A temporary directory or
+ * Node --test child is NOT an isolation mechanism. No ambient fallback exists.
+ *
+ * The executor is responsible for making the supplied files available only in
+ * an ephemeral isolated workspace, mounting exact declared dependencies
+ * read-only, disabling network and host credentials, bounding resources and
+ * killing all descendants. This function checks behavior evidence afterward.
  */
-export function preAssayModules(closure, sources, derivedCases = [], dependencyResolutions = []) {
+export async function preAssayModules(closure, sources, derivedCases = [], dependencyResolutions = [], isolatedAssayExecutor) {
+  if (typeof isolatedAssayExecutor !== "function") return {
+    passed: false, code: "ISOLATED_ASSAY_UNAVAILABLE",
+    failure: "isolated execution capability was not composed by the host; candidate source was not executed",
+  };
   for (const [name, version] of Object.entries(closure.dependencies ?? {})) {
     const resolution = dependencyResolutions.find(item => item.expectedName === name);
     if (!resolution?.conformant || resolution.packageVersion !== version || !resolution.packageRoot) {
-      return { passed: false, failure: `no exact installed assay dependency: ${name}@${version}` };
+      return { passed: false, code: "ASSAY_CONTEXT_UNAVAILABLE",
+        failure: `no exact installed assay dependency: ${name}@${version}` };
     }
   }
-  const directory = mkdtempSync(path.join(tmpdir(), "jsnode-closure-"));
   try {
-    for (const resolution of dependencyResolutions) {
-      const link = path.join(directory, "node_modules", resolution.expectedName);
-      mkdirSync(path.dirname(link), { recursive: true });
-      symlinkSync(resolution.packageRoot, link, "dir");
-    }
-    // The existing projector admits paths, exports and local import closure
-    // before any supplier source is executed. Assay one connected artifact,
-    // never a sibling in isolation or a partially supplied source set.
-    const files = projectJsnodeModules({ sources: sources.map(({ path, text }) => ({ path, text })), operations: closure.operations });
-    for (const projection of files) {
-      const file = path.join(directory, projection.path);
-      mkdirSync(path.dirname(file), { recursive: true });
-      writeFileSync(file, projection.text);
-    }
-    const tests = testsOfClosure(closure, derivedCases);
-    const testPaths = tests.map(test => {
-      const testFile = path.join(directory, test.path);
-      mkdirSync(path.dirname(testFile), { recursive: true });
-      writeFileSync(testFile, test.text);
-      return testFile;
+    // Admission of paths, named exports and complete import closure happens
+    // BEFORE any executable provider is called.
+    const modules = projectJsnodeModules({
+      sources: sources.map(({ path, text }) => ({ path, text })),
+      operations: closure.operations,
     });
-    const run = spawnSync(process.execPath, ["--test", "--test-reporter=tap", ...testPaths], { cwd: directory, env: { TZ: "UTC" }, encoding: "utf8", timeout: 30_000 });
-    if (run.status === 0) return { passed: true };
-    const lines = run.stdout.trim().split("\n");
-    const failureAt = lines.findIndex(line => line.startsWith("not ok"));
-    const said = failureAt >= 0 ? lines.slice(failureAt, failureAt + 16).join("\n") : run.stderr.trim().split("\n").slice(-3).join(" ");
-    return { passed: false, failure: said.slice(0, 600) };
+    const assays = testsOfClosure(closure, derivedCases);
+    const names = admittedAssayNames(closure, derivedCases);
+    const files = Object.freeze([...modules, ...assays.map(({ path, text }) => ({ path, text }))].map(file =>
+      Object.freeze({ path: file.path, text: file.text })));
+    const testPaths = Object.freeze(assays.map(({ path }) => path));
+    const allPaths = files.map(file => file.path);
+    if (new Set(allPaths).size !== allPaths.length ||
+        files.length > 128 || files.some(file => file.text.length > 1024 * 1024) ||
+        files.reduce((size, file) => size + Buffer.byteLength(file.text, "utf8"), 0) > 4 * 1024 * 1024)
+      return { passed: false, code: "ASSAY_INPUT_UNBOUNDED",
+        failure: "connected module assay input has duplicate paths or exceeds the bounded source profile" };
+
+    const run = await isolatedAssayExecutor(Object.freeze({
+      kind: "jsnode.connected-module-pre-assay", version: 1,
+      files, testPaths, expectedAssays: names,
+      dependencies: Object.freeze(dependencyResolutions.map(item => Object.freeze({
+        expectedName: item.expectedName, packageVersion: item.packageVersion,
+        packageRoot: item.packageRoot,
+      }))),
+      timeoutMs: 30000, network: false, writableHostWorkspace: false,
+    }));
+    return receiveIsolatedAssayOutcome(run, names);
   } catch (error) {
-    return { passed: false, failure: error.message };
-  } finally {
-    rmSync(directory, { recursive: true, force: true });
+    return { passed: false, code: "ASSAY_EXECUTION_REFUSED",
+      failure: error instanceof Error ? error.message : String(error) };
   }
 }
 
@@ -361,7 +249,7 @@ export function preAssayModules(closure, sources, derivedCases = [], dependencyR
  * Returns { sources, tests, derivations } or a JsnodeClosureDerivationRefusal naming the operation,
  * the open question when the order is not closed, and every attempt.
  */
-export async function deriveJsnodePackageFromClosure(workOrder, { infer, judge = async () => undefined, dependencyProjectRoot } = {}) {
+export async function deriveJsnodePackageFromClosure(workOrder, { infer, judge = async () => undefined, dependencyProjectRoot, isolatedAssayExecutor } = {}) {
   // The native path uses one admitted order for both the providers and assays.
   // A lower-level closure remains usable by code callers without claiming admission.
   const closure = workOrder.type === "ArtifactFabricationSpecification"
@@ -370,6 +258,13 @@ export async function deriveJsnodePackageFromClosure(workOrder, { infer, judge =
         constraints: workOrder.constraints, openQuestions: workOrder.openQuestions }
     : workOrder;
   if (typeof infer !== "function") throw new TypeError("a closure's sources are derived by an inference carrier the caller composes");
+  // Do not purchase inference or materialize source when the host cannot
+  // actually run and receive the complete hidden/declared test lot safely.
+  if (typeof isolatedAssayExecutor !== "function")
+    return Object.freeze({ type: "JsnodeClosureDerivationRefusal", version: 1,
+      code: "ISOLATED_ASSAY_UNAVAILABLE",
+      evidence: "the host did not compose an isolated code-execution capability",
+      derivations: Object.freeze([]) });
   const told = async (lot, outcome, evidence) => {
     try { await judge(lot, outcome, evidence); return outcome; } catch (error) { return `${outcome} (untold: ${String(error?.message ?? error).slice(0, 200)})`; }
   };
@@ -471,7 +366,7 @@ export async function deriveJsnodePackageFromClosure(workOrder, { infer, judge =
     return refused("ASSAY_CONTEXT_CHANGED", undefined, { scope: "module-set" });
   }
   dependencyResolutions = currentDependencies;
-  const assay = preAssayModules(closure, sources, assayCases.cases, dependencyResolutions);
+  const assay = await preAssayModules(closure, sources, assayCases.cases, dependencyResolutions, isolatedAssayExecutor);
   if (!assay.passed) {
     // The whole composition failed. Do not attribute an interaction failure
     // to an arbitrarily selected module or purchase automatic repairs.
@@ -486,3 +381,4 @@ export async function deriveJsnodePackageFromClosure(workOrder, { infer, judge =
   });
   return Object.freeze({ sources: Object.freeze(sources), tests: Object.freeze(tests), derivations: Object.freeze(derivations), proofing: proofing() });
 }
+

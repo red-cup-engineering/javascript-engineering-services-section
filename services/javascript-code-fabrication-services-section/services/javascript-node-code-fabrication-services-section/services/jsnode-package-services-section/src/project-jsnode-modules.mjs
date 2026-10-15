@@ -1,11 +1,11 @@
+import { schemaPath, confined, projectJsnodeModulePaths } from "./project-jsnode-module-paths.mjs";
+export { projectJsnodeModulePaths } from "./project-jsnode-module-paths.mjs";
 import { posix as path } from "node:path";
-import { readFileSync } from "node:fs";
 import { compileJsonSchema } from "@red-cup-engineering/json-schema-services-section/validation";
 import { readJsnodeModuleExports, readJsnodeModuleRequests } from "@red-cup-engineering/javascript-node-services-section/syntax";
 
-const specificationSchema = JSON.parse(readFileSync(new URL("../data/records/schema/jsnode-module-specification.schema.json", import.meta.url), "utf8"));
+import specificationSchema from "../data/records/schema/jsnode-module-specification.schema.json" with { type: "json" };
 const specificationContract = compileJsonSchema(specificationSchema);
-const schemaPath = (operation, side) => operation[`${side}SchemaPath`] ?? `data/records/schema/${operation.name}.${side}.schema.json`;
 
 function textFile(path, text, mode = 0o644) {
   return Object.freeze({ type: "TextFileCreationProjection", version: 1, path, text, mode });
@@ -22,11 +22,6 @@ function json(value) {
 function rejectIssues(issues) {
   const detail = issues.map((issue) => `${issue.path || "/"} ${issue.message}`).join("; ");
   throw new TypeError(`invalid JSNode module specification: ${detail}`);
-}
-function confined(pathname, prefix) {
-  if (typeof pathname !== "string" || pathname.startsWith("/") || pathname.includes("\\")) throw new TypeError(`unsafe path: ${pathname}`);
-  const parts = pathname.split("/");
-  if (parts[0] !== prefix || parts.some((part) => part === "" || part === "." || part === "..")) throw new TypeError(`unsafe path: ${pathname}`);
 }
 function validateOperationSchema(schema, operation, side) {
   const result = compileJsonSchema(schema).validate(null);
@@ -64,21 +59,6 @@ function cliText(cli, operations) {
   }).join("\n");
   // The catalog is a declaration, not a program: the code layer's runJavascriptNodeOperationModule creates and runs its operations.
   return `${imports.concat(schemas).join("\n")}\n\nexport const catalog = Object.freeze({\n  name: ${JSON.stringify(cli.name)},\n  description: ${JSON.stringify(cli.description)},\n  operations: {\n${definitions}\n  },\n});\n`;
-}
-
-/** Project source-free output paths from the same schema and module rules as emitted files. */
-export function projectJsnodeModulePaths({ operations }) {
-  const paths = [...new Set(operations.map(operation => operation.module))];
-  for (const module of paths) confined(module, "src");
-  for (const operation of operations) for (const side of ["input", "output"]) {
-    if (Object.hasOwn(operation, `${side}Schema`) && !Object.hasOwn(operation, `${side}SchemaPath`)) {
-      const target = schemaPath(operation, side);
-      confined(target, "data");
-      if (paths.includes(target)) throw new TypeError(`projected path is duplicated: ${target}`);
-      paths.push(target);
-    }
-  }
-  return Object.freeze(paths.sort((left, right) => left.localeCompare(right)));
 }
 
 /** Projects shared ESM source carriers, their explicit schemas, and one optional catalog declaration that the code layer runs. */
@@ -122,3 +102,4 @@ export function projectJsnodeModules(specification) {
   }
   return Object.freeze(files.sort((left, right) => left.path.localeCompare(right.path)));
 }
+

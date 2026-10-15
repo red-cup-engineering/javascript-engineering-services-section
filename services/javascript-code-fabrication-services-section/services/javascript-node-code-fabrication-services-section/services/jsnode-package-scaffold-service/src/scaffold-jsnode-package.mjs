@@ -1,5 +1,5 @@
-import { existsSync } from "node:fs";
-import { mkdir, writeFile } from "node:fs/promises";
+import { lstatSync } from "node:fs";
+import { mkdir, mkdtemp, realpath, rename, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 // Ported from the legacy organizing-with-jsnode conformance/{scaffold,layer}.mts
@@ -11,7 +11,9 @@ import { join, resolve } from "node:path";
 // table (lib/apps/services/sites) is carried over faithfully.
 
 const LAYERS = Object.freeze(["lib", "apps", "services", "sites"]);
-const NAME = /^[a-z][a-z0-9-]*$/u;
+// Hyphens are separators, never dangling or consecutive: camel() must
+// always yield a JavaScript identifier and paths must be confined.
+const NAME = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/u;
 const OWNER = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/u;
 
 function oneLine(value, label) {
@@ -121,6 +123,8 @@ export async function scaffoldJsnodePackage({
   if (typeof directory !== "string" || !directory) throw new TypeError("directory is required");
   if (!LAYERS.includes(layer)) throw new TypeError(`layer must be one of ${LAYERS.join(", ")}`);
   const resolvedEntryName = entryName === undefined ? defaultEntryName(name) : oneLine(entryName, "entryName");
+  if (!NAME.test(resolvedEntryName))
+    throw new TypeError("entryName must be lower-kebab-case without empty or trailing segments");
   const resolvedDescription = oneLine(description, "description");
 
   const packageDir = resolve(directory, layer, name);
@@ -134,11 +138,44 @@ export async function scaffoldJsnodePackage({
   if (layer === "apps") files.push([`bin/${resolvedEntryName}.mjs`, binFor(resolvedEntryName)]);
 
   if (apply) {
-    if (existsSync(packageDir)) throw new Error(`${packageDir} already exists; scaffolding is append-only`);
-    await mkdir(join(packageDir, "src"), { recursive: true });
-    await mkdir(join(packageDir, "test"), { recursive: true });
-    if (layer === "apps") await mkdir(join(packageDir, "bin"), { recursive: true });
-    for (const [rel, content] of files) await writeFile(join(packageDir, rel), content, { flag: "wx" });
+    // Construct an entire package in a private sibling and publish only after
+    // its files exist. Do not leave a half-generated package on exceptions.
+    const sourceRoot = resolve(directory);
+    if (await realpath(sourceRoot) !== sourceRoot)
+      throw new Error("scaffold root must not be a symlink");
+    const layerDir = join(sourceRoot, layer);
+    try {
+      const currentLayer = lstatSync(layerDir);
+      if (!currentLayer.isDirectory() || currentLayer.isSymbolicLink())
+        throw new Error("scaffold layer is not a canonical directory");
+    } catch (error) {
+      if (error?.code !== "ENOENT") throw error;
+      await mkdir(layerDir);
+    }
+    const destination = join(layerDir, name);
+    // lstat, not existsSync: a dangling symlink is still an existing target.
+    const assertAbsent = () => {
+      try { lstatSync(destination); }
+      catch (error) {
+        if (error?.code === "ENOENT") return;
+        throw error;
+      }
+      throw new Error(`${destination} already exists; scaffolding is append-only`);
+    };
+    assertAbsent();
+    const stage = await mkdtemp(join(layerDir, `.${name}-scaffold-`));
+    try {
+      await mkdir(join(stage, "src"));
+      await mkdir(join(stage, "test"));
+      if (layer === "apps") await mkdir(join(stage, "bin"));
+      for (const [rel, content] of files)
+        await writeFile(join(stage, rel), content, { flag: "wx" });
+      assertAbsent();
+      await rename(stage, destination);
+    } catch (error) {
+      await rm(stage, { recursive: true, force: true });
+      throw error;
+    }
   }
 
   return Object.freeze({

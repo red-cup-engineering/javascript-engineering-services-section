@@ -149,6 +149,36 @@ admits application to a production consumer.
 
 ## Source-free connected module fabrication
 
+### Host-isolated pre-assay (required for source-free derivation)
+
+The module fabricator **does not spawn Node on supplier-generated code**. Its
+`deriveJsnodeModules` / `deriveJsnodePackageFromClosure` operations require a
+host-composed function named `isolatedAssayExecutor`. Without it they return
+`ISOLATED_ASSAY_UNAVAILABLE` *before purchasing inference*. It is not a
+customer-supplied serialization field or an alternative generic shell runner.
+
+The existing fabricator now passes one connected, bounded request containing
+projected `src/` modules and deterministic `test/` files, exact declared
+dependency locations, test paths and test names. The request explicitly
+requires no network or writable host workspace and a 30-second maximum.
+The effectful execution provider must impose those conditions in a real
+isolated Guix/LAGOON runtime: mount the admitted dependencies read-only, give
+only an ephemeral writable scratch tree, omit credentials/network, cap CPU,
+RAM and process count, and terminate the complete process group on completion
+or failure. Return a bounded `{ isolated: true, status, stdout, stderr,
+signal?, timedOut?, truncated? }` from the host's verified execution—not
+from an arbitrary model-supplied object. The boolean is a host-observation
+claim, **not itself a proof of sandbox security**.
+
+The pure recipient rejects abnormal/partial execution, missing expected
+tests, test skips, and the Node early-exit-zero false positive. A controlled
+local Node runner exists solely in `test/fixtures/` for fixed test source;
+it is **not** a production execution alternative. Host integration and real
+negative controls remain required before treating untrusted generated source
+as safely executable.
+
+
+
 A `jsnode-modules` order declares every operation, its module, schemas, examples,
 exact dependencies, clauses and independent receiving obligations. The native
 `fabrication-derive-jsnode-modules` operation admits that order before inference.
@@ -160,3 +190,8 @@ An incomplete or failing composition is refused as a whole, without automatic
 repair purchases or attributing an interaction failure to one arbitrary supplier.
 The result retains the original order, source lots and assay evidence; it remains
 a proposal for an independent receiver, not accepted or deployed software.
+
+The bounded workspace lockfile codec accepts a document ending at its importer
+section. End of input terminates dependency and importer walks; it is never a
+blank line to skip. `cutPnpmLockfile` preserves every unnamed importer and the
+existing registry closure.

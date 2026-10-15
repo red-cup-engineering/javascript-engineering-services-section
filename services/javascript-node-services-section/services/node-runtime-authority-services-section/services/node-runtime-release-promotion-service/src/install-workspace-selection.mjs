@@ -164,6 +164,12 @@ export async function installWorkspaceSelection({
   workspace, expectedCommit, selector, importerIds: requestedImporters, materializeSources = false, planOnly = false, stateDirectory, pnpm = "pnpm", storeDirectory,
   prepareOnly = false, environment = process.env, onOutput = (chunk) => process.stderr.write(chunk),
 }) {
+  for (const [name, value] of Object.entries({prepareOnly, materializeSources, planOnly})) {
+    if (typeof value !== "boolean") throw new TypeError(name + " must be a boolean");
+  }
+  if (requestedImporters !== undefined && (!Array.isArray(requestedImporters) || !requestedImporters.length || requestedImporters.some(id => typeof id !== "string" || !id))) {
+    throw new TypeError("at least one nonempty importer path is required");
+  }
   if ((selector !== undefined) === (requestedImporters !== undefined)) throw new TypeError("choose a pnpm selector or explicit importer paths");
   if (selector !== undefined && (typeof selector !== "string" || !selector.trim() || selector.startsWith("-"))) throw new TypeError("one nonempty pnpm selector is required");
   if ((materializeSources || planOnly) && requestedImporters === undefined) throw new TypeError("source planning and materialization require explicit importer paths");
@@ -277,6 +283,7 @@ export async function installWorkspaceSelection({
     for (const [id, hash] of Object.entries(manifestHashes)) assert.equal(digest(await readFile(join(root, id, "package.json"))), hash, "source manifest changed: " + id);
     assert.equal((await git("rev-parse", "HEAD")).trim(), commit, "source revision changed during installation");
     receipt.sourceConfigurationUnchanged = true;
+    receipt.totalElapsedMilliseconds = Date.now() - startedAt;
     await writeFile(receiptPath, json(receipt));
     return { ...receipt, receiptPath };
   } catch (error) {

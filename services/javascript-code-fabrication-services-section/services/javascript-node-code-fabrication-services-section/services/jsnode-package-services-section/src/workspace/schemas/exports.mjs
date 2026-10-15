@@ -9,7 +9,7 @@
  * inspect without re-reading `package.json` or guessing at path strata.
  */
 
-import { schemaFrom } from "@red-cup-engineering/relating/carriers/schema";
+import { schemaFrom } from "@red-cup-engineering/json-schema-services-section/contracts";
 
 export const exportSurfaceEntrySchema = {
   $id: "metroplat/exports/entry",

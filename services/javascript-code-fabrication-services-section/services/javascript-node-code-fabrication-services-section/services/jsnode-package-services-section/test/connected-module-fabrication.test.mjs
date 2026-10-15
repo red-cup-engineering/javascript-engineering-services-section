@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {deriveJsnodeModules} from '../src/derive-jsnode-package-from-closure.mjs';
+import { controlledLocalAssayFixture } from './fixtures/controlled-local-assay.mjs';
 import {translateMarkdownJsnodeOperationPackageSpecification} from '../src/translate-markdown-jsnode-operation-package-specification.mjs';
 
 // A controlled capability demonstration, not an allocated enterprise demand.
@@ -22,9 +23,19 @@ async function exercise(sources){
  const result=await deriveJsnodeModules(order,{infer:async request=>{
   calls.push(request);const module=JSON.parse(request.messages[1].content).selectedModule;
   return {text:JSON.stringify(module===undefined?{cases,question:null}:{source:sources[module],question:null}),lot:{id:'controlled:'+calls.length}};
- },judge:async(...args)=>judgments.push(args)});
+ },judge:async(...args)=>judgments.push(args),isolatedAssayExecutor:controlledLocalAssayFixture});
  return {result,calls,judgments};
 }
+// A customer cannot cause supplier code to reach the ambient host process.
+// Without the host-composed isolated runner, the factory refuses *before*
+// purchasing or asking for any model output.
+let unauthorizedInferenceCalls=0;
+const noHost=await deriveJsnodeModules(order, {
+ infer: async () => { unauthorizedInferenceCalls++; throw new Error("unreachable"); },
+});
+assert.equal(noHost.type,"JsnodeModuleDerivationRefusal");
+assert.equal(noHost.code,"ISOLATED_ASSAY_UNAVAILABLE");
+assert.equal(unauthorizedInferenceCalls,0);
 const good=await exercise(valid);
 assert.equal(good.result.type,'JsnodeModuleProposal',JSON.stringify(good.result));
 assert.equal(good.result.files.filter(f=>f.path.startsWith('src/')).length,2);
@@ -44,6 +55,12 @@ assert.equal(good.result.derivation.proofing.independentBehavioralChannels,0);
 assert.equal(bad.result.cause.proofing.catches.length,1);
 assert.ok(['clause-assays','admitted-examples'].includes(bad.result.cause.proofing.catches[0].method),JSON.stringify(bad.result.cause.proofing.catches));
 assert.ok(bad.result.cause.proofing.catches[0].caughtBy);
+// A source module can call process.exit(0) at import time; the Node test
+// runner can then pass its file-wrapper without executing even one assay.
+const skipped=await exercise({...valid,'src/double.mjs':'process.exit(0); export function doubleValue(n){return n+n;}'});
+assert.equal(skipped.result.type,'JsnodeModuleDerivationRefusal');
+assert.equal(skipped.result.cause.scope,'module-set');
+assert.match(skipped.result.cause.evidence,/assay-incomplete/);
 const missing=await exercise({...valid,'src/increment.mjs':'import {doubleValue} from "./undeclared.mjs"; export function incrementValue(n){return doubleValue(n)+1;}' });
 assert.equal(missing.result.cause.scope,'module-set');
 assert.match(missing.result.cause.evidence,/unresolvable projected import/);
