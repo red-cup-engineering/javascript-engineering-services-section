@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
+import { createHash } from "node:crypto";
 import {
   barrelDeviation,
   distPresentDeviation,
@@ -572,4 +573,149 @@ test("the CLI accepts --package/--root, the flags every javascript-node audit ta
   } finally {
     rmSync(fixtureRoot, { recursive: true });
   }
+});
+
+
+// These are static-evidence fixtures, not assertions that a native install ran.
+function sourceFixture({ local = 'workspace:*', field = 'dependencies', purpose = 'development', rootPackage = false } = {}) {
+  const root = mkdtempSync(join(tmpdir(), 'source-review-'));
+  const evidence = mkdtempSync(join(tmpdir(), 'source-evidence-'));
+  const hash = value => createHash('sha256').update(value).digest('hex');
+  const blob = value => createHash('sha1').update(Buffer.from('blob ' + Buffer.byteLength(value) + '\0')).update(value).digest('hex');
+  const appPath = rootPackage ? '.' : 'example-service';
+  const manifest = {...normalManifest, [field]: {'@red-cup-engineering/provider': local}};
+  const inventory = {purpose, sources:[{repository:'fixtures/source',revision:'a'.repeat(40),workspacePath:'.'}],packages:[],files:[],generatedRoots:['node_modules', ...(rootPackage?[]:['example-service/node_modules']), 'provider/node_modules']};
+  const add = (path, text) => {
+    const absolute=join(root,path);mkdirSync(resolve(absolute,'..'),{recursive:true});writeFileSync(absolute,text);
+    inventory.files.push({repository:'fixtures/source',revision:'a'.repeat(40),path,workspacePath:path,gitBlob:blob(text),sha256:hash(text),mode:'100644'});
+  };
+  for(const [path, value] of [[appPath,manifest],['provider',{...normalManifest,name:'@red-cup-engineering/provider'}]]) {
+    inventory.packages.push({repository:'fixtures/source',revision:'a'.repeat(40),path,workspacePath:path,name:value.name,version:value.version});
+    add((path==='.'?'':path+'/')+'package.json',JSON.stringify(value));
+    add((path==='.'?'':path+'/')+'src/owned.mjs','export const owned = true;\n');
+  }
+  const configuration='packages: ["'+appPath+'", "provider"]\n';
+  const lock='lockfileVersion: \'9.0\'\n';
+  writeFileSync(join(root,'pnpm-workspace.yaml'),configuration);writeFileSync(join(root,'pnpm-lock.yaml'),lock);
+  const inventoryBytes=JSON.stringify(inventory);writeFileSync(join(evidence,'inventory.json'),inventoryBytes);
+  const native={sourceInventorySha256:hash(inventoryBytes),workspaceConfigurationSha256:hash(configuration),lockSha256:hash(lock),tools:{node:process.versions.node,pnpm:'11.25.0'},commands:[{argv:['pnpm','install','--frozen-lockfile'],cwd:root,exitCode:0}],provenance:{kind:'unit-test-fixture',recordedBy:'test',observedAt:'2026-10-15',execution:'not-observed'}};
+  const nativeBytes=JSON.stringify(native);writeFileSync(join(evidence,'native.json'),nativeBytes);
+  const artifact={kind:'source-workspace',workspace:root,inventory:{path:join(evidence,'inventory.json'),sha256:hash(inventoryBytes)},configuration:{path:'pnpm-workspace.yaml',sha256:hash(configuration)},lockfile:{path:'pnpm-lock.yaml',sha256:hash(lock)},nativeReceiving:{path:join(evidence,'native.json'),sha256:hash(nativeBytes)}};
+  return {root,evidence,manifest,inventory,artifact,packageDirectory:join(root,appPath),finish(){rmSync(root,{recursive:true,force:true});rmSync(evidence,{recursive:true,force:true});},writeInventory(){const bytes=JSON.stringify(inventory);writeFileSync(artifact.inventory.path,bytes);artifact.inventory.sha256=hash(bytes);native.sourceInventorySha256=hash(bytes);const bytes2=JSON.stringify(native);writeFileSync(artifact.nativeReceiving.path,bytes2);artifact.nativeReceiving.sha256=hash(bytes2);}};
+}
+
+for (const local of ['workspace:*','file:../provider','link:../provider','1.0.0']) test('source context binds its exact edge '+local, () => {
+  const f=sourceFixture({local});try {
+    const review=reviewJsnodePackage({manifest:f.manifest,packageDirectory:f.packageDirectory,artifact:f.artifact});
+    assert.deepEqual(review.deviations,[]);
+    assert.equal(review.evidenceBinding.sourceVerified,true);assert.equal(review.evidenceBinding.nativeRecordBound,true);
+    assert.equal(review.evidenceBinding.executionVerified,false);assert.equal(review.evidenceBinding.provenanceVerified,false);
+    assert.ok(reviewJsnodePackage({manifest:f.manifest}).deviations.some(d=>d.code==='local-dependency-specifier') || local==='1.0.0');
+  } finally {f.finish();}
+});
+
+test('source context requires an actual directory and cannot waive registry checks',()=>{
+ const f=sourceFixture();try {
+  const source=reviewJsnodePackage({manifest:f.manifest,artifact:f.artifact});
+  for(const code of ['source-workspace-unreceived','local-dependency-specifier','nonexact-house-dependency'])assert.ok(source.deviations.some(d=>d.code===code));
+  const registry=reviewJsnodePackage({manifest:f.manifest,packageDirectory:f.packageDirectory,artifact:{kind:'registry-package'}});
+  assert.ok(registry.deviations.some(d=>d.code==='local-dependency-specifier'));assert.ok(!('evidenceBinding'in registry));
+ }finally{f.finish();}
+});
+
+for (const change of ['modify','add','delete','symlink','manifest','lock','configuration','native-record']) test('source context refuses changed '+change,()=>{
+ const f=sourceFixture();try{
+  const source=join(f.packageDirectory,'src/owned.mjs');
+  if(change==='modify')writeFileSync(source,'export const changed = true;');
+  if(change==='add')writeFileSync(join(f.packageDirectory,'src/unlisted.mjs'),'export const hidden = true;');
+  if(change==='delete')rmSync(source);
+  if(change==='symlink'){rmSync(source);symlinkSync(join(f.root,'provider/src/owned.mjs'),source);}
+  if(change==='manifest')writeFileSync(join(f.packageDirectory,'package.json'),JSON.stringify({...f.manifest,version:'2.0.0'}));
+  if(change==='lock')writeFileSync(join(f.root,'pnpm-lock.yaml'),'changed');
+  if(change==='configuration')writeFileSync(join(f.root,'pnpm-workspace.yaml'),'changed');
+  if(change==='native-record')writeFileSync(f.artifact.nativeReceiving.path,'{}');
+  const review=reviewJsnodePackage({manifest:f.manifest,packageDirectory:f.packageDirectory,artifact:f.artifact});
+  assert.ok(review.deviations.some(d=>d.code==='source-workspace-unreceived'));assert.equal(review.evidenceBinding.sourceVerified,change==='native-record');
+  assert.ok(review.deviations.some(d=>d.code==='local-dependency-specifier'));assert.ok(review.deviations.some(d=>d.code==='nonexact-house-dependency'));
+ }finally{f.finish();}
+});
+
+for(const field of ['dependencies','devDependencies','optionalDependencies','peerDependencies'])test('source closure retains '+field+' obligations',()=>{
+ const f=sourceFixture({field});try{
+  f.inventory.packages=f.inventory.packages.filter(row=>row.name!== '@red-cup-engineering/provider');f.inventory.generatedRoots=f.inventory.generatedRoots.filter(path=>path!=='provider/node_modules');f.writeInventory();
+  const review=reviewJsnodePackage({manifest:f.manifest,packageDirectory:f.packageDirectory,artifact:f.artifact});
+  assert.ok(review.deviations.some(d=>d.code==='source-workspace-unreceived'&&d.detail.includes(field)));
+ }finally{f.finish();}
+});
+
+for(const local of ['workspace:^','^1.0.0','file:../runtime.tgz','link:../../outside'])test('unsupported or escaping source edge remains visible '+local,()=>{
+ const f=sourceFixture({local});try{assert.ok(reviewJsnodePackage({manifest:f.manifest,packageDirectory:f.packageDirectory,artifact:f.artifact}).deviations.some(d=>d.code==='source-workspace-unreceived'));}finally{f.finish();}
+});
+
+test('source inventory cannot hide authored changes under a generated exclusion',()=>{
+ const f=sourceFixture();try{f.inventory.generatedRoots.push('example-service/src');f.writeInventory();assert.ok(reviewJsnodePackage({manifest:f.manifest,packageDirectory:f.packageDirectory,artifact:f.artifact}).deviations.some(d=>d.code==='source-workspace-unreceived'));}finally{f.finish();}
+});
+
+test('a standalone source root owns its native lock; another adjacent lock stays visible',()=>{
+ const f=sourceFixture({rootPackage:true});try{
+  assert.deepEqual(lockfilePresentDeviations(f.root,f.artifact),[]);
+  assert.deepEqual(lockfilePresentDeviations(f.root),[{code:'lockfile-present',detail:'pnpm-lock.yaml'}]);
+  writeFileSync(join(f.root,'yarn.lock'),'unreceived');assert.ok(lockfilePresentDeviations(f.root,f.artifact).some(d=>d.detail==='yarn.lock'));
+ }finally{f.finish();}
+});
+
+test('source-context CLI preserves its execution limit in ordinary and summary output',()=>{
+ const f=sourceFixture();try{
+  const input=join(f.evidence,'context.json');writeFileSync(input,JSON.stringify(f.artifact));
+  const command=fileURLToPath(new URL('../scripts/review-jsnode-package.mjs',import.meta.url));
+  for(const args of [[f.packageDirectory],['--all','--root',f.root,'--summary']]){
+   const child=spawnSync(process.execPath,[command,...args,'--artifact',input],{encoding:'utf8',env:process.env});
+   assert.ok([0,2].includes(child.status),child.stderr);
+   const value=JSON.parse(child.stdout);const bindings=value.evidenceBindings??[value.evidenceBinding];assert.ok(bindings.length>0);
+   for(const binding of bindings){assert.equal(binding.executionVerified,false);assert.equal(binding.provenanceVerified,false);}
+  }
+ }finally{f.finish();}
+});
+
+
+for (const extra of ['package.json','.npmrc','.pnpmfile.cjs','unselected/extra.mjs']) test('multi-root composition refuses added native input '+extra,()=>{
+ const f=sourceFixture();try {
+  f.inventory.sources=f.inventory.packages.map(row=>({repository:'fixtures/'+row.workspacePath,revision:row.revision,workspacePath:row.workspacePath}));
+  for(const row of f.inventory.packages){row.repository='fixtures/'+row.workspacePath;row.path='.';}
+  for(const row of f.inventory.files){const [mount,...parts]=row.workspacePath.split('/');row.repository='fixtures/'+mount;row.path=parts.join('/');}
+  f.writeInventory();
+  assert.equal(reviewJsnodePackage({manifest:f.manifest,packageDirectory:f.packageDirectory,artifact:f.artifact}).evidenceBinding.sourceVerified,true);
+  const target=join(f.root,extra);mkdirSync(resolve(target,'..'),{recursive:true});writeFileSync(target,extra==='package.json'?'{}':'// unreceived native input\n');
+  const review=reviewJsnodePackage({manifest:f.manifest,packageDirectory:f.packageDirectory,artifact:f.artifact});
+  assert.equal(review.evidenceBinding.sourceVerified,false);assert.ok(review.deviations.some(d=>d.code==='source-workspace-unreceived'&&d.detail.includes(extra)));
+ }finally{f.finish();}
+});
+
+
+for(const fault of ['wrong-command','conflicting-frozen','missing-tools','missing-provenance','wrong-target','missing-cwd'])test('native evidence rejects '+fault,()=>{
+ const f=sourceFixture();try{
+  const record=JSON.parse(readFileSync(f.artifact.nativeReceiving.path,'utf8'));
+  if(fault==='wrong-command')record.commands[0].argv=['echo','install','--frozen-lockfile'];
+  if(fault==='wrong-target')record.commands[0].argv=['pnpm','--dir','/unrelated-workspace','install','--frozen-lockfile'];
+  if(fault==='missing-cwd')delete record.commands[0].cwd;
+  if(fault==='conflicting-frozen')record.commands[0].argv.push('--no-frozen-lockfile');
+  if(fault==='missing-tools')delete record.tools;
+  if(fault==='missing-provenance')record.provenance={};
+  const bytes=JSON.stringify(record);writeFileSync(f.artifact.nativeReceiving.path,bytes);f.artifact.nativeReceiving.sha256=createHash('sha256').update(bytes).digest('hex');
+  const review=reviewJsnodePackage({manifest:f.manifest,packageDirectory:f.packageDirectory,artifact:f.artifact});
+  assert.ok(review.deviations.some(d=>d.code==='source-workspace-unreceived'));assert.equal(review.evidenceBinding.nativeRecordBound,false);assert.equal(review.evidenceBinding.executionVerified,false);
+ }finally{f.finish();}
+});
+
+test('relative standalone source directory retains its received native lock',()=>{
+ const f=sourceFixture({rootPackage:true});try{assert.deepEqual(lockfilePresentDeviations(relative(process.cwd(),f.root),f.artifact),[]);}finally{f.finish();}
+});
+
+test('source tree review errors still expose native execution and provenance limits',()=>{
+ const f=sourceFixture();try{
+  writeFileSync(join(f.packageDirectory,'package.json'),'not-json');
+  const result=reviewJsnodePackageTree({root:f.root,map:{packages:{example:'example-service'}},artifact:f.artifact});
+  assert.ok(result.reports[0].deviations.some(d=>d.code==='review-error'));
+  assert.equal(result.evidenceBindings[0].executionVerified,false);assert.equal(result.evidenceBindings[0].provenanceVerified,false);
+ }finally{f.finish();}
 });
