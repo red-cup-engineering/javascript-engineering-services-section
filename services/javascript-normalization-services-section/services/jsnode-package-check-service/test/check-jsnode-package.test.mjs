@@ -290,3 +290,30 @@ test("M3 examines real file type and symlink owner through the same SignCell wit
     assert.equal(read.cells.find((c) => c.object === "M3").for[0].observed.exportTargets[0].exists, true);
   } finally { await rm(root, { recursive: true, force: true }); }
 });
+
+test("an uninspected source symlink does not turn a partial A3 scan into clean conformance", async () => {
+  const root = await mkdtemp(join(tmpdir(), "jsnode-uninspected-source-"));
+  try {
+    const dir = join(root, "services", "source-coverage");
+    await mkdir(join(dir, "src"), { recursive: true });
+    await writeManifest(dir, {
+      name: "@owner/source-coverage", type: "module", private: true, exports: "./src/entry.mjs",
+      scripts: { check: "node --check src/entry.mjs", test: "node --test", verify: "npm test" },
+    });
+    await writeFile(join(dir, "src", "entry.mjs"), 'export const datum = { type: "SourceRecord" };\n');
+    const full = await checkJsnodePackage({ directory: dir });
+    assert.equal(full.findings.find((item) => item.invariantId === "A3").status, "clean");
+    assert.equal(full.cells.find((item) => item.object === "A3").for.length, 1);
+    await writeFile(join(root, "unobserved.mjs"), 'export const x = { type: "non-Pascal" };\n');
+    await symlink(join(root, "unobserved.mjs"), join(dir, "src", "unobserved.mjs"));
+    const incomplete = await checkJsnodePackage({ directory: dir });
+    const a3 = incomplete.findings.find((item) => item.invariantId === "A3");
+    assert.equal(a3.status, "informational");
+    assert.deepEqual([
+      incomplete.cells.find((item) => item.object === "A3").for.length,
+      incomplete.cells.find((item) => item.object === "A3").against.length,
+    ], [0, 0], "incomplete source enumeration is unknown, never witnessed clean");
+    assert.notEqual(incomplete.cells[0].subject.revision, full.cells[0].subject.revision,
+      "source inventory omissions change the declared inspection identity");
+  } finally { await rm(root, { recursive: true, force: true }); }
+});

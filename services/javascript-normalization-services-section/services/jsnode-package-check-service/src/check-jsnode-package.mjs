@@ -87,18 +87,27 @@ export function detectPackageKind(dir, manifest) {
 // --- source collection -------------------------------------------------
 
 async function sourceFiles(srcDir) {
-  const out = [];
+  const out = [], uninspected = [];
   async function walk(dir) {
     const entries = await readdir(dir, { withFileTypes: true });
     for (const entry of entries) {
       const full = join(dir, entry.name);
       if (entry.isDirectory()) { await walk(full); continue; }
-      if (!entry.isFile() || entry.name.includes(".test.")) continue;
+      if (entry.name.includes(".test.")) continue;
+      if (entry.isSymbolicLink() || !entry.isFile()) {
+        // A symlink could be a whole directory subtree or executable source;
+        // claiming complete positive source coverage without reading it lies.
+        uninspected.push(full);
+        continue;
+      }
       if (SOURCE_EXTENSIONS.has(extname(entry.name))) out.push(full);
     }
   }
   await walk(srcDir);
-  return out.sort();
+  return Object.freeze({
+    files: Object.freeze(out.sort()),
+    uninspected: Object.freeze(uninspected.sort()),
+  });
 }
 
 // --- M: manifest invariants ---------------------------------------------
@@ -346,7 +355,7 @@ function checkD1(dir) {
  * Each subject pins the checked manifest, inspected source content, observed
  * exported-file existence, and the checker source itself.
  */
-function witnessedPackageCells(findings, { dir, layer, kind, manifest, manifestSource, texts, checkerSource, exportTargets }) {
+function witnessedPackageCells(findings, { dir, layer, kind, manifest, manifestSource, texts, checkerSource, exportTargets, uninspectedSourceEntries }) {
   const manifestField = (key) => Object.hasOwn(manifest, key) ? manifest[key] : null;
   const scannedSources = texts.map(({ file, text }) => Object.freeze({
     path: relative(dir, file),
@@ -355,6 +364,7 @@ function witnessedPackageCells(findings, { dir, layer, kind, manifest, manifestS
   const revision = address(cell(dir, "jsnode.inspected-source", {
     manifestSource,
     scannedSources,
+    uninspectedSourceEntries,
     exportTargets,
   }));
   const checkerRevision = address(cell("jsnode-package-check-service", "checker-source", checkerSource));
@@ -372,7 +382,7 @@ function witnessedPackageCells(findings, { dir, layer, kind, manifest, manifestS
     L1: { layer, dependencies: manifestField("dependencies") },
     L4: { layer, directoryName: basename(dir), dependencies: manifestField("dependencies") },
     L5: { dependencies: manifestField("dependencies") },
-    A3: { files: scannedSources, coverage: "recursive src, admitted JS/TS extensions, excluding test files" },
+    A3: { files: scannedSources, uninspected: uninspectedSourceEntries, coverage: "recursive src, admitted JS/TS extensions, excluding test files and unresolved links" },
   };
   return Object.freeze(findings.map((finding) => {
     const basis = observed[finding.invariantId];
@@ -411,8 +421,16 @@ export async function checkJsnodePackage({ directory } = {}) {
   const kind = detectPackageKind(dir, manifest);
 
   const srcDir = join(dir, "src");
-  const files = kind === "jsnode" && existsSync(srcDir) ? await sourceFiles(srcDir) : [];
-  const texts = await Promise.all(files.map(async (file) => ({ file, text: await readFile(file, "utf8") })));
+  const sourceInventory = kind === "jsnode" && existsSync(srcDir)
+    ? await sourceFiles(srcDir) : { files: [], uninspected: [] };
+  const uninspectedSourceEntries = Object.freeze(sourceInventory.uninspected.map((file) => relative(dir, file)));
+  const texts = await Promise.all(sourceInventory.files.map(async (file) => ({ file, text: await readFile(file, "utf8") })));
+  const checkedA3 = checkA3(texts);
+  // A negative observation may stand despite incomplete coverage. A positive
+  // "no problems anywhere" cannot be witnessed while source entries are unread.
+  const sourceA3 = checkedA3.status === "clean" && uninspectedSourceEntries.length > 0
+    ? finding("A3", "adapted", "informational", "source scan incomplete; uninspected entries: " + uninspectedSourceEntries.join(", "))
+    : checkedA3;
 
   const exportTargets = Object.freeze(rootExportTargets(manifest.exports).map((target) => observeExportTarget(dir, target)));
 
@@ -428,7 +446,7 @@ export async function checkJsnodePackage({ directory } = {}) {
     checkL3(layer),
     checkL4(dir, manifest),
     checkL5(manifest),
-    ...(kind === "jsnode" ? [checkA1(texts), checkA2(texts), checkA3(texts)] : []),
+    ...(kind === "jsnode" ? [checkA1(texts), checkA2(texts), sourceA3] : []),
     ...(kind === "jsnode" ? checkLaws(texts) : []),
     ...(kind === "jsnode" ? [checkS6(layer, texts)] : []),
     checkD1(dir),
@@ -446,6 +464,6 @@ export async function checkJsnodePackage({ directory } = {}) {
     findings: Object.freeze(findings),
     violationCount,
     byConvention: Object.freeze(byConvention),
-    cells: witnessedPackageCells(findings, { dir, layer, kind, manifest, manifestSource, texts, checkerSource, exportTargets }),
+    cells: witnessedPackageCells(findings, { dir, layer, kind, manifest, manifestSource, texts, checkerSource, exportTargets, uninspectedSourceEntries }),
   });
 }
