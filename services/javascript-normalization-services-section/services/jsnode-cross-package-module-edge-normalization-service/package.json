@@ -17,6 +17,10 @@
     "node": ">=22"
   },
   "files": [
-    "src"
-  ]
+    "src",
+    "scripts"
+  ],
+  "bin": {
+    "normalize-registry-module-bindings": "scripts/normalize-registry-module-bindings.mjs"
+  }
 }

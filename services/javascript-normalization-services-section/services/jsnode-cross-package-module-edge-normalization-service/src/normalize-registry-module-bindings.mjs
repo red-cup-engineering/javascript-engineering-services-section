@@ -1,16 +1,22 @@
-import { access, readdir, readFile, writeFile } from "node:fs/promises";
+import { access, readdir, readFile, writeFile, stat } from "node:fs/promises";
 import { dirname, join, relative, sep } from "node:path";
 
 /** Port an explicitly assessed public-interface relocation through owned JS
  * bodies, including literal dynamic imports. Source paths select edits only;
  * the resulting runtime references name published package interfaces. */
-export async function normalizeRegistryModuleBindings({ packageDirs, bindings, releaseVersions = {}, maxFilesPerPackage = 2000 }) {
+export async function normalizeRegistryModuleBindings({ packageDirs, bindings, releaseVersions = {}, maxFilesPerPackage = 2000, onProgress = () => {} }) {
   if (!Array.isArray(packageDirs) || !Array.isArray(bindings)) throw new TypeError("explicit package bodies and interface bindings required");
-  const changed = [];
+  const changed = [], visited = [];
   for (const root of packageDirs) {
     const manifestPath = join(root, "package.json"), manifest = JSON.parse(await readFile(manifestPath, "utf8"));
     const introduced = new Set();
-    const pending = [root]; let count = 0;
+    const nested = (manifest.files ?? []).filter(value => value.startsWith("services/") && !value.includes("*"));
+    const pending = [root];
+    for (const locator of nested) {
+      const path = join(root, locator);
+      try { if ((await stat(path)).isDirectory()) pending.push(path); } catch {}
+    }
+    let count = 0;
     while (pending.length) {
       const dir = pending.pop();
       for (const file of await readdir(dir, { withFileTypes: true })) {
@@ -47,6 +53,8 @@ export async function normalizeRegistryModuleBindings({ packageDirs, bindings, r
       if (manifest.dependencies[dependency] !== version) { manifest.dependencies[dependency] = version; manifestChanged = true; }
     }
     if (manifestChanged) { await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`); changed.push(manifestPath); }
+    visited.push(root);
+    await onProgress({ kind: "jsnode.registry-module-bindings", bindings: bindings.length, changed, visited });
   }
-  return { kind: "jsnode.registry-module-bindings", bindings: bindings.length, changed };
+  return { kind: "jsnode.registry-module-bindings", bindings: bindings.length, changed, visited };
 }
