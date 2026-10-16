@@ -1,6 +1,6 @@
 {
   "name": "@red-cup-engineering/javascript-file-services-section",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "exports": {
     "./javascript-file-main-guard": "./scripts/javascript-file-main-guard.mjs",
@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@red-cup-engineering/computer-file-engineering-services-section": "0.4.0",
-    "@red-cup-engineering/javascript-node-services-section": "0.3.1"
+    "@red-cup-engineering/javascript-node-services-section": "0.3.2"
   },
   "scripts": {
     "test": "node --test test/*.test.mjs"
