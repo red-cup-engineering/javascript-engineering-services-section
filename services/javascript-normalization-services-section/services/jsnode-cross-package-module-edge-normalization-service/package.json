@@ -1,10 +1,13 @@
 {
   "name": "@red-cup-engineering/jsnode-cross-package-module-edge-normalization-service",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "type": "module",
   "description": "Normalizes relative cross-package JSNode module references into explicit package dependency and export edges.",
-  "exports": "./src/normalize-jsnode-module-edges.mjs",
+  "exports": {
+    ".": "./src/normalize-jsnode-module-edges.mjs",
+    "./registry-bindings": "./src/normalize-registry-module-bindings.mjs"
+  },
   "scripts": {
     "check": "check-package-syntax",
     "test": "run-package-tests",
@@ -17,6 +20,10 @@
     "@red-cup-engineering/jsnode-package-services-section": "workspace:*"
   },
   "files": [
-    "src"
-  ]
+    "src",
+    "scripts"
+  ],
+  "bin": {
+    "normalize-registry-module-bindings": "scripts/normalize-registry-module-bindings.mjs"
+  }
 }

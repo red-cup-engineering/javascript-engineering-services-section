@@ -1,6 +1,6 @@
 {
   "name": "@red-cup-engineering/read-javascript-file-export-documentation-service",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "description": "Reads standard JSDoc attached to exported functions in one JavaScript text-file reading.",
   "type": "module",
   "private": false,
@@ -17,10 +17,10 @@
     "package.json"
   ],
   "dependencies": {
-    "@red-cup-engineering/computer-content-engineering-services-section": "workspace:*",
-    "@red-cup-engineering/computer-file-engineering-services-section": "workspace:*",
-    "@red-cup-engineering/jsonl-services-section": "workspace:*",
-    "@red-cup-engineering/javascript-node-services-section": "workspace:*"
+    "@red-cup-engineering/computer-content-engineering-services-section": "0.1.0",
+    "@red-cup-engineering/computer-file-engineering-services-section": "0.4.0",
+    "@red-cup-engineering/jsonl-services-section": "0.1.0",
+    "@red-cup-engineering/javascript-node-services-section": "0.3.2"
   },
   "scripts": {
     "check": "check-package-syntax",
