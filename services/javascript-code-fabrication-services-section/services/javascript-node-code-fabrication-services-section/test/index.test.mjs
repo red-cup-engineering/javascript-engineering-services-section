@@ -116,10 +116,10 @@ test("generates native ESM and matching declarations from shared carrier schemas
     { exportName: "refSchema", typeName: "Ref", schema: { $id: "https://test.example/ref", title: "Ref", description: "Typed reference", type: "object", required: ["id"], properties: { id: { type: "string", minLength: 1 } }, additionalProperties: false } },
     { exportName: "recordSchema", typeName: "Record", runtimeName: "recordType", schema: { $id: "https://test.example/record", title: "Record", description: "Record with a shared reference", type: "object", required: ["ref"], properties: { ref: { $ref: "https://test.example/ref" } }, additionalProperties: false } },
   ];
-  const runtimeBinding = { name: "defineSchemaType", from: new URL("../../../../../../../../../../computer-data-engineering-services-section/apps/computer-data-engine/src/schema-type.mjs", import.meta.url).href, genericSchema: true };
+  const runtimeBinding = { name: "defineSchemaType", from: import.meta.resolve("@red-cup-engineering/signcell/type-system/schema-type"), genericSchema: true };
   const javascript = renderJsonSchemaModule(entries, { format: "javascript", runtimeBinding });
   const generated = await import(`data:text/javascript;base64,${Buffer.from(javascript).toString("base64")}`);
-  const { admit } = await import(new URL("../../../../../../../../../../computer-data-engineering-services-section/apps/computer-data-engine/src/type-system.mjs", import.meta.url));
+  const { admit } = await import("@red-cup-engineering/signcell/type-system");
   assert.equal(admit(generated.recordType, { ref: { id: "retained" } }).ok, true);
   assert.equal(admit(generated.recordType, { ref: { id: "" } }).ok, false);
   assert.equal(admit(generated.recordType, { ref: { id: "retained", unrelated: true } }).ok, false);
