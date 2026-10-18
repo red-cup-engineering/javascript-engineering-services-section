@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Signed bounded edge compute admitted only while Deno reports the owning organization free_verified.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/red-cup-engineering/computer-code-engineering-services-section.git",
+    "directory": "services/javascript-engineering-services-section/services/deno-services-section/services/deno-deploy-free-compute-provider"
+  },
   "bin": {
     "invoke-deno-free-compute": "./scripts/invoke-deno-free-compute.mjs"
   },

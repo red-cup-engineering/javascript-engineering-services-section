@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "description": "Deterministic JSNode API-index projection actuator.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/red-cup-engineering/computer-code-engineering-services-section.git",
+    "directory": "services/javascript-engineering-services-section/services/jsnode-observation-service"
+  },
   "exports": "./src/api-index-query.mts",
   "scripts": {
     "check": "node --check src/api-index-query.mts",

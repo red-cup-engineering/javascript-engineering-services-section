@@ -3,6 +3,11 @@
   "version": "0.2.3",
   "type": "module",
   "description": "Shared JSNode module and schema projection with an optional package catalog and fabrication boundary.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/red-cup-engineering/computer-code-engineering-services-section.git",
+    "directory": "services/javascript-engineering-services-section/services/javascript-code-fabrication-services-section/services/javascript-node-code-fabrication-services-section/services/jsnode-package-services-section"
+  },
   "license": "UNLICENSED",
   "exports": {
     "./fabrication-receipts": "./src/fabrication-receipts.mjs",
