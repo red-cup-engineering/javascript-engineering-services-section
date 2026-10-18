@@ -195,3 +195,14 @@ The bounded workspace lockfile codec accepts a document ending at its importer
 section. End of input terminates dependency and importer walks; it is never a
 blank line to skip. `cutPnpmLockfile` preserves every unnamed importer and the
 existing registry closure.
+
+## Strict PNPM importer source admission
+
+The original Code PNPM v9 importer decoder refuses duplicate importer
+coordinates, duplicate dependencies within a field, and unresolved empty
+specifier/version entries rather than allowing a later row to overwrite
+one source of resolution evidence. Its existing typed importer result remains
+unchanged for valid locks. Organizing's importer-scoped resolution consumer
+uses this provider rather than independent lexical guesses. Source edition
+0.2.4 needs immutable package publication and a selected consumer lock before
+it can be called installed.

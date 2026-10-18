@@ -53,12 +53,16 @@ function requireLockfileVersion(lines) {
 
 function dependencyBlock(lines, cursor, indent, field) {
   const uses = [];
+  const seen = new Set();
   for (;;) {
     const line = lines[cursor.pos];
     if (isBlank(line)) { cursor.pos += 1; continue; }
     if (line === undefined || indentOf(line) !== indent) break;
     const split = splitKeyLine(line.slice(indent));
     if (split === null) break;
+    if (!split.key || seen.has(split.key))
+      throw new TypeError("pnpm-lockfile: duplicated or unnamed dependency in " + field);
+    seen.add(split.key);
     cursor.pos += 1;
     let specifier = "";
     let version = "";
@@ -71,6 +75,8 @@ function dependencyBlock(lines, cursor, indent, field) {
       else if (detail?.key === "version") version = detail.rest.trim();
       cursor.pos += 1;
     }
+    if (!specifier || !version)
+      throw new TypeError("pnpm-lockfile: dependency lacks specifier or selected version");
     uses.push(Object.freeze({
       name: split.key,
       field,
@@ -107,9 +113,12 @@ export function decodePnpmLockfileImporters(text) {
 
   const importersLineIndex = lines.findIndex((line) => line === "importers:");
   if (importersLineIndex === -1) throw new TypeError("pnpm-lockfile: missing importers: root key");
+  if (lines.filter(line => line === "importers:").length !== 1)
+    throw new TypeError("pnpm-lockfile: duplicate importers root keys");
 
   const cursor = { pos: importersLineIndex + 1 };
   const importers = [];
+  const seenImporters = new Set();
   const importerIndent = 2;
   for (;;) {
     const line = lines[cursor.pos];
@@ -117,6 +126,9 @@ export function decodePnpmLockfileImporters(text) {
     if (line === undefined || indentOf(line) !== importerIndent) break;
     const split = splitKeyLine(line.slice(importerIndent));
     if (split === null) break;
+    if (!split.key || seenImporters.has(split.key))
+      throw new TypeError("pnpm-lockfile: duplicate or unnamed importer");
+    seenImporters.add(split.key);
     cursor.pos += 1;
     const dependencies = split.rest.trim() === "{}" ? Object.freeze([]) : importerDependencies(lines, cursor, importerIndent);
     importers.push(Object.freeze({ path: split.key, dependencies }));
