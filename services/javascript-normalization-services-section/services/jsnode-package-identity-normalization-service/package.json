@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "description": "Pure JSNode package-identity normalization from an admitted package name and explicit owner.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/red-cup-engineering/computer-code-engineering-services-section.git",
+    "directory": "services/javascript-engineering-services-section/services/javascript-normalization-services-section/services/jsnode-package-identity-normalization-service"
+  },
   "exports": "./src/normalize-jsnode-package-identity.mjs",
   "scripts": {
     "check": "check-package-syntax",

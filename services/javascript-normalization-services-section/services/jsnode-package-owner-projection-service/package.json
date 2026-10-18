@@ -4,6 +4,11 @@
   "private": false,
   "type": "module",
   "description": "Projects one explicit repository package path to the currently declared npm owner policy.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/red-cup-engineering/computer-code-engineering-services-section.git",
+    "directory": "services/javascript-engineering-services-section/services/javascript-normalization-services-section/services/jsnode-package-owner-projection-service"
+  },
   "exports": "./src/project-jsnode-package-owner.mjs",
   "scripts": {
     "check": "check-package-syntax",

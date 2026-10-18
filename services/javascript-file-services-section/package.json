@@ -1,6 +1,11 @@
 {
   "name": "@red-cup-engineering/javascript-file-services-section",
   "version": "0.1.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/red-cup-engineering/computer-code-engineering-services-section.git",
+    "directory": "services/javascript-engineering-services-section/services/javascript-file-services-section"
+  },
   "type": "module",
   "exports": {
     "./javascript-file-main-guard": "./scripts/javascript-file-main-guard.mjs",

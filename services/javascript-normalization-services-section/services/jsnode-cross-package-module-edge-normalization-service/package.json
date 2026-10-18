@@ -4,6 +4,11 @@
   "private": false,
   "type": "module",
   "description": "Normalizes relative cross-package JSNode module references into explicit package dependency and export edges.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/red-cup-engineering/computer-code-engineering-services-section.git",
+    "directory": "services/javascript-engineering-services-section/services/javascript-normalization-services-section/services/jsnode-cross-package-module-edge-normalization-service"
+  },
   "exports": {
     ".": "./src/normalize-jsnode-module-edges.mjs",
     "./registry-bindings": "./src/normalize-registry-module-bindings.mjs"

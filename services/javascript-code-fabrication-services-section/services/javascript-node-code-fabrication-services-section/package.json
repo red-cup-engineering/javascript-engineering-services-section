@@ -3,6 +3,11 @@
   "version": "0.1.1",
   "type": "module",
   "description": "Red Cup Engineering service section for javascript node code fabrication.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/red-cup-engineering/computer-code-engineering-services-section.git",
+    "directory": "services/javascript-engineering-services-section/services/javascript-code-fabrication-services-section/services/javascript-node-code-fabrication-services-section"
+  },
   "license": "UNLICENSED",
   "exports": {
     "./transform-json-schema-to-typescript": "./scripts/transform-json-schema-to-typescript.mjs"
