@@ -58,7 +58,7 @@ export function admitMarkdownJsnodeOperationPackageFabricationReceipt(receipt) {
     throw receiptAdmissionError("MISSING_ARTIFACT_SPECIFICATION", "fabrication receipt has no artifact specification");
   }
   const { type, version, specificationDigest, ...specificationCandidate } = specification;
-  const admittedSpecification = admitArtifactFabricationSpecification({ type: "ArtifactFabricationSpecificationCandidate", version: 1, ...specificationCandidate });
+  const admittedSpecification = admitArtifactFabricationSpecification({ type: "ArtifactFabricationSpecificationCandidate", version, ...specificationCandidate });
   if (admittedSpecification.type !== "ArtifactFabricationSpecification" || admittedSpecification.specificationDigest !== specificationDigest) {
     throw receiptAdmissionError("INVALID_ARTIFACT_SPECIFICATION", "fabrication receipt has an unadmitted artifact specification", admittedSpecification);
   }
@@ -69,16 +69,16 @@ export function admitMarkdownJsnodeOperationPackageFabricationReceipt(receipt) {
   // evidence. Every new v2 derivation binds its pre-inference work order.
   if ([2, 3].includes(receipt.derivation?.version)) {
     const order = receipt.derivation.workOrderSpecification;
-    if (order?.type !== "ArtifactFabricationSpecification" || order.version !== 1) {
+    if (order?.type !== "ArtifactFabricationSpecification" || ![1, 2].includes(order.version)) {
       throw receiptAdmissionError("MISSING_WORK_ORDER_SPECIFICATION", "derived fabrication must retain the source-free admitted work order");
     }
     const { type: orderType, version: orderVersion, specificationDigest: orderDigest, ...orderCandidate } = order;
-    const admittedOrder = admitArtifactFabricationSpecification({ type: "ArtifactFabricationSpecificationCandidate", version: 1, ...orderCandidate });
+    const admittedOrder = admitArtifactFabricationSpecification({ type: "ArtifactFabricationSpecificationCandidate", version: orderVersion, ...orderCandidate });
     // Projecting away only generated sources and tests must recover exactly the
     // admitted order. All requirements, constraints, examples and dependencies
     // remain part of its identity; provider output cannot change them.
     const recoveredOrder = admitArtifactFabricationSpecification({
-      type: "ArtifactFabricationSpecificationCandidate", version: 1,
+      type: "ArtifactFabricationSpecificationCandidate", version,
       ...specificationCandidate,
       projections: admittedSpecification.projections.map((projection) => ({
         ...projection, configuration: { ...projection.configuration, sources: [], tests: [] },

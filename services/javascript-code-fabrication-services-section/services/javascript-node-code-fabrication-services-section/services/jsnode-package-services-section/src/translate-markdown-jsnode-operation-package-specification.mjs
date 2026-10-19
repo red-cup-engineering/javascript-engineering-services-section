@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { sha256Digest, sha256Hex } from "@red-cup-engineering/cryptographic-computer-data-engineering-services-section/integrity";
+import { DEFINITIONALLY_EXACT_PARAMETERS } from "@red-cup-engineering/computer-data-engineering-services-section/artifact-fabrication";
 
 class TranslationRefusal extends Error {
   constructor(code, message, sourceSpan = null) {
@@ -61,7 +62,7 @@ function parsedFence(lines, index, label) {
   return { language: opener[1], attributes: opener[2] ?? "", text: lines.slice(index + 1, end).join("\n") + "\n", startLine: index + 1, endLine: end + 1, next: end + 1 };
 }
 
-function clauseLines(lines, start, end, type, options = {}) {
+function clauseLines(lines, start, end, type, claimed = false) {
   const clauses = [];
   for (let index = start; index < end; index += 1) {
     const line = lines[index];
@@ -71,34 +72,36 @@ function clauseLines(lines, start, end, type, options = {}) {
     const [ , id, statement ] = match;
     slug(id, `${type} ID`, index + 1);
     nonempty(statement, `${type} statement`, index + 1);
-    clauses.push({ id, statement, sourceSpan: span(index + 1), ...options });
+    const suffix = claimed ? /^(.*?) \[claims: ([a-z0-9, -]+)\]$/u.exec(statement) : null;
+    clauses.push({ id, statement: suffix ? suffix[1] : statement, claimIds: suffix ? suffix[2].split(", ") : [], sourceSpan: span(index + 1) });
   }
   if (clauses.length === 0) refuse("MISSING_CLAUSES", `${type} must contain at least one clause`, span(start + 1));
   return clauses;
 }
 
-function constraints(lines, start, end, kind) {
+function constraints(lines, start, end, kind, claimed = false) {
   const values = [];
   for (let index = start; index < end; index += 1) {
     const line = lines[index];
     if (line.length === 0) continue;
     const match = /^- `([a-z][a-z0-9]*(?:-[a-z0-9]+)*)` \| ([^|]+) \| ([^|]+) \| ([^|]+) \| ([^|]+) \| (.+)$/u.exec(line);
     if (!match) refuse("INVALID_CONSTRAINT", `${kind} constraints must use - \`stable-id\` | authority | revision | locator | applicability | statement`, span(index + 1));
-    values.push({ type: "ArtifactFabricationConstraint", version: 1, id: slug(match[1], `${kind} constraint ID`, index + 1), kind, authority: nonempty(match[2], `${kind} authority`, index + 1), revision: nonempty(match[3], `${kind} revision`, index + 1), locator: nonempty(match[4], `${kind} locator`, index + 1), applicability: nonempty(match[5], `${kind} applicability`, index + 1), statement: nonempty(match[6], `${kind} statement`, index + 1), sourceSpan: span(index + 1) });
+    values.push({ type: "ArtifactFabricationConstraint", version: claimed ? 2 : 1, id: slug(match[1], `${kind} constraint ID`, index + 1), kind, authority: nonempty(match[2], `${kind} authority`, index + 1), revision: nonempty(match[3], `${kind} revision`, index + 1), locator: nonempty(match[4], `${kind} locator`, index + 1), applicability: nonempty(match[5], `${kind} applicability`, index + 1), statement: nonempty(match[6], `${kind} statement`, index + 1), ...(claimed ? { parameters: [], claimIds: [] } : {}), sourceSpan: span(index + 1) });
   }
   if (values.length === 0) refuse("MISSING_CONSTRAINT", `${kind} must contain at least one settled constraint`, span(start + 1));
   return values;
 }
 
-function questions(lines, start, end) {
+function questions(lines, start, end, claimed = false) {
   if (end === start + 1 && lines[start] === "none") return [];
   const values = [];
   for (let index = start; index < end; index += 1) {
     const line = lines[index];
     if (line.length === 0) continue;
     const match = /^- `([a-z][a-z0-9]*(?:-[a-z0-9]+)*)` \[(blocking|nonblocking)\]: (.+)$/u.exec(line);
+    const about = claimed ? /^(.*?) \[claim: ([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\]$/u.exec(match?.[3] ?? "") : null;
     if (!match) refuse("INVALID_OPEN_QUESTION", "Open questions must use - `stable-id` [blocking|nonblocking]: question, or exactly `none`", span(index + 1));
-    values.push({ type: "ArtifactFabricationOpenQuestion", version: 1, id: slug(match[1], "open-question ID", index + 1), question: nonempty(match[3], "open question", index + 1), blocking: match[2] === "blocking", sourceSpan: span(index + 1) });
+    values.push({ type: "ArtifactFabricationOpenQuestion", version: claimed ? 2 : 1, id: slug(match[1], "open-question ID", index + 1), question: nonempty(about ? about[1] : match[3], "open question", index + 1), blocking: match[2] === "blocking", ...(claimed ? { claimId: about ? about[2] : null } : {}), sourceSpan: span(index + 1) });
   }
   return values;
 }
@@ -128,10 +131,83 @@ function traceability(lines, start, end, coveredIds, constraintIds) {
 // meaning-closed and is refused here.
 const CLOSURE_HEADINGS = ["# ", "## Requirements", "## Prohibitions", "## Laws", "## Standards", "## Open questions", "## Package", "## Operations", "## Examples", "## Traceability"];
 
+
+// The epistemic layer (candidate version 2). A work order with a `## Claims` section states, for every
+// claim its clauses rest on, its status and basis; its numbers are `{{claim-id}}` placeholders (or
+// `{{exact-constant}}` names from Data's definitionally exact set), and each dependency it names is a
+// measured dependency claim. The Data admission refuses what the law refuses; this layer only parses.
+//   - `id` | measured | kind | statement | quantity | locator | digest | derivation
+//   - `id` | derived | kind | statement | quantity | kind:ref; kind:ref | derivation
+//   - `id` | conjectured | kind | statement | quantity | hypothesis | observable | instrument | decision rule | estimate derivation
+// quantity is `none` or `<number> <unit>`; a clause ends with `[claims: id, id]`; a question with `[claim: id]`.
+function withClaims(claimed, headings) {
+  return claimed ? headings.flatMap((heading) => heading === "## Open questions" ? [heading, "## Claims"] : [heading]) : headings;
+}
+
+function claimQuantity(token, line) {
+  if (token === "none") return null;
+  const match = /^(-?[0-9]+(?:\.[0-9]+)?(?:e-?[0-9]+)?) (\S.*)$/u.exec(token);
+  if (!match) refuse("INVALID_CLAIM", "a claim quantity is `none` or `<number> <unit>`", span(line));
+  return { type: "ArtifactFabricationQuantity", value: Number(match[1]), unit: match[2] };
+}
+
+function claimsFrom(lines, [start, end]) {
+  const claims = [];
+  for (let index = start; index < end; index += 1) {
+    const line = lines[index];
+    if (line.length === 0) continue;
+    const match = /^- `([a-z][a-z0-9]*(?:-[a-z0-9]+)*)` \| (measured|derived|conjectured) \| ([a-z]+) \| (.+)$/u.exec(line);
+    if (!match) refuse("INVALID_CLAIM", "claims must use - `stable-id` | measured|derived|conjectured | kind | statement | quantity | basis...", span(index + 1));
+    const [, id, status, kind, rest] = match;
+    const parts = rest.split(" | ");
+    const arity = { measured: 5, derived: 4, conjectured: 7 }[status];
+    if (parts.length !== arity) refuse("INVALID_CLAIM", `a ${status} claim carries statement and quantity then ${arity - 2} basis fields, separated by ' | '`, span(index + 1));
+    const [statement, quantity, ...basis] = parts;
+    const base = { type: "ArtifactFabricationClaim", version: 1, id: slug(id, "claim ID", index + 1), kind, statement: nonempty(statement, "claim statement", index + 1), status, quantity: claimQuantity(quantity, index + 1), sourceSpan: span(index + 1) };
+    if (status === "measured") claims.push({ ...base, basis: { type: "ArtifactFabricationMeasuredBasis", locator: basis[0], digest: basis[1], derivation: basis[2] } });
+    else if (status === "derived") {
+      const premises = basis[0] === "" ? [] : basis[0].split("; ").map((item) => { const at = item.indexOf(":"); return { type: "ArtifactFabricationPremise", kind: item.slice(0, at), ref: item.slice(at + 1) }; });
+      claims.push({ ...base, basis: { type: "ArtifactFabricationDerivedBasis", premises, derivation: basis[1] } });
+    } else claims.push({ ...base, basis: { type: "ArtifactFabricationConjecturedBasis", hypothesis: basis[0], measurementPlan: { type: "ArtifactFabricationMeasurementPlan", observable: basis[1], instrument: basis[2], decisionRule: basis[3] }, estimateDerivation: basis[4] } });
+  }
+  return claims;
+}
+
+function clausesOf(type, clauses, claims) {
+  if (claims === null) return clauses.map(({ id, statement, sourceSpan }) => ({ type, version: 1, id, statement, sourceSpan }));
+  return clauses.map(({ id, statement, claimIds, sourceSpan }) => {
+    const placed = [...new Set([...statement.matchAll(/\{\{([^{}]*)\}\}/gu)].map((item) => item[1]))];
+    const parameters = placed.map((name) => {
+      const claim = claims.find((item) => item.id === name);
+      if (claim?.quantity) return { type: "ArtifactFabricationParameter", version: 1, name, value: claim.quantity.value, unit: claim.quantity.unit, claimId: name, exact: null };
+      const exact = DEFINITIONALLY_EXACT_PARAMETERS[name];
+      if (!claim && exact) return { type: "ArtifactFabricationParameter", version: 1, name, value: exact.value, unit: exact.unit, claimId: null, exact: name };
+      refuse("UNKNOWN_PARAMETER_PLACEHOLDER", `{{${name}}} names no claim with a quantity and no definitionally exact constant`, sourceSpan);
+    });
+    return { type, version: 2, id, statement, parameters, claimIds: [...new Set([...claimIds, ...parameters.map((item) => item.claimId).filter((item) => item !== null)])].sort(), sourceSpan };
+  });
+}
+
+function conjecturedIds(claims) {
+  return claims.filter(({ status }) => status === "conjectured").map(({ id }) => id).sort();
+}
+
+// A dependency named by a claimed work order is backed by an observed artifact: a measured dependency
+// claim whose statement names it as name@version (the registry response is the claim's evidence).
+function measuredDependencies(claims, dependencies, line) {
+  const entries = Array.isArray(dependencies) ? dependencies.map((item) => [item?.name, item?.version]) : Object.entries(dependencies ?? {});
+  for (const [name, version] of entries) {
+    if (!claims.some((claim) => claim.kind === "dependency" && claim.status === "measured" && claim.statement.includes(`${name}@${version}`))) {
+      refuse("DEPENDENCY_WITHOUT_MEASURED_CLAIM", `dependency ${name}@${version} needs a measured dependency claim naming it`, span(line));
+    }
+  }
+}
+
 function translateV2(source, lines) {
   const modules = lines.includes("## Modules");
   const closure = !lines.includes("## Sources") && !lines.includes("## Tests");
-  const headings = modules ? ["# ", "## Requirements", "## Prohibitions", "## Laws", "## Standards", "## Open questions", "## Modules", "## Acceptance obligations", "## Traceability"] : closure ? CLOSURE_HEADINGS : ["# ", "## Requirements", "## Prohibitions", "## Laws", "## Standards", "## Open questions", "## Package", "## Sources", "## Operations", "## Tests", "## Examples", "## Traceability"];
+  const claimed = lines.includes("## Claims");
+  const headings = withClaims(claimed, modules ? ["# ", "## Requirements", "## Prohibitions", "## Laws", "## Standards", "## Open questions", "## Modules", "## Acceptance obligations", "## Traceability"] : closure ? CLOSURE_HEADINGS : ["# ", "## Requirements", "## Prohibitions", "## Laws", "## Standards", "## Open questions", "## Package", "## Sources", "## Operations", "## Tests", "## Examples", "## Traceability"]);
   const atxHeadings = lines.map((line, index) => ({ line, index })).filter(({ line }) => /^#{1,6} /u.test(line));
   if (atxHeadings.length !== headings.length || atxHeadings[0].index !== 0 || atxHeadings.slice(1).some(({ line }, index) => line !== headings[index + 1])) {
     refuse("UNKNOWN_STRUCTURE", `v2 ${closure ? "closure " : ""}document must have exactly one title and exactly one of each required level-two heading: ${headings.slice(1).join(", ")}`, span(1));
@@ -140,12 +216,13 @@ function translateV2(source, lines) {
   if (indexes.some((value) => value < 0) || indexes.some((value, index) => index > 0 && value <= indexes[index - 1])) refuse("INVALID_STRUCTURE", "v2 document headings must occur in order", span(1));
   const sections = Object.fromEntries(headings.slice(1).map((heading, index) => [heading, [indexes[index + 1] + 1, indexes[index + 2] ?? lines.length]]));
   const artifactId = slug(lines[0].slice(2).trim(), "title / artifact ID", 1);
-  const requirementClauses = clauseLines(lines, ...sections["## Requirements"], "requirements");
-  const prohibitionClauses = clauseLines(lines, ...sections["## Prohibitions"], "prohibitions");
-  const requirements = requirementClauses.map(({ id, statement, sourceSpan }) => ({ type: "ArtifactFabricationRequirement", version: 1, id, statement, sourceSpan }));
-  const prohibitions = prohibitionClauses.map(({ id, statement, sourceSpan }) => ({ type: "ArtifactFabricationProhibition", version: 1, id, statement, sourceSpan }));
-  const constraintsValue = [...constraints(lines, ...sections["## Laws"], "law"), ...constraints(lines, ...sections["## Standards"], "standard")];
-  const openQuestions = questions(lines, ...sections["## Open questions"]);
+  const claimList = claimed ? claimsFrom(lines, sections["## Claims"]) : null;
+  const requirementClauses = clauseLines(lines, ...sections["## Requirements"], "requirements", claimed);
+  const prohibitionClauses = clauseLines(lines, ...sections["## Prohibitions"], "prohibitions", claimed);
+  const requirements = clausesOf("ArtifactFabricationRequirement", requirementClauses, claimList);
+  const prohibitions = clausesOf("ArtifactFabricationProhibition", prohibitionClauses, claimList);
+  const constraintsValue = [...constraints(lines, ...sections["## Laws"], "law", claimed), ...constraints(lines, ...sections["## Standards"], "standard", claimed)];
+  const openQuestions = questions(lines, ...sections["## Open questions"], claimed);
   if (modules) {
     const recordSection = (heading) => {
       const fence = parsedFence(lines, sections[heading][0], heading.slice(3));
@@ -154,11 +231,12 @@ function translateV2(source, lines) {
     };
     const moduleRecord = recordSection("## Modules");
     exactKeys(moduleRecord.value, ["operations", "examples", "dependencies"], "Modules", moduleRecord.sourceSpan.startLine);
+    if (claimed) measuredDependencies(claimList, moduleRecord.value.dependencies, moduleRecord.sourceSpan.startLine);
     const acceptance = recordSection("## Acceptance obligations");
     if (!Array.isArray(acceptance.value) || acceptance.value.length === 0) refuse("MISSING_ACCEPTANCE_OBLIGATIONS", "a module order must state its receiving obligations", acceptance.sourceSpan);
     const acceptanceObligations = acceptance.value.map(value => {
-      exactKeys(value, ["id", "kind", "statement"], "acceptance obligation", acceptance.sourceSpan.startLine);
-      return { type: "ArtifactFabricationAcceptanceObligation", version: 1, id: slug(value.id, "acceptance obligation ID", acceptance.sourceSpan.startLine), kind: nonempty(value.kind, "acceptance obligation kind", acceptance.sourceSpan.startLine), statement: nonempty(value.statement, "acceptance obligation statement", acceptance.sourceSpan.startLine), sourceSpan: acceptance.sourceSpan };
+      exactKeys(value, claimed ? ["id", "kind", "statement", "claimIds"] : ["id", "kind", "statement"], "acceptance obligation", acceptance.sourceSpan.startLine);
+      return { type: "ArtifactFabricationAcceptanceObligation", version: claimed ? 2 : 1, ...(claimed ? { parameters: [], claimIds: value.claimIds } : {}), id: slug(value.id, "acceptance obligation ID", acceptance.sourceSpan.startLine), kind: nonempty(value.kind, "acceptance obligation kind", acceptance.sourceSpan.startLine), statement: nonempty(value.statement, "acceptance obligation statement", acceptance.sourceSpan.startLine), sourceSpan: acceptance.sourceSpan };
     });
     const coveredIds = new Set([...requirements, ...prohibitions].map(value => value.id));
     const constraintIds = new Set(constraintsValue.map(value => value.id));
@@ -166,10 +244,10 @@ function translateV2(source, lines) {
     if (openQuestions.some(question => question.blocking)) refuse("BLOCKING_OPEN_QUESTION", "a module meaning closure cannot carry a blocking open question", span(sections["## Open questions"][0]));
     const digest = sha256Digest(source.text);
     const artifactSpecificationCandidate = {
-      type: "ArtifactFabricationSpecificationCandidate", version: 1,
+      type: "ArtifactFabricationSpecificationCandidate", version: claimed ? 2 : 1,
       source: { type: "ArtifactFabricationSource", version: 1, identity: { type: "ArtifactFabricationSourceIdentity", id: artifactId }, provenance: { type: "ArtifactFabricationSourceProvenance", locator: source.path, digest, sourceSpan: span(1, lines.length) } },
       artifact: { type: "FabricatedArtifactIdentity", version: 1, id: artifactId, kind: "jsnode-modules" },
-      requirements, prohibitions, openQuestions, constraints: constraintsValue,
+      ...(claimed ? { claims: claimList } : {}), requirements, prohibitions, openQuestions, constraints: constraintsValue,
       projections: [{ type: "ArtifactFabricationProjection", version: 1, id: "jsnode-modules", target: "@red-cup-engineering/jsnode-package-services-section/derive-jsnode-package-from-closure", configuration: moduleRecord.value, sourceSpan: moduleRecord.sourceSpan }],
       acceptanceObligations, traceability: traceabilityValue,
     };
@@ -180,6 +258,7 @@ function translateV2(source, lines) {
   const metadata = json(packageFence.text, "Package", packageFence.startLine);
   exactKeys(metadata, ["version", "topic", "packageName", "packageVersion", "license", "dependencies", "devDependencies", ...(Object.hasOwn(metadata, "cli") ? ["cli"] : [])], "Package", packageFence.startLine);
   if (metadata.version !== 2 || typeof metadata.topic !== "string") refuse("INVALID_PACKAGE_SECTION", "Package must carry version 2 and topic", span(packageFence.startLine, packageFence.endLine));
+  if (claimed) { measuredDependencies(claimList, metadata.dependencies, packageFence.startLine); measuredDependencies(claimList, metadata.devDependencies, packageFence.startLine); }
   const readFences = (section, language, pattern, type) => {
     const values = [];
     for (let index = sections[section][0]; index < sections[section][1];) {
@@ -207,7 +286,7 @@ function translateV2(source, lines) {
   });
   const candidate = { type: "JsnodeOperationPackageSpecificationCandidate", version: 2, packageName: metadata.packageName, packageVersion: metadata.packageVersion, license: metadata.license, topic: metadata.topic, ...(Object.hasOwn(metadata, "cli") ? { cli: metadata.cli } : {}), sources, operations, tests, examples, dependencies: metadata.dependencies, devDependencies: metadata.devDependencies };
   const projection = { type: "ArtifactFabricationProjection", version: 1, id: "jsnode-operation-package", target: "@red-cup-engineering/jsnode-package-services-section/admit-jsnode-operation-package-specification", configuration: candidate, sourceSpan: span(packageFence.startLine, sections["## Examples"][1]) };
-  const obligation = { type: "ArtifactFabricationAcceptanceObligation", version: 1, id: "jsnode-package-assays", kind: "assay", statement: closure
+  const obligation = { type: "ArtifactFabricationAcceptanceObligation", version: claimed ? 2 : 1, ...(claimed ? { parameters: [], claimIds: conjecturedIds(claimList) } : {}), id: "jsnode-package-assays", kind: "assay", statement: closure
     ? "The derived JSNode package must pass the package-birth pipeline: its examples typed by their schemas, tests derived from the examples before the source, and its import and command faces giving the admitted outputs."
     : "The existing JSNode package-birth pipeline must admit, stage, test, pack, install, and assay the projected package.", sourceSpan: span(sections[closure ? "## Examples" : "## Tests"][0] + 1, sections["## Examples"][1]) };
   const coveredIds = new Set([...requirements, ...prohibitions].map((value) => value.id));
@@ -215,7 +294,7 @@ function translateV2(source, lines) {
   const traceabilityValue = traceability(lines, ...sections["## Traceability"], coveredIds, constraintIds);
   if (closure && openQuestions.some((question) => question.blocking)) refuse("BLOCKING_OPEN_QUESTION", `a closure with a blocking open question is not closed: ${openQuestions.filter((question) => question.blocking).map((question) => question.id).join(", ")}`, span(sections["## Open questions"][0]));
   const digest = sha256Digest(source.text);
-  const artifactSpecificationCandidate = { type: "ArtifactFabricationSpecificationCandidate", version: 1, source: { type: "ArtifactFabricationSource", version: 1, identity: { type: "ArtifactFabricationSourceIdentity", id: artifactId }, provenance: { type: "ArtifactFabricationSourceProvenance", locator: source.path, digest, sourceSpan: span(1, lines.length) } }, artifact: { type: "FabricatedArtifactIdentity", version: 1, id: artifactId, kind: "jsnode-operation-package" }, requirements, prohibitions, openQuestions, constraints: constraintsValue, projections: [projection], acceptanceObligations: [obligation], traceability: traceabilityValue };
+  const artifactSpecificationCandidate = { type: "ArtifactFabricationSpecificationCandidate", version: claimed ? 2 : 1, source: { type: "ArtifactFabricationSource", version: 1, identity: { type: "ArtifactFabricationSourceIdentity", id: artifactId }, provenance: { type: "ArtifactFabricationSourceProvenance", locator: source.path, digest, sourceSpan: span(1, lines.length) } }, artifact: { type: "FabricatedArtifactIdentity", version: 1, id: artifactId, kind: "jsnode-operation-package" }, ...(claimed ? { claims: claimList } : {}), requirements, prohibitions, openQuestions, constraints: constraintsValue, projections: [projection], acceptanceObligations: [obligation], traceability: traceabilityValue };
   if (closure) return frozen({ type: "MarkdownJsnodeOperationPackageClosureTranslation", version: 1, artifactSpecificationCandidate, closure: { ...candidate, requirements, prohibitions, constraints: constraintsValue, openQuestions } });
   return frozen({ type: "MarkdownJsnodeOperationPackageSpecificationTranslation", version: 1, artifactSpecificationCandidate, jsnodeOperationPackageSpecificationCandidate: candidate });
 }
@@ -251,7 +330,8 @@ export function translateMarkdownJsnodeOperationPackageSpecification(request) {
     const lines = source.text.replace(/\r\n/gu, "\n").split("\n");
     if (lines.at(-1) === "") lines.pop();
     if (lines.includes("## Modules") || lines.includes("## Sources") || lines.includes("## Operations")) return translateV2(source, lines);
-    const headings = ["# ", "## Requirements", "## Prohibitions", "## Laws", "## Standards", "## Open questions", "## Package", "## Operation", "## Tests", "## Examples", "## Traceability"];
+    const claimed = lines.includes("## Claims");
+    const headings = withClaims(claimed, ["# ", "## Requirements", "## Prohibitions", "## Laws", "## Standards", "## Open questions", "## Package", "## Operation", "## Tests", "## Examples", "## Traceability"]);
     if (!lines[0]?.startsWith("# ")) refuse("MISSING_TITLE", "line 1 must be the Markdown title", span(1));
     const atxHeadings = lines.map((line, index) => ({ line, index })).filter(({ line }) => /^#{1,6} /u.test(line));
     if (atxHeadings.length !== headings.length || atxHeadings[0].index !== 0 || atxHeadings.slice(1).some(({ line }, index) => line !== headings[index + 1])) {
@@ -261,16 +341,18 @@ export function translateMarkdownJsnodeOperationPackageSpecification(request) {
     if (indexes.some((value) => value < 0) || indexes.some((value, index) => index > 0 && value <= indexes[index - 1])) refuse("INVALID_STRUCTURE", `document headings must occur once and in this order: ${headings.join(", ")}`, span(1));
     const artifactId = slug(lines[0].slice(2).trim(), "title / artifact ID", 1);
     const sections = Object.fromEntries(headings.slice(1).map((heading, index) => [heading, [indexes[index + 1] + 1, indexes[index + 2] ?? lines.length]]));
-    const requirementClauses = clauseLines(lines, ...sections["## Requirements"], "requirements");
-    const prohibitionClauses = clauseLines(lines, ...sections["## Prohibitions"], "prohibitions");
-    const requirements = requirementClauses.map(({ id, statement, sourceSpan }) => ({ type: "ArtifactFabricationRequirement", version: 1, id, statement, sourceSpan }));
-    const prohibitions = prohibitionClauses.map(({ id, statement, sourceSpan }) => ({ type: "ArtifactFabricationProhibition", version: 1, id, statement, sourceSpan }));
-    const constraintsValue = [...constraints(lines, ...sections["## Laws"], "law"), ...constraints(lines, ...sections["## Standards"], "standard")];
-    const openQuestions = questions(lines, ...sections["## Open questions"]);
+    const claimList = claimed ? claimsFrom(lines, sections["## Claims"]) : null;
+    const requirementClauses = clauseLines(lines, ...sections["## Requirements"], "requirements", claimed);
+    const prohibitionClauses = clauseLines(lines, ...sections["## Prohibitions"], "prohibitions", claimed);
+    const requirements = clausesOf("ArtifactFabricationRequirement", requirementClauses, claimList);
+    const prohibitions = clausesOf("ArtifactFabricationProhibition", prohibitionClauses, claimList);
+    const constraintsValue = [...constraints(lines, ...sections["## Laws"], "law", claimed), ...constraints(lines, ...sections["## Standards"], "standard", claimed)];
+    const openQuestions = questions(lines, ...sections["## Open questions"], claimed);
     const packageFence = parsedFence(lines, sections["## Package"][0], "Package");
     if (packageFence.language !== "json" || packageFence.next !== sections["## Package"][1]) refuse("INVALID_PACKAGE_SECTION", "Package must contain exactly one JSON fence", span(packageFence.startLine, packageFence.endLine));
     const metadata = json(packageFence.text, "Package", packageFence.startLine);
     exactKeys(metadata, ["packageName", "packageVersion", "license", "dependencies", "devDependencies"], "Package", packageFence.startLine);
+    if (claimed) { measuredDependencies(claimList, metadata.dependencies, packageFence.startLine); measuredDependencies(claimList, metadata.devDependencies, packageFence.startLine); }
     const operationFence = parsedFence(lines, sections["## Operation"][0], "Operation");
     const operationAttribute = /^path=(scripts\/[a-z][a-z0-9-]*\.mjs)$/u.exec(operationFence.attributes);
     if (operationFence.language !== "mjs" || !operationAttribute || operationFence.next !== sections["## Operation"][1]) refuse("INVALID_OPERATION_SECTION", "Operation must contain exactly one mjs fence with path=scripts/<command>.mjs", span(operationFence.startLine, operationFence.endLine));
@@ -296,13 +378,13 @@ export function translateMarkdownJsnodeOperationPackageSpecification(request) {
     if (examples.length === 0) refuse("MISSING_EXAMPLES", "Examples must contain at least one JSON example", span(sections["## Examples"][0] + 1));
     const jsnodeOperationPackageSpecificationCandidate = { type: "JsnodeOperationPackageSpecificationCandidate", version: 1, packageName: metadata.packageName, packageVersion: metadata.packageVersion, license: metadata.license, operation: { type: "JavascriptNodeOperationSource", path: operationAttribute[1], text: operationFence.text }, tests, examples, dependencies: metadata.dependencies, devDependencies: metadata.devDependencies };
     const projection = { type: "ArtifactFabricationProjection", version: 1, id: "jsnode-operation-package", target: "@red-cup-engineering/jsnode-package-services-section/admit-jsnode-operation-package-specification", configuration: jsnodeOperationPackageSpecificationCandidate, sourceSpan: span(packageFence.startLine, sections["## Examples"][1]) };
-    const obligation = { type: "ArtifactFabricationAcceptanceObligation", version: 1, id: "jsnode-package-assays", kind: "assay", statement: "The existing JSNode package-birth pipeline must admit, stage, test, pack, install, and assay the projected package.", sourceSpan: span(sections["## Tests"][0] + 1, sections["## Examples"][1]) };
+    const obligation = { type: "ArtifactFabricationAcceptanceObligation", version: claimed ? 2 : 1, ...(claimed ? { parameters: [], claimIds: conjecturedIds(claimList) } : {}), id: "jsnode-package-assays", kind: "assay", statement: "The existing JSNode package-birth pipeline must admit, stage, test, pack, install, and assay the projected package.", sourceSpan: span(sections["## Tests"][0] + 1, sections["## Examples"][1]) };
     const coveredIds = new Set([...requirements, ...prohibitions].map((value) => value.id));
     if (coveredIds.size !== requirements.length + prohibitions.length) refuse("DUPLICATE_CLAUSE_ID", "requirement and prohibition IDs must be globally unique", span(1));
     const constraintIds = new Set(constraintsValue.map((value) => value.id));
     const traceabilityValue = traceability(lines, ...sections["## Traceability"], coveredIds, constraintIds);
     const digest = sha256Digest(source.text);
-    const artifactSpecificationCandidate = { type: "ArtifactFabricationSpecificationCandidate", version: 1, source: { type: "ArtifactFabricationSource", version: 1, identity: { type: "ArtifactFabricationSourceIdentity", id: artifactId }, provenance: { type: "ArtifactFabricationSourceProvenance", locator: source.path, digest, sourceSpan: span(1, lines.length) } }, artifact: { type: "FabricatedArtifactIdentity", version: 1, id: artifactId, kind: "jsnode-operation-package" }, requirements, prohibitions, openQuestions, constraints: constraintsValue, projections: [projection], acceptanceObligations: [obligation], traceability: traceabilityValue };
+    const artifactSpecificationCandidate = { type: "ArtifactFabricationSpecificationCandidate", version: claimed ? 2 : 1, source: { type: "ArtifactFabricationSource", version: 1, identity: { type: "ArtifactFabricationSourceIdentity", id: artifactId }, provenance: { type: "ArtifactFabricationSourceProvenance", locator: source.path, digest, sourceSpan: span(1, lines.length) } }, artifact: { type: "FabricatedArtifactIdentity", version: 1, id: artifactId, kind: "jsnode-operation-package" }, ...(claimed ? { claims: claimList } : {}), requirements, prohibitions, openQuestions, constraints: constraintsValue, projections: [projection], acceptanceObligations: [obligation], traceability: traceabilityValue };
     return frozen({ type: "MarkdownJsnodeOperationPackageSpecificationTranslation", version: 1, artifactSpecificationCandidate, jsnodeOperationPackageSpecificationCandidate });
   } catch (error) {
     if (error instanceof TranslationRefusal) return frozen({ type: "MarkdownJsnodeOperationPackageSpecificationTranslationRefusal", version: 1, code: error.code, message: error.message, sourceSpan: error.sourceSpan });
