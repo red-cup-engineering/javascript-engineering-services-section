@@ -34,5 +34,9 @@
   },
   "engines": {
     "node": ">=24"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/red-cup-engineering/javascript-engineering-services-section.git"
   }
 }
