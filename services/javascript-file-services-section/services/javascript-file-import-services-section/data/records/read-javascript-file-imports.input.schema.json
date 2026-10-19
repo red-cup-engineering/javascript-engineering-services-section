@@ -1,1 +1,0 @@
-{"$schema":"https://json-schema.org/draft/2020-12/schema","description":"A TextFileRead containing one JavaScript path and its source text.","title":"readJavascriptFileImportsInput","type":"object"}
