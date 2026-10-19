@@ -1,6 +1,6 @@
 {
   "name": "@red-cup-engineering/javascript-node-code-fabrication-services-section",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Red Cup Engineering service section for javascript node code fabrication.",
   "repository": {
@@ -25,5 +25,8 @@
     "content",
     "README.md",
     "package.json"
-  ]
+  ],
+  "dependencies": {
+    "@red-cup-engineering/signcell": "0.4.2"
+  }
 }

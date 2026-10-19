@@ -7,7 +7,7 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 import { isMain, isStrictMain, runJsonMain } from "../scripts/javascript-file-main-guard.mjs";
 
-const modulePath = realpathSync(new URL("../src/index.mjs", import.meta.url));
+const modulePath = realpathSync(new URL("../scripts/javascript-file-main-guard.mjs", import.meta.url));
 
 test("isMain compares real files and follows entry symlinks", () => {
   const root = mkdtempSync(join(tmpdir(), "javascript-main-guard-"));
@@ -42,7 +42,7 @@ test("isStrictMain compares the raw invoked path without resolving symlinks", ()
 test("runMain passes the argument tail and selected streams on direct execution", () => {
   const root = mkdtempSync(join(tmpdir(), "javascript-run-main-"));
   const entry = join(root, "success.mjs");
-  const sourceUrl = new URL("../src/index.mjs", import.meta.url).href;
+  const sourceUrl = new URL("../scripts/javascript-file-main-guard.mjs", import.meta.url).href;
   writeFileSync(entry, [
     `import { runMain } from ${JSON.stringify(sourceUrl)};`,
     "await runMain(async ({ argv, stdout }) => {",
@@ -60,7 +60,7 @@ test("runMain passes the argument tail and selected streams on direct execution"
 test("runMain defaults to raw error.message plus newline and exit code 2", () => {
   const root = mkdtempSync(join(tmpdir(), "javascript-run-main-error-"));
   const entry = join(root, "failure.mjs");
-  const sourceUrl = new URL("../src/index.mjs", import.meta.url).href;
+  const sourceUrl = new URL("../scripts/javascript-file-main-guard.mjs", import.meta.url).href;
   writeFileSync(entry, [
     `import { runMain } from ${JSON.stringify(sourceUrl)};`,
     "await runMain(async () => { throw new Error('boom'); }, { moduleUrl: import.meta.url });",
@@ -76,7 +76,7 @@ test("runMain defaults to raw error.message plus newline and exit code 2", () =>
 test("runMain retains leaf formatting and exit-code overrides", () => {
   const root = mkdtempSync(join(tmpdir(), "javascript-run-main-override-"));
   const entry = join(root, "failure.mjs");
-  const sourceUrl = new URL("../src/index.mjs", import.meta.url).href;
+  const sourceUrl = new URL("../scripts/javascript-file-main-guard.mjs", import.meta.url).href;
   writeFileSync(entry, [
     `import { runMain } from ${JSON.stringify(sourceUrl)};`,
     "await runMain(async () => { throw new Error('boom'); }, {",
@@ -97,7 +97,7 @@ test("runMain does not execute an imported module", () => {
   const root = mkdtempSync(join(tmpdir(), "javascript-run-main-import-"));
   const child = join(root, "child.mjs");
   const wrapper = join(root, "wrapper.mjs");
-  const sourceUrl = new URL("../src/index.mjs", import.meta.url).href;
+  const sourceUrl = new URL("../scripts/javascript-file-main-guard.mjs", import.meta.url).href;
   writeFileSync(child, [
     `import { runMain } from ${JSON.stringify(sourceUrl)};`,
     "await runMain(async ({ stdout }) => stdout.write('ran'), { moduleUrl: import.meta.url });",
@@ -115,7 +115,7 @@ test("runJsonMain writes a JSON result and newline only for the strict raw entry
   const root = mkdtempSync(join(tmpdir(), "javascript-run-json-main-"));
   const entry = join(root, "success.mjs");
   const entryLink = join(root, "success-link.mjs");
-  const sourceUrl = new URL("../src/index.mjs", import.meta.url).href;
+  const sourceUrl = new URL("../scripts/javascript-file-main-guard.mjs", import.meta.url).href;
   writeFileSync(entry, [
     `import { runJsonMain } from ${JSON.stringify(sourceUrl)};`,
     "await runJsonMain(async ({ argv }) => ({ argv }), import.meta.url);",
@@ -137,7 +137,7 @@ test("runJsonMain writes a JSON result and newline only for the strict raw entry
 test("runJsonMain refuses errors with exit code 78", () => {
   const root = mkdtempSync(join(tmpdir(), "javascript-run-json-main-error-"));
   const entry = join(root, "failure.mjs");
-  const sourceUrl = new URL("../src/index.mjs", import.meta.url).href;
+  const sourceUrl = new URL("../scripts/javascript-file-main-guard.mjs", import.meta.url).href;
   writeFileSync(entry, [
     `import { runJsonMain } from ${JSON.stringify(sourceUrl)};`,
     "await runJsonMain(async () => { throw new Error('boom'); }, import.meta.url);",
