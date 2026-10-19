@@ -3,7 +3,6 @@ import test from "node:test";
 import {
   admitArtifactFabricationRealizationPlan,
   admitArtifactFabricationSpecification,
-  findArtifactFabricationEpistemicDebt,
   summarizeArtifactFabricationClaims,
 } from "@red-cup-engineering/computer-data-engineering-services-section/artifact-fabrication";
 import { JSNODE_PACKAGE_DIALECT_EXAMPLE } from "../src/jsnode-package.mjs";
@@ -23,6 +22,8 @@ function claimedOrder({ requirement = "The topic doubles within {{double-budget}
     "- `budget-holds` | conjectured | world | Doubling stays inside its budget at scale | 4 ms | Doubling time stays near the median at ten times the load | Latency per call under load | The package-birth assay timing | Keep the budget while the 99th percentile is within twice the median | The measured median",
   ].join("\n");
   return JSNODE_PACKAGE_DIALECT_EXAMPLE
+    .replace(/## Claims\n[\s\S]*?(?=## Package)/u, "")
+    .replace(" [claims: input-outside-domain]", "")
     .replace("- `number-result`: The topic returns typed number results.", `- \`number-result\`: ${requirement}`)
     .replace("- `bad-input`: Invalid inputs are refused.", `- \`bad-input\`: ${prohibition}`)
     .replace("## Package", `## Claims\n${claimLines}\n## Package`)
@@ -47,10 +48,11 @@ test("a work order with claims translates to a version 2 candidate that the Data
   assert.equal(plan.type, "ArtifactFabricationRealizationPlan");
 });
 
-test("without a Claims section the candidate stays version 1 and lists its migration debt", () => {
-  const translation = translate(JSNODE_PACKAGE_DIALECT_EXAMPLE);
-  assert.equal(translation.artifactSpecificationCandidate.version, 1);
-  assert.deepEqual(findArtifactFabricationEpistemicDebt(translation.artifactSpecificationCandidate), [{ code: "RESTRICTION_WITHOUT_CLAIM", path: "prohibitions[0]" }]);
+test("a work order without a Claims section is refused: candidate version 1 is retired", () => {
+  const refused = translate(JSNODE_PACKAGE_DIALECT_EXAMPLE.replace(/## Claims\n[\s\S]*?(?=## Package)/u, "").replace(" [claims: input-outside-domain]", ""));
+  assert.equal(refused.type, "MarkdownJsnodeOperationPackageSpecificationTranslationRefusal");
+  assert.equal(refused.code, "MISSING_CLAIMS");
+  assert.equal(translate(JSNODE_PACKAGE_DIALECT_EXAMPLE).artifactSpecificationCandidate.version, 2, "the shipped dialect example carries claims");
 });
 
 test("the law binds a translated work order: bare numbers, ungrounded refusals and measured evidence", () => {
