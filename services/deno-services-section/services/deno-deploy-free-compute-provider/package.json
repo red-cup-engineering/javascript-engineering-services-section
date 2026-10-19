@@ -1,6 +1,6 @@
 {
   "name": "@red-cup-engineering/deno-deploy-free-compute-provider",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Signed bounded edge compute admitted only while Deno reports the owning organization free_verified.",
   "repository": {
@@ -19,6 +19,6 @@
   },
   "license": "LicenseRef-561Group-1.0",
   "dependencies": {
-    "@red-cup-engineering/cryptographic-computer-data-engineering-services-section": "workspace:*"
+    "@red-cup-engineering/cryptographic-computer-data-engineering-services-section": "0.3.1"
   }
 }
