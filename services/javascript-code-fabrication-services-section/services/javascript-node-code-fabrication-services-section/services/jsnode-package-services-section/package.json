@@ -1,6 +1,6 @@
 {
   "name": "@red-cup-engineering/jsnode-package-services-section",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "type": "module",
   "description": "Shared JSNode module and schema projection with an optional package catalog and fabrication boundary.",
   "repository": {
@@ -83,7 +83,7 @@
     "@red-cup-engineering/read-javascript-file-export-documentation-service": "0.1.5",
     "@red-cup-engineering/uri-services-section": "0.1.1",
     "@red-cup-engineering/yaml-frontmatter-codec-service": "0.1.7",
-    "@red-cup-engineering/computer-data-engineering-services-section": "0.2.0",
+    "@red-cup-engineering/computer-data-engineering-services-section": "0.5.0",
     "@red-cup-engineering/computer-content-address-engineering-services-section": "0.2.0",
     "@red-cup-engineering/npm-package-version-admission-service": "0.2.0",
     "@red-cup-engineering/npm-scoped-package-name-formation-service": "0.3.0"
