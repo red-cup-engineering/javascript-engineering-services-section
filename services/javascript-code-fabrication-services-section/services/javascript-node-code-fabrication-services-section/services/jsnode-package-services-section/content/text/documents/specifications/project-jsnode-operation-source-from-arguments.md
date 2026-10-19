@@ -8,9 +8,9 @@
 - `canonical-main-guard`: The projected text ends with the canonical `if (import.meta.main)` NDJSON command guard, identical in shape to the jsnode-package-services-section live example's guard, with `--help` printing `<exportName> — <description>`, and the per-line call awaited when the record's `isAsync` is true or `bodyText` declares `export async function`.
 - `deterministic-projection`: The same JsnodeOperationArguments record projects to byte-identical text on every call.
 ## Prohibitions
-- `missing-export-name-refusal`: The operation must refuse a record whose `exportName` is missing.
-- `missing-body-text-refusal`: The operation must refuse a record whose `bodyText` is missing.
-- `missing-description-refusal`: The operation must refuse a record whose `description` is missing.
+- `missing-export-name-refusal`: The operation must refuse a record whose `exportName` is missing. [claims: malformed-input-outside-domain]
+- `missing-body-text-refusal`: The operation must refuse a record whose `bodyText` is missing. [claims: malformed-input-outside-domain]
+- `missing-description-refusal`: The operation must refuse a record whose `description` is missing. [claims: malformed-input-outside-domain]
 ## Laws
 - `jsnode-one-form` | jsnode-package-services-section README | v1 | lib/emsenn/services/561-group/services/engineering-services-section/services/computer-engineering-services-section/services/computer-code-engineering-services-section/services/javascript-engineering-services-section/services/javascript-code-fabrication-services-section/services/javascript-node-code-fabrication-services-section/services/jsnode-package-services-section/README.md | Applies to the exact operation-file shape this operation projects. | "The operation file starts with the Node shebang, exports exactly one JSDoc-documented function, and contains the real `if (import.meta.main)` command guard" — this operation is the projector of exactly that one canonical form, never a second style.
 - `zero-dependency-projection` | org-layering.md / import-stratification.md | v1 | .claude/rules/import-stratification.md | Applies to why this operation carries no runtime dependencies. | "scripts can import scripts and src." A pure deterministic text projector needs no further script or src composition, so it declares zero dependencies rather than importing capability it does not need.
@@ -19,6 +19,8 @@
 - `node-esm-operation` | Node.js | v24.2.0+ | https://nodejs.org/docs/v24/api/esm.html | Applies to the .mjs operation, its import.meta.main guard, and downstream package-birth assays. | The package uses one executable ESM operation source file that is eligible for downstream staged package-birth assays.
 ## Open questions
 none
+## Claims
+- `malformed-input-outside-domain` | derived | world | A request or field not of its declared type lies outside the operation's input domain | none | constraint:node-esm-operation; citation:Red Cup reconcile-typed-boundaries skill, a boundary admits only its declared type | Refusing an out-of-domain input is the typed boundary's own behavior, not a further choice
 ## Package
 ```json
 {"packageName":"@red-cup-engineering/project-jsnode-operation-source-from-arguments-service","packageVersion":"0.2.0","license":"MIT","dependencies":{},"devDependencies":{}}

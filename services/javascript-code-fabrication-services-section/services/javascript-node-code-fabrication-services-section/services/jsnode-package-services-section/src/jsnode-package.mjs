@@ -10,13 +10,15 @@ export const JSNODE_PACKAGE_DIALECT_EXAMPLE = `# number-topic
 ## Requirements
 - \`number-result\`: The topic returns typed number results.
 ## Prohibitions
-- \`bad-input\`: Invalid inputs are refused.
+- \`bad-input\`: Invalid inputs are refused. [claims: input-outside-domain]
 ## Laws
 - \`face-equivalence\` | JSNode | v1 | local | Applies to every operation. | Module exports and the optional catalog agree.
 ## Standards
 - \`node-esm\` | Node.js | v24.2.0+ | https://nodejs.org | Applies to package sources. | Sources are ESM.
 ## Open questions
 none
+## Claims
+- \`input-outside-domain\` | derived | world | An input that is not of its declared type lies outside the operation's input domain | none | constraint:node-esm; citation:Red Cup reconcile-typed-boundaries skill, a boundary admits only its declared type | Refusing an out-of-domain input is the typed boundary's own behavior
 ## Package
 \`\`\`json
 {"version":2,"topic":"number-topic","packageName":"@red-cup-engineering/number-topic-service","packageVersion":"0.1.0","license":"MIT","dependencies":{},"devDependencies":{}}

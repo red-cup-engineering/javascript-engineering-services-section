@@ -204,6 +204,7 @@ function measuredDependencies(claims, dependencies, line) {
 }
 
 function translateV2(source, lines) {
+  if (!lines.includes("## Claims")) refuse("MISSING_CLAIMS", "a work order states the claims its clauses rest on in a ## Claims section (candidate version 1 is retired)", span(1));
   const modules = lines.includes("## Modules");
   const closure = !lines.includes("## Sources") && !lines.includes("## Tests");
   const claimed = lines.includes("## Claims");
@@ -235,8 +236,8 @@ function translateV2(source, lines) {
     const acceptance = recordSection("## Acceptance obligations");
     if (!Array.isArray(acceptance.value) || acceptance.value.length === 0) refuse("MISSING_ACCEPTANCE_OBLIGATIONS", "a module order must state its receiving obligations", acceptance.sourceSpan);
     const acceptanceObligations = acceptance.value.map(value => {
-      exactKeys(value, claimed ? ["id", "kind", "statement", "claimIds"] : ["id", "kind", "statement"], "acceptance obligation", acceptance.sourceSpan.startLine);
-      return { type: "ArtifactFabricationAcceptanceObligation", version: claimed ? 2 : 1, ...(claimed ? { parameters: [], claimIds: value.claimIds } : {}), id: slug(value.id, "acceptance obligation ID", acceptance.sourceSpan.startLine), kind: nonempty(value.kind, "acceptance obligation kind", acceptance.sourceSpan.startLine), statement: nonempty(value.statement, "acceptance obligation statement", acceptance.sourceSpan.startLine), sourceSpan: acceptance.sourceSpan };
+      exactKeys(value, Object.hasOwn(value, "claimIds") ? ["id", "kind", "statement", "claimIds"] : ["id", "kind", "statement"], "acceptance obligation", acceptance.sourceSpan.startLine);
+      return { type: "ArtifactFabricationAcceptanceObligation", version: claimed ? 2 : 1, ...(claimed ? { parameters: [], claimIds: value.claimIds ?? [] } : {}), id: slug(value.id, "acceptance obligation ID", acceptance.sourceSpan.startLine), kind: nonempty(value.kind, "acceptance obligation kind", acceptance.sourceSpan.startLine), statement: nonempty(value.statement, "acceptance obligation statement", acceptance.sourceSpan.startLine), sourceSpan: acceptance.sourceSpan };
     });
     const coveredIds = new Set([...requirements, ...prohibitions].map(value => value.id));
     const constraintIds = new Set(constraintsValue.map(value => value.id));
@@ -330,7 +331,8 @@ export function translateMarkdownJsnodeOperationPackageSpecification(request) {
     const lines = source.text.replace(/\r\n/gu, "\n").split("\n");
     if (lines.at(-1) === "") lines.pop();
     if (lines.includes("## Modules") || lines.includes("## Sources") || lines.includes("## Operations")) return translateV2(source, lines);
-    const claimed = lines.includes("## Claims");
+    if (!lines.includes("## Claims")) refuse("MISSING_CLAIMS", "a work order states the claims its clauses rest on in a ## Claims section (candidate version 1 is retired)", span(1));
+    const claimed = true;
     const headings = withClaims(claimed, ["# ", "## Requirements", "## Prohibitions", "## Laws", "## Standards", "## Open questions", "## Package", "## Operation", "## Tests", "## Examples", "## Traceability"]);
     if (!lines[0]?.startsWith("# ")) refuse("MISSING_TITLE", "line 1 must be the Markdown title", span(1));
     const atxHeadings = lines.map((line, index) => ({ line, index })).filter(({ line }) => /^#{1,6} /u.test(line));

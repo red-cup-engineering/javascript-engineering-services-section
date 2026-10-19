@@ -187,7 +187,7 @@ test("blocking open questions refuse before JSNode package birth and leave the d
   const root = await mkdtemp(path.join("/tmp", "markdown-jsnode-package-blocked-"));
   const destination = path.join(root, "greet-person-service");
   try {
-    const blocked = fixture.replace("none\n## Package", "- `license-choice` [blocking]: Decide the license.\n## Package");
+    const blocked = fixture.replace("none\n## Claims", "- `license-choice` [blocking]: Decide the license.\n## Claims");
     const result = await fabricateMarkdownJsnodeOperationPackage(request(blocked, destination));
     assert.equal(result.type, "MarkdownJsnodeOperationPackageFabricationRefusal");
     assert.equal(result.phase, "artifact-specification-admission");

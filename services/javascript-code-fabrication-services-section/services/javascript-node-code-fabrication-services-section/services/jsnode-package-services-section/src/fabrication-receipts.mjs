@@ -58,7 +58,7 @@ export function admitMarkdownJsnodeOperationPackageFabricationReceipt(receipt) {
     throw receiptAdmissionError("MISSING_ARTIFACT_SPECIFICATION", "fabrication receipt has no artifact specification");
   }
   const { type, version, specificationDigest, ...specificationCandidate } = specification;
-  const admittedSpecification = admitArtifactFabricationSpecification({ type: "ArtifactFabricationSpecificationCandidate", version, ...specificationCandidate });
+  const admittedSpecification = admitArtifactFabricationSpecification({ type: "ArtifactFabricationSpecificationCandidate", version, ...specificationCandidate }, { admittedDigest: specificationDigest });
   if (admittedSpecification.type !== "ArtifactFabricationSpecification" || admittedSpecification.specificationDigest !== specificationDigest) {
     throw receiptAdmissionError("INVALID_ARTIFACT_SPECIFICATION", "fabrication receipt has an unadmitted artifact specification", admittedSpecification);
   }
@@ -73,7 +73,7 @@ export function admitMarkdownJsnodeOperationPackageFabricationReceipt(receipt) {
       throw receiptAdmissionError("MISSING_WORK_ORDER_SPECIFICATION", "derived fabrication must retain the source-free admitted work order");
     }
     const { type: orderType, version: orderVersion, specificationDigest: orderDigest, ...orderCandidate } = order;
-    const admittedOrder = admitArtifactFabricationSpecification({ type: "ArtifactFabricationSpecificationCandidate", version: orderVersion, ...orderCandidate });
+    const admittedOrder = admitArtifactFabricationSpecification({ type: "ArtifactFabricationSpecificationCandidate", version: orderVersion, ...orderCandidate }, { admittedDigest: orderDigest });
     // Projecting away only generated sources and tests must recover exactly the
     // admitted order. All requirements, constraints, examples and dependencies
     // remain part of its identity; provider output cannot change them.
@@ -83,7 +83,7 @@ export function admitMarkdownJsnodeOperationPackageFabricationReceipt(receipt) {
       projections: admittedSpecification.projections.map((projection) => ({
         ...projection, configuration: { ...projection.configuration, sources: [], tests: [] },
       })),
-    });
+    }, { admittedDigest: orderDigest });
     if (admittedOrder.type !== "ArtifactFabricationSpecification" || admittedOrder.specificationDigest !== orderDigest
       || receipt.derivation.workOrderSpecificationDigest !== orderDigest
       || recoveredOrder.type !== "ArtifactFabricationSpecification" || recoveredOrder.specificationDigest !== orderDigest) {
