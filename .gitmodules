@@ -1,0 +1,52 @@
+[submodule "check-stale-references-app"]
+	path = apps/check-stale-references-app
+	url = https://github.com/red-cup-engineering/check-stale-references-app.git
+	branch = main
+[submodule "transform-json-schema-to-typescript-service"]
+	path = services/transform-json-schema-to-typescript-service
+	url = https://github.com/red-cup-engineering/transform-json-schema-to-typescript-service.git
+	branch = main
+[submodule "software-mission-customer-induction-service"]
+	path = services/software-mission-customer-induction-service
+	url = https://github.com/red-cup-engineering/software-mission-customer-induction-service.git
+	branch = main
+[submodule "software-mission-action-record-parser-service"]
+	path = services/software-mission-action-record-parser-service
+	url = https://github.com/red-cup-engineering/software-mission-action-record-parser-service.git
+	branch = main
+[submodule "software-edit-language-service"]
+	path = services/software-edit-language-service
+	url = https://github.com/red-cup-engineering/software-edit-language-service.git
+	branch = main
+[submodule "sandbox-command-execution-service"]
+	path = services/sandbox-command-execution-service
+	url = https://github.com/red-cup-engineering/sandbox-command-execution-service.git
+	branch = main
+[submodule "jsnode-observation-service"]
+	path = services/jsnode-observation-service
+	url = https://github.com/red-cup-engineering/jsnode-observation-service.git
+	branch = main
+[submodule "javascript-normalization-services-section"]
+	path = services/javascript-normalization-services-section
+	url = https://github.com/red-cup-engineering/javascript-normalization-services-section.git
+	branch = main
+[submodule "javascript-node-services-section"]
+	path = services/javascript-node-services-section
+	url = https://github.com/red-cup-engineering/javascript-node-services-section.git
+	branch = main
+[submodule "javascript-file-services-section"]
+	path = services/javascript-file-services-section
+	url = https://github.com/red-cup-engineering/javascript-file-services-section.git
+	branch = main
+[submodule "javascript-code-fabrication-services-section"]
+	path = services/javascript-code-fabrication-services-section
+	url = https://github.com/red-cup-engineering/javascript-code-fabrication-services-section.git
+	branch = main
+[submodule "javascript-code-analysis-services-section"]
+	path = services/javascript-code-analysis-services-section
+	url = https://github.com/red-cup-engineering/javascript-code-analysis-services-section.git
+	branch = main
+[submodule "deno-services-section"]
+	path = services/deno-services-section
+	url = https://github.com/red-cup-engineering/deno-services-section.git
+	branch = main
