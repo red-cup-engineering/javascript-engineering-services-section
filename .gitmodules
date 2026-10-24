@@ -28,25 +28,25 @@
 	branch = main
 [submodule "javascript-normalization-services-section"]
 	path = services/javascript-normalization-services-section
-	url = https://github.com/red-cup-engineering/javascript-normalization-services-section.git
+	url = https://github.com/red-cup-engineering/javascript-normalization-engineering-services-section.git
 	branch = main
 [submodule "javascript-node-services-section"]
 	path = services/javascript-node-services-section
-	url = https://github.com/red-cup-engineering/javascript-node-services-section.git
+	url = https://github.com/red-cup-engineering/javascript-node-engineering-services-section.git
 	branch = main
 [submodule "javascript-file-services-section"]
 	path = services/javascript-file-services-section
-	url = https://github.com/red-cup-engineering/javascript-file-services-section.git
+	url = https://github.com/red-cup-engineering/javascript-file-engineering-services-section.git
 	branch = main
 [submodule "javascript-code-fabrication-services-section"]
 	path = services/javascript-code-fabrication-services-section
-	url = https://github.com/red-cup-engineering/javascript-code-fabrication-services-section.git
+	url = https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section.git
 	branch = main
 [submodule "javascript-code-analysis-services-section"]
 	path = services/javascript-code-analysis-services-section
-	url = https://github.com/red-cup-engineering/javascript-code-analysis-services-section.git
+	url = https://github.com/red-cup-engineering/javascript-code-analysis-engineering-services-section.git
 	branch = main
 [submodule "deno-services-section"]
 	path = services/deno-services-section
-	url = https://github.com/red-cup-engineering/deno-services-section.git
+	url = https://github.com/red-cup-engineering/deno-engineering-services-section.git
 	branch = main
