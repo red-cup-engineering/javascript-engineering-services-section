@@ -28,9 +28,9 @@
   },
   "dependencies": {
     "@red-cup-engineering/computer-content-graph-engineering-services-section": "workspace:*",
-    "@red-cup-engineering/javascript-file-import-engineering-services-section": "workspace:*",
-    "@red-cup-engineering/javascript-node-engineering-services-section": "workspace:*",
-    "@red-cup-engineering/javascript-normalization-engineering-services-section": "workspace:*"
+    "@red-cup-engineering/javascript-file-import-services-section": "workspace:*",
+    "@red-cup-engineering/javascript-node-services-section": "workspace:*",
+    "@red-cup-engineering/javascript-normalization-services-section": "workspace:*"
   },
   "engines": {
     "node": ">=24"
