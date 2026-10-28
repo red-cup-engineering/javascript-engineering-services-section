@@ -88,10 +88,10 @@ continues to own those downstream obligations.
 
 The incumbent Gitlink under
 `services/javascript-code-fabrication-services-section` names original
-source `d7db96c44f21a4a95783b46c7d44094cbb497997`, whose
+source `d61b7527ba28aa9f07849abb2c5301e8d9217523`, whose
 `child-code-receiving` GitHub Actions job independently selected original
 nested Code and JSNode Package Gitlinks and exercised the *actual* clean-installed
-Code consumer (four passing native tests). This JavaScript section's new
+Code consumer (six passing native tests). This JavaScript section's new
 `native-code-fabrication-receiving.yml` authenticates the reviewed Gitlink,
 refuses a foreign `.gitmodules` provider URL, reads that exact child's
 GitHub Actions check-run and requires one completed passing native
@@ -119,3 +119,23 @@ check-run through the existing `native-code-fabrication-receiving.yml`.
 No second source registry, test runner, agent service or customer Work is created.
 Original Computer Code #74 retains host isolation, full installed factory
 and beneficiary settlement obligations.
+
+## Received exact ECMAScript source-to-catalog operation (2026-10-27)
+
+The original JavaScript Code Fabrication parent now selects source
+`d61b7527ba28aa9f07849abb2c5301e8d9217523`. Its
+independently completed [native Code receiving](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section/actions/runs/40629481109)
+checks the exact JSNode Code owner and original maker Gitlinks,
+packs the real original maker `e254fca3be3d67668b5dc5bce0fe215b66750fe1`,
+and clean-installs it into the Code consumer for six real native tests.
+
+Those tests now include source-to-catalog ECMAScript export correctness
+for default/reserved/dollar-sign exports and rejection of source-shaped
+comments or malformed syntax before an implementation is received.
+The existing JavaScript Engineering `original-code-receiving` check
+reads the immutable child's successful GitHub Actions result instead
+of spending another npm install, another test runner or another
+manually synchronized Git revision. No new WorkCell or parser is
+created here. Root Code Engineering still owes native root CI
+execution, actual isolated host source fabrication, original
+Work/SignChain authority and beneficiary settlement.
