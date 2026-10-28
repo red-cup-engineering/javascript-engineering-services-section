@@ -70,12 +70,12 @@ no longer holds it; that location now only handles the registry lifecycle
 ## Original Code fabrication selection (2026-10-27)
 
 The existing `services/javascript-code-fabrication-services-section`
-gitlink selects source `bbbb946883ea012cde7ff58bc60d8c2b1406a689`. Its original child
+gitlink selects source `7d18a6fa7f89a9f90fe023c2b9cd1021e21b2054`. Its original child
 selects JavaScript Node Code Fabrication
-`6a3474be2b558397ef69f6addb1288c0b0e8dbfb`, whose
-[complete native source-to-Code workflow](https://github.com/red-cup-engineering/javascript-node-code-fabrication-engineering-services-section/actions/runs/40616054276)
+`2741a43881d30860dc1669355be3a13f6bad0bac`, whose
+[complete native source-to-Code workflow](https://github.com/red-cup-engineering/javascript-node-code-fabrication-engineering-services-section/actions/runs/40626229293)
 independently passed on merged main, including an exact JSNode Package
-producer `f039a4fd4f3fc844fc7aa7455dd16f38ebf1cd77`
+producer `7a13bfe1c5ad7287d4c7631564ef7e0f3bc49fbf`
 installed as an npm archive into a clean Code consumer. The consumer actually
 ran positive, invalid-input, nonmutation, stable-replay and receipt-tampering
 assays. This JavaScript parent contributes **only qualified Git source
@@ -83,3 +83,24 @@ selection**, not another maker, Stage Proof, sandbox, installed runtime,
 consumer Work settlement or economic outcome. The original
 [Code P0 #74](https://github.com/red-cup-engineering/computer-code-engineering-services-section/issues/74)
 continues to own those downstream obligations.
+
+## Native Code-source receiving without re-running the same fabrication test
+
+The incumbent Gitlink under
+`services/javascript-code-fabrication-services-section` names original
+source `7d18a6fa7f89a9f90fe023c2b9cd1021e21b2054`, whose
+`child-code-receiving` GitHub Actions job independently selected original
+nested Code and JSNode Package Gitlinks and exercised the *actual* clean-installed
+Code consumer (four passing native tests). This JavaScript section's new
+`native-code-fabrication-receiving.yml` authenticates the reviewed Gitlink,
+refuses a foreign `.gitmodules` provider URL, reads that exact child's
+GitHub Actions check-run and requires one completed passing native
+`child-code-receiving` result for the selected immutable SHA.
+
+It reuses the original downstream executable receipt rather than duplicating
+supplier code/tests, another package registry or a second WorkCell. This
+source-custody read is not an original buyer's proof of functioning software,
+an installed MetroPlat executor, a signed SignChain outcome, production
+sandbox isolation or economic settlement. Root Computer Code Engineering
+must independently select this section and remains subject to its existing
+unrecovered root CI job-start problem.
