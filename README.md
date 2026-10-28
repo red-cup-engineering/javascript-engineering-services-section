@@ -70,12 +70,12 @@ no longer holds it; that location now only handles the registry lifecycle
 ## Original Code fabrication selection (2026-10-27)
 
 The existing `services/javascript-code-fabrication-services-section`
-gitlink selects source `7d18a6fa7f89a9f90fe023c2b9cd1021e21b2054`. Its original child
+gitlink selects source `d7db96c44f21a4a95783b46c7d44094cbb497997`. Its original child
 selects JavaScript Node Code Fabrication
-`2741a43881d30860dc1669355be3a13f6bad0bac`, whose
+`1725668beb6e71a78432c4df2a2691a0bcc0a7bb`, whose
 [complete native source-to-Code workflow](https://github.com/red-cup-engineering/javascript-node-code-fabrication-engineering-services-section/actions/runs/40626229293)
 independently passed on merged main, including an exact JSNode Package
-producer `7a13bfe1c5ad7287d4c7631564ef7e0f3bc49fbf`
+producer `5ea672ea74d1395e2bcc9d7d8bf28562970773fe`
 installed as an npm archive into a clean Code consumer. The consumer actually
 ran positive, invalid-input, nonmutation, stable-replay and receipt-tampering
 assays. This JavaScript parent contributes **only qualified Git source
@@ -88,7 +88,7 @@ continues to own those downstream obligations.
 
 The incumbent Gitlink under
 `services/javascript-code-fabrication-services-section` names original
-source `7d18a6fa7f89a9f90fe023c2b9cd1021e21b2054`, whose
+source `d7db96c44f21a4a95783b46c7d44094cbb497997`, whose
 `child-code-receiving` GitHub Actions job independently selected original
 nested Code and JSNode Package Gitlinks and exercised the *actual* clean-installed
 Code consumer (four passing native tests). This JavaScript section's new
@@ -104,3 +104,18 @@ an installed MetroPlat executor, a signed SignChain outcome, production
 sandbox isolation or economic settlement. Root Computer Code Engineering
 must independently select this section and remains subject to its existing
 unrecovered root CI job-start problem.
+
+## Received literal TAP names through the qualified child maker (2026-10-27)
+
+The original Code Fabrication source now selects child `d7db96c44f21a4a95783b46c7d44094cbb497997`, with
+the independently accepted source receiver [PR #3](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section/pull/3)
+and successful native
+[Node 24 job](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section/actions/runs/40628837237).
+Its verified original JSNode maker `5ea672ea74d1395e2bcc9d7d8bf28562970773fe` refuses unreportable
+hash and backslash assay names before paid implementation-source inference.
+The child recursively installed the real maker into a clean original Code
+recipient; this parent only receives its immutable source and GitHub Actions
+check-run through the existing `native-code-fabrication-receiving.yml`.
+No second source registry, test runner, agent service or customer Work is created.
+Original Computer Code #74 retains host isolation, full installed factory
+and beneficiary settlement obligations.
