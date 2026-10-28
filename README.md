@@ -139,3 +139,33 @@ manually synchronized Git revision. No new WorkCell or parser is
 created here. Root Code Engineering still owes native root CI
 execution, actual isolated host source fabrication, original
 Work/SignChain authority and beneficiary settlement.
+
+## Restored source-bound Design-to-Code continuation and native receiving
+
+The original JavaScript Code child now selects Gitlink revision
+`0cd9c947d970851e6ef36c6bef8bbe9f7a1d3fa0`,
+which independently received original Code
+`ab8b9829f2651ddeb41ca6adca4544f62c31d8b2` after the
+mistaken rollback was corrected. Original child Code PR #14 remains
+present: the Specification-owned HLD/LLD and Code-work source reader
+produces source-pinned executable adapters and requirement-traced
+test cases; its unchanged four-case source-mismatch, behavioral
+disagreement and corrected-retest native consumer passed both source
+and separately packed Code library receiving.
+
+The parent JavaScript Code Fabrication
+[PR #5](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section/pull/5)
+and [main run 40738032272](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section/actions/runs/40738032272)
+authenticate the exact original Code producer's native CI success and
+run the original JSNode Code-owner behavior suite after independently
+packing and installing the genuine maker. The existing
+`native-code-fabrication-receiving.yml` in this repository now
+receives that exact JavaScript Code parent through its original
+completed GitHub Actions check. No duplicate Code factory or manual
+copy of a downstream source revision is introduced.
+
+Authentic Engineering Stage Proof, operating isolated Work, publisher
+version compatibility, original customer delivery and economic
+settlement remain distinct unresolved obligations. The still-blocked
+root Code CI may not be reported as passing because these child CI
+receipts passed.
