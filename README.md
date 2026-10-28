@@ -66,3 +66,20 @@ Its former location, beneath this section's
 `services/javascript-node-services-section/services/jsnode-packaging-services-section/services/`,
 no longer holds it; that location now only handles the registry lifecycle
 (versioning, building, and publishing) of packages already created.
+
+## Original Code fabrication selection (2026-10-27)
+
+The existing `services/javascript-code-fabrication-services-section`
+gitlink selects source `bbbb946883ea012cde7ff58bc60d8c2b1406a689`. Its original child
+selects JavaScript Node Code Fabrication
+`6a3474be2b558397ef69f6addb1288c0b0e8dbfb`, whose
+[complete native source-to-Code workflow](https://github.com/red-cup-engineering/javascript-node-code-fabrication-engineering-services-section/actions/runs/40616054276)
+independently passed on merged main, including an exact JSNode Package
+producer `f039a4fd4f3fc844fc7aa7455dd16f38ebf1cd77`
+installed as an npm archive into a clean Code consumer. The consumer actually
+ran positive, invalid-input, nonmutation, stable-replay and receipt-tampering
+assays. This JavaScript parent contributes **only qualified Git source
+selection**, not another maker, Stage Proof, sandbox, installed runtime,
+consumer Work settlement or economic outcome. The original
+[Code P0 #74](https://github.com/red-cup-engineering/computer-code-engineering-services-section/issues/74)
+continues to own those downstream obligations.
