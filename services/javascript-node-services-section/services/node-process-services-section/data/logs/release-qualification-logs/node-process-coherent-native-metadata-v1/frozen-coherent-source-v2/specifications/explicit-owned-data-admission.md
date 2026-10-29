@@ -1,0 +1,21 @@
+# Explicit owned-data metadata admission
+
+Source owner: NodeProcess `./config`. Receiving need: BCF issue93; original CDE receiveOwnerDataRoot/receiveOwnedDataDestination APIs and NodeProcess final section-owner validation. This is one shared rule, with distinct section-root and data-directory adapters.
+
+## Requirements
+
+`receiveServicesSectionDataRoot(sectionRoot)` accepts only an explicit nonempty absolute canonical native path without CR, LF or NUL characters. It returns that same string after the original section/data ancestry validator receives it. The section must exist; its immediate data/ may be absent. No environment, argv, config file or cwd can select another root at this boundary. The existing processDataRootConfig resolver retains its complete earlier precedence, normalization, private validator behavior and immutable result.
+
+`receiveOwnerDataRoot(ownerDataRoot)` receives an existing real section/data directory and returns that exact data-directory string. It calls the same section validator and retains CDE's convention; it does not reinterpret data/ as a section.
+
+`receiveOwnedDataDestination(ownerDataRoot,destination,{kind='directory',label='data destination'}={})` receives a canonical absolute destination strictly inside that existing owner data directory. Kind is directory or file. Missing descendant paths are allowed without creation; an existing target has the requested kind and no existing target/ancestor may redirect. The result is the original destination. The data-directory adapter first applies the shared pure owner-path shape check, retaining TypeError for invalid owner shapes even when missing. It then retains original filesystem ENOENT/ENOTDIR/EACCES for valid-shaped owner/data paths before shared ancestry receiving; no errno is translated into a successful path. Confinement uses native path operations, not a platform-specific slash prefix.
+
+These functions inspect metadata only. They confer no owner jurisdiction, audience, permission, storage reservation or effect authority and do not implement semantic filing. Callers select the owning section and correct typed logs/records/state location, rereceive immediately before the effect, and retain original exclusive creation/lease/replay rules. This is neither a sandbox nor a TOCTOU/exclusive-access guarantee. Historical read-only inputs are not silently changed into new write destinations.
+
+## Design and compatibility
+
+Expose a strict explicit-input boundary over the original private section validator. Factor that original semantic validator into pure path-shape then ancestry/data metadata phases, preserving its order and diagnostics for the process resolver. The public section receiver calls both; the existing data-directory adapter places its original lstat/realpath between those same phases. Keep the semantic implementation private to the process resolver as well; do not make the resolver read a fabricated config filename or ambient input to validate an already-selected binding. Reuse the original CDE metadata walk for the data-directory and destination adapters. A native relative path rejects escape, self and sibling-prefix paths, while the existing lstat/realpath walk receives existing parents when descendants are missing. No new dependency or generated artifact is needed.
+
+The public API is additive; valid existing process resolver calls retain their behavior. Version and dev runner selection belong to the existing coordinated release producer and are not changed by this source proposal. Existing 49 source cases remain untouched. The new dependency-free tests cover explicit binding vs config, raw inputs, owner/data ancestry, section/data distinction, native confinement, existing kind and missing descendants, and redirected target/parents. Fixtures live only under this source's data/logs/shared-data-admission-test-logs and cleanup checks their owned directory identity.
+
+The actual initially qualified OS context is Linux/WSL with Node24.18; no other operating-host receipt is implied. Complete native/package/registry/installed consumers, CDE forward use and CSE/GHS adoption remain separate. Family completion requires original CDE adapters, CSE and GHS all consuming the qualified published APIs with no competing copied rule. Native World/office/host uptake is still held.
