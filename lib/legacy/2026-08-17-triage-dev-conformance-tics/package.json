@@ -1,0 +1,34 @@
+{
+  "name": "@emsenn/conformance-tics",
+  "version": "0.0.1",
+  "type": "module",
+  "keywords": [
+    "decommissioned",
+    "triage"
+  ],
+  "description": "Live package-conformance service: runs conformance checks on demand for paths registered at startup.",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "serve": "node src/server.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "conformance-tics": "./src/server.ts"
+  },
+  "dependencies": {
+    "@emsenn/jsnode-ick": "workspace:*",
+    "@emsenn/http-server": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0"
+  },
+  "sideEffects": false
+}
