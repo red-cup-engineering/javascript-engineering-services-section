@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "projectJavascriptArgvTailOutput",
+  "type": "object",
+  "description": "An immutable JavascriptArgvTail@1 carrying only the user arguments."
+}
