@@ -1,0 +1,19 @@
+{
+  "name": "@red-cup-engineering/javascript-node-command-execution-services-section",
+  "version": "0.1.0",
+  "description": "Exports the Node.js command-execution actuator and its immutable receipt projection.",
+  "type": "module",
+  "exports": "./scripts/registry.mjs",
+  "files": ["scripts", "package.json", "README.md"],
+  "dependencies": {
+    "@red-cup-engineering/execute-javascript-node-command-service": "0.1.0",
+    "@red-cup-engineering/project-javascript-node-command-execution-receipt-service": "0.1.0"
+  },
+  "scripts": {
+    "check": "node --check scripts/registry.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": { "node": ">=22" }
+}

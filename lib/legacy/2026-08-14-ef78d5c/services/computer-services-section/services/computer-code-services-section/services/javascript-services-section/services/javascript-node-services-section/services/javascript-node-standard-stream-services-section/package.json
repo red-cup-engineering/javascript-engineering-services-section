@@ -1,0 +1,19 @@
+{
+  "name": "@red-cup-engineering/javascript-node-standard-stream-services-section",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Owns independently addressable Node.js standard-stream text effects.",
+  "exports": "./scripts/registry.mjs",
+  "files": ["scripts", "package.json", "README.md"],
+  "dependencies": {
+    "@red-cup-engineering/read-javascript-node-standard-input-text-service": "0.1.0",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.1.0"
+  },
+  "scripts": {
+    "check": "node --check scripts/registry.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": { "node": ">=22" }
+}

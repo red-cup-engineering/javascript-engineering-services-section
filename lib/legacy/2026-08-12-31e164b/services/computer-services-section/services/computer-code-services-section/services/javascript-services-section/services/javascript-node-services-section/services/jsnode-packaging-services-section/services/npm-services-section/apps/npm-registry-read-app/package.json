@@ -1,0 +1,32 @@
+{
+  "name": "@red-cup-engineering/npm-registry-read-app",
+  "version": "1.0.0",
+  "description": "Deploys the read-only HTTP face for a built npm registry.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "exports": "./src/npm-registry-read-app.mjs",
+  "bin": {
+    "serve-npm-registry-read": "./scripts/serve-npm-registry-read.mjs"
+  },
+  "files": [
+    "src",
+    "scripts",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "verify": "node --check src/npm-registry-read-app.mjs && node --check scripts/serve-npm-registry-read.mjs && node --test test/*.test.mjs && npm pack --dry-run"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@red-cup-engineering/npm-registry-read-service": "1.0.0"
+  }
+}

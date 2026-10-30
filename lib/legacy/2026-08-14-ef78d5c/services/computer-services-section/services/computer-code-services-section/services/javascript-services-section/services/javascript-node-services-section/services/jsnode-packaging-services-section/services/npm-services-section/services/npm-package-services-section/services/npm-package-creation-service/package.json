@@ -1,0 +1,30 @@
+{
+  "name": "@red-cup-engineering/npm-package-creation-service",
+  "version": "0.0.1",
+  "description": "Creates a new npm package: a directory holding the package.json described by explicit arguments. Refuses to write over an existing package directory.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./src/create-npm-package.mjs",
+  "files": [
+    "src",
+    "scripts",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "bin": {
+    "create-npm-package": "scripts/create-npm-package.mjs"
+  },
+  "scripts": {
+    "check": "node --check src/create-npm-package.mjs && node --check scripts/create-npm-package.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

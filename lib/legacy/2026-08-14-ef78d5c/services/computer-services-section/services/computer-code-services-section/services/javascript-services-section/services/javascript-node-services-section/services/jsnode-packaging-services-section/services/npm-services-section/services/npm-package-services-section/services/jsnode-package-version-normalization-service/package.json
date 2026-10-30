@@ -1,0 +1,22 @@
+{
+  "name": "@red-cup-engineering/jsnode-package-version-normalization-service",
+  "version": "0.1.0",
+  "description": "Normalizes a candidate JSNode package version to an exact three-part numeric version with the repository fallback.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/normalize-jsnode-package-version.mjs",
+  "bin": { "normalize-jsnode-package-version": "./scripts/normalize-jsnode-package-version.mjs" },
+  "files": ["scripts", "package.json"],
+  "dependencies": {
+    "@red-cup-engineering/parse-javascript-argv-service": "0.1.0",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.1.0"
+  },
+  "scripts": {
+    "check": "node --check scripts/normalize-jsnode-package-version.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": { "node": ">=22" }
+}

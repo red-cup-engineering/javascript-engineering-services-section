@@ -1,0 +1,32 @@
+{
+  "name": "@red-cup-engineering/resolve-javascript-node-file-import-service",
+  "version": "0.1.0",
+  "description": "Resolves one relative JavaScript file import to an existing JSNode module filepath or an explicit refusal.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/resolve-javascript-node-file-import.mjs",
+  "bin": {
+    "resolve-javascript-node-file-import": "./scripts/resolve-javascript-node-file-import.mjs"
+  },
+  "files": [
+    "scripts",
+    "package.json"
+  ],
+  "dependencies": {
+    "@red-cup-engineering/json-codec-service": "0.1.4",
+    "@red-cup-engineering/project-filepath-directory-service": "0.1.0",
+    "@red-cup-engineering/read-javascript-node-standard-input-text-service": "0.1.0",
+    "@red-cup-engineering/resolve-filepath-service": "0.1.0",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.1.0"
+  },
+  "scripts": {
+    "check": "node --check scripts/resolve-javascript-node-file-import.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

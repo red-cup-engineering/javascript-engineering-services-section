@@ -1,0 +1,30 @@
+{
+  "name": "@red-cup-engineering/convert-javascript-file-import-to-registry-import-service",
+  "version": "0.1.0",
+  "description": "Converts one established cross-package JavaScript file import into one registry-import text edit.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/convert-javascript-file-import-to-registry-import.mjs",
+  "bin": {
+    "convert-javascript-file-import-to-registry-import": "./scripts/convert-javascript-file-import-to-registry-import.mjs"
+  },
+  "files": [
+    "scripts",
+    "package.json"
+  ],
+  "dependencies": {
+    "@red-cup-engineering/json-codec-service": "0.1.4",
+    "@red-cup-engineering/read-javascript-node-standard-input-text-service": "0.1.0",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.1.0"
+  },
+  "scripts": {
+    "check": "node --check scripts/convert-javascript-file-import-to-registry-import.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

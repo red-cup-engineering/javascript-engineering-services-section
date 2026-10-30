@@ -1,0 +1,30 @@
+{
+  "name": "@red-cup-engineering/npm-package-body-observation-service",
+  "version": "1.0.0",
+  "description": "Observes the named JSNode package carriers and active source resources beneath one explicit repository root.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./src/observe-jsnode-package-body.mjs",
+  "files": [
+    "src",
+    "scripts",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "bin": {
+    "observe-jsnode-package-body": "./scripts/observe-jsnode-package-body.mjs"
+  },
+  "scripts": {
+    "check": "node --check src/observe-jsnode-package-body.mjs && node --check scripts/observe-jsnode-package-body.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

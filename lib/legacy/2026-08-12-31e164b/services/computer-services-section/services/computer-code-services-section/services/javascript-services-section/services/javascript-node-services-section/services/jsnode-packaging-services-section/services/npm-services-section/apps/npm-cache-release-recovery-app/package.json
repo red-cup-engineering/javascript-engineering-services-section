@@ -1,0 +1,33 @@
+{
+  "name": "@red-cup-engineering/npm-cache-release-recovery-app",
+  "version": "1.0.0",
+  "description": "Audits explicit npm package-lock evidence against a local npm cache and optionally materializes verified release tarballs.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "exports": "./src/npm-cache-release-recovery-app.mjs",
+  "bin": {
+    "recover-npm-cache-releases": "./scripts/recover-npm-cache-releases.mjs"
+  },
+  "files": [
+    "src",
+    "scripts",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "verify": "node --check src/npm-cache-release-recovery-app.mjs && node --check scripts/recover-npm-cache-releases.mjs && node --test test/*.test.mjs && npm pack --dry-run --ignore-scripts",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=22.9.0"
+  },
+  "dependencies": {
+    "@red-cup-engineering/npm-cache-release-recovery-service": "1.0.0"
+  }
+}
