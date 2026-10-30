@@ -1,4 +1,4 @@
-# JavaScript services section
+# JavaScript Engineering Services Section
 
 <!-- 561-group-standards:badges:start -->
 [![Red Cup Engineering](https://img.shields.io/badge/561%20Group-Red%20Cup%20Engineering-c0392b)](https://github.com/red-cup-engineering)
@@ -7,165 +7,47 @@
 [![Tips welcome](https://img.shields.io/badge/tips-welcome-d4a017)](https://github.com/561-group/.github/blob/main/TIPS.md)
 <!-- 561-group-standards:badges:end -->
 
-This is the authoritative repository section for material whose subject is the
-JavaScript ecosystem: JavaScript and TypeScript source structure, Node.js and
-Deno runtimes, npm packages and registries, pnpm workspaces, and the local
-JSNode model.
+This is Red Cup Engineering's source owner for reusable work **about the JavaScript ecosystem**: JavaScript and TypeScript source, Node.js and Deno, package and workspace structure, and JSNode. A program merely *written in JavaScript* remains with the engineering section that owns its actual subject.
 
-## Topology
+This section provides cross-cutting source readers and composes separately owned services. It does not own every runtime, compiler, registry, publisher, or application that uses JavaScript.
 
-- `services/` contains live services: `deno-services-section/` (Deno runtime
-  work), `javascript-code-analysis-services-section/` (tooling that reads
-  JavaScript/TypeScript source into category-theoretic carriers, without
-  generating or fabricating code), `javascript-file-services-section/`,
-  `javascript-node-services-section/` (Node.js work — npm and pnpm package
-  and registry services live nested beneath it, at
-  `javascript-node-services-section/services/jsnode-packaging-services-section/services/`),
-  and `javascript-normalization-services-section/`.
-- `javascript-node-services-section/` also holds
-  `node-runtime-authority-services-section/` (Node/npm package-authority and
-  runtime-release tooling) and `jsnode-workspace-analysis-services-section/`
-  (tooling that reads an existing JS/Node workspace into relational carriers
-  — package facts, dependency topology, serialization — without generating
-  or fabricating code), alongside its original children.
-- `content/text/documents/articles/notes/` contains current notes and research,
-  organized by publication date.
-- `lib/legacy/` contains historical implementations. They are evidence and
-  training material, not workspace authority.
+## Maintained source
 
-The former live sections at
-`computer-code-development-services-section/services/javascript-engineering-services-section`
-and `computer-code-development-services-section/services/jsnode-services-section`
-were merged here on 2026-08-10. They must not be recreated as competing
-authorities.
+The [package manifest](package.json) defines the current exported interfaces and Node.js requirement (24 or later). The section's directly maintained logic is in `src/`, its command entry points in `scripts/`, and its bounded behavioral checks in `test/`.
 
-## Section-level transformations
+- `./import-lattice` checks local JavaScript imports against the source → scripts → application composition order. Package-import authority belongs to the package dependency graph, not this local-file check.
+- `./package-import-lattice` reads package import relationships under their own declared constraints.
+- `./executable-readiness` assesses an existing executable catalog; it does not fabricate an executable.
+- `./project-capability-graph` projects package scripts and local source imports into an operations graph. It is a source observation, not a runtime-capability grant.
+- `./review-package` reviews an existing JavaScript package through the maintained reader.
 
-The section directly owns three transformations that apply across its child
-services: the `src`/`scripts`/`apps` import lattice, an executable-catalog
-readiness assessment, and a bounded projection of executable scripts and local
-imports into an operations graph. Their reusable modules live in `src/`, their
-command faces in `scripts/`, and their behavioral assays in `test/`.
+The corresponding command-line entries are in [`scripts/`](scripts/) and the tests in [`test/`](test/). `npm test` runs the package's declared Node tests when its workspace dependencies are available. A package test is not a native Code Work, Proof, host installation, release or beneficiary acceptance.
 
-These transformations were relocated here from the 561 Group organizational
-services tree. They do not wrap or rename JSNode workspace, package, symbol,
-topology, search, review, description, or move operations; those remain with
-their specific engineering providers.
+## Subsection and supplier custody
 
-The 2026-08-10 consolidation's collation record and reading map — it would
-have lived at
-`content/text/documents/references/2026/08/10/javascript-knowledge-and-code-index.md`
-— was lost during that consolidation and will not be recreated by this
-effort.
+The [`.gitmodules`](.gitmodules) and selected Git tree, not an earlier README's copied commit hashes, identify the child sources this section currently composes. The principal subsection mounts are:
 
-`jsnode-package-services-section` (staging, admitting, and receipting the
-creation of a new JSNode operation package) relocated on 2026-08-20 to the
-fabrication lineage, at
-`engineering-services-section/services/computer-engineering-services-section/services/computer-code-engineering-services-section/services/javascript-engineering-services-section/services/javascript-code-fabrication-services-section/services/javascript-node-code-fabrication-services-section/services/jsnode-package-services-section`.
-Its former location, beneath this section's
-`services/javascript-node-services-section/services/jsnode-packaging-services-section/services/`,
-no longer holds it; that location now only handles the registry lifecycle
-(versioning, building, and publishing) of packages already created.
+- [JavaScript Code Analysis](https://github.com/red-cup-engineering/javascript-code-analysis-engineering-services-section) for source analysis rather than code fabrication;
+- [JavaScript Code Fabrication](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section) for its separately qualified maker and Code receiving;
+- [JavaScript File](https://github.com/red-cup-engineering/javascript-file-engineering-services-section), [JavaScript Node](https://github.com/red-cup-engineering/javascript-node-engineering-services-section) and [JavaScript Normalization](https://github.com/red-cup-engineering/javascript-normalization-engineering-services-section) for their corresponding reusable capabilities;
+- [Deno Engineering](https://github.com/red-cup-engineering/deno-engineering-services-section) for Deno-specific work.
 
-## Original Code fabrication selection (2026-10-27)
+Other directly mounted services, including the source-read and editing suppliers, retain their identities in the same Git tree. The JavaScript Node section's package-management descendants govern the lifecycle of existing packages; Code Fabrication's original source owns creating a new JSNode Code package. The distinction prevents a second maker or registry being built in this parent.
 
-The existing `services/javascript-code-fabrication-services-section`
-gitlink selects source `d7db96c44f21a4a95783b46c7d44094cbb497997`. Its original child
-selects JavaScript Node Code Fabrication
-`1725668beb6e71a78432c4df2a2691a0bcc0a7bb`, whose
-[complete native source-to-Code workflow](https://github.com/red-cup-engineering/javascript-node-code-fabrication-engineering-services-section/actions/runs/40626229293)
-independently passed on merged main, including an exact JSNode Package
-producer `5ea672ea74d1395e2bcc9d7d8bf28562970773fe`
-installed as an npm archive into a clean Code consumer. The consumer actually
-ran positive, invalid-input, nonmutation, stable-replay and receipt-tampering
-assays. This JavaScript parent contributes **only qualified Git source
-selection**, not another maker, Stage Proof, sandbox, installed runtime,
-consumer Work settlement or economic outcome. The original
-[Code P0 #74](https://github.com/red-cup-engineering/computer-code-engineering-services-section/issues/74)
-continues to own those downstream obligations.
+A submodule records **selected source**, not installed host state or downstream use. The directory `lib/legacy/` holds historical material, never an alternative live package.
 
-## Native Code-source receiving without re-running the same fabrication test
+## Native Code fabrication evidence
 
-The incumbent Gitlink under
-`services/javascript-code-fabrication-services-section` names original
-source `d61b7527ba28aa9f07849abb2c5301e8d9217523`, whose
-`child-code-receiving` GitHub Actions job independently selected original
-nested Code and JSNode Package Gitlinks and exercised the *actual* clean-installed
-Code consumer (six passing native tests). This JavaScript section's new
-`native-code-fabrication-receiving.yml` authenticates the reviewed Gitlink,
-refuses a foreign `.gitmodules` provider URL, reads that exact child's
-GitHub Actions check-run and requires one completed passing native
-`child-code-receiving` result for the selected immutable SHA.
+The existing [native Code receiving workflow](.github/workflows/native-code-fabrication-receiving.yml) validates the exact `services/javascript-code-fabrication-services-section` Gitlink, its declared GitHub origin, and one independently completed successful `child-code-receiving` check-run for that selected source SHA. It **reuses** the child's native clean-installed Code-consumer evidence instead of rebuilding the same producer here.
 
-It reuses the original downstream executable receipt rather than duplicating
-supplier code/tests, another package registry or a second WorkCell. This
-source-custody read is not an original buyer's proof of functioning software,
-an installed MetroPlat executor, a signed SignChain outcome, production
-sandbox isolation or economic settlement. Root Computer Code Engineering
-must independently select this section and remains subject to its existing
-unrecovered root CI job-start problem.
+This is a source-receiving check only. It neither fabricates the Code, proves that every requirement is met, runs an isolated production Work, publishes a package, grants a principal authority, nor settles a customer's outcome. The continuing [Computer Code Engineering obligation #74](https://github.com/red-cup-engineering/computer-code-engineering-services-section/issues/74) retains the downstream Stage Proof, execution, installation, source-release and beneficiary-receiving questions. A passing child check cannot substitute for a missing parent or host result.
 
-## Received literal TAP names through the qualified child maker (2026-10-27)
+Historical evidence for earlier child cuts remains at [Code Fabrication PR #3](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section/pull/3), [PR #5](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section/pull/5) and the [native consumer run](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section/actions/runs/40738032272). These are dated receipts; they do not establish the current condition of another revision.
 
-The original Code Fabrication source now selects child `d7db96c44f21a4a95783b46c7d44094cbb497997`, with
-the independently accepted source receiver [PR #3](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section/pull/3)
-and successful native
-[Node 24 job](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section/actions/runs/40628837237).
-Its verified original JSNode maker `5ea672ea74d1395e2bcc9d7d8bf28562970773fe` refuses unreportable
-hash and backslash assay names before paid implementation-source inference.
-The child recursively installed the real maker into a clean original Code
-recipient; this parent only receives its immutable source and GitHub Actions
-check-run through the existing `native-code-fabrication-receiving.yml`.
-No second source registry, test runner, agent service or customer Work is created.
-Original Computer Code #74 retains host isolation, full installed factory
-and beneficiary settlement obligations.
+## Earlier consolidation and research
 
-## Received exact ECMAScript source-to-catalog operation (2026-10-27)
+The August 10 JavaScript/JSNode source collation removed competing live homes under the old computer-code-development tree. The [original August knowledge-and-code index](lib/legacy/2026-08-11-bd3f7f2/services/computer-services-section/services/computer-coding-services-section/services/javascript-services-section/content/documents/references/2026/08/10/javascript-knowledge-and-code-index.md) **is present** in a retained legacy snapshot. It is a historical reading map, not the current repository topology or an instruction to recreate any old subsection.
 
-The original JavaScript Code Fabrication parent now selects source
-`d61b7527ba28aa9f07849abb2c5301e8d9217523`. Its
-independently completed [native Code receiving](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section/actions/runs/40629481109)
-checks the exact JSNode Code owner and original maker Gitlinks,
-packs the real original maker `e254fca3be3d67668b5dc5bce0fe215b66750fe1`,
-and clean-installs it into the Code consumer for six real native tests.
+The earlier README said that this index was lost; the source tree now supplies its exact archived file. It also referred to a current `content/text/documents/articles/notes/` directory that is **not present in this repository**. Read historical notes through their actual surviving sources rather than interpreting those legacy paths as live documentation.
 
-Those tests now include source-to-catalog ECMAScript export correctness
-for default/reserved/dollar-sign exports and rejection of source-shaped
-comments or malformed syntax before an implementation is received.
-The existing JavaScript Engineering `original-code-receiving` check
-reads the immutable child's successful GitHub Actions result instead
-of spending another npm install, another test runner or another
-manually synchronized Git revision. No new WorkCell or parser is
-created here. Root Code Engineering still owes native root CI
-execution, actual isolated host source fabrication, original
-Work/SignChain authority and beneficiary settlement.
-
-## Restored source-bound Design-to-Code continuation and native receiving
-
-The original JavaScript Code child now selects Gitlink revision
-`0cd9c947d970851e6ef36c6bef8bbe9f7a1d3fa0`,
-which independently received original Code
-`ab8b9829f2651ddeb41ca6adca4544f62c31d8b2` after the
-mistaken rollback was corrected. Original child Code PR #14 remains
-present: the Specification-owned HLD/LLD and Code-work source reader
-produces source-pinned executable adapters and requirement-traced
-test cases; its unchanged four-case source-mismatch, behavioral
-disagreement and corrected-retest native consumer passed both source
-and separately packed Code library receiving.
-
-The parent JavaScript Code Fabrication
-[PR #5](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section/pull/5)
-and [main run 40738032272](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section/actions/runs/40738032272)
-authenticate the exact original Code producer's native CI success and
-run the original JSNode Code-owner behavior suite after independently
-packing and installing the genuine maker. The existing
-`native-code-fabrication-receiving.yml` in this repository now
-receives that exact JavaScript Code parent through its original
-completed GitHub Actions check. No duplicate Code factory or manual
-copy of a downstream source revision is introduced.
-
-Authentic Engineering Stage Proof, operating isolated Work, publisher
-version compatibility, original customer delivery and economic
-settlement remain distinct unresolved obligations. The still-blocked
-root Code CI may not be reported as passing because these child CI
-receipts passed.
+Earlier relocations and dated Code-receiving hashes remain recoverable in Git history and their owning PRs. Current architecture and package status must be read from the current repository and selected subsection sources, not a growing copy of previous change logs.
