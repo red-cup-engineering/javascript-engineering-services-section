@@ -1,0 +1,56 @@
+name: JavaScript original Code fabrication receiving
+on:
+  pull_request:
+    paths:
+      - 'services/javascript-code-fabrication-services-section'
+      - 'README.md'
+      - '.github/workflows/native-code-fabrication-receiving.yml'
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  checks: read
+jobs:
+  original-code-receiving:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Select exact reviewed JavaScript source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Native source and independently passed Code-consumer evidence
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          child=services/javascript-code-fabrication-services-section
+          test "$(git config -f .gitmodules --get submodule.javascript-code-fabrication-services-section.url)" = "https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section.git"
+          selected="$(git rev-parse "HEAD:$child")"
+          [[ "$selected" =~ ^[0-9a-f]{40}$ ]]
+          git -c protocol.file.allow=never submodule update --init -- "$child"
+          test "$(git -C "$child" rev-parse HEAD)" = "$selected"
+          # The original child already executes its own packed, clean-installed
+          # behavioral Code consumer. Receive that exact GitHub Actions result
+          # instead of purchasing a duplicate install and test at this level.
+          gh api -H "Accept: application/vnd.github+json" \
+            "repos/red-cup-engineering/javascript-code-fabrication-engineering-services-section/commits/$selected/check-runs?per_page=100" \
+            > "$RUNNER_TEMP/original-code-checks.json"
+          node --input-type=module - "$RUNNER_TEMP/original-code-checks.json" "$selected" <<'NODE'
+          import assert from "node:assert/strict";
+          import { readFileSync } from "node:fs";
+          const [, , file, selected] = process.argv;
+          const received = JSON.parse(readFileSync(file, "utf8"));
+          const accepted = received.check_runs?.filter(check =>
+            check.name === "child-code-receiving" &&
+            check.head_sha === selected &&
+            check.status === "completed" &&
+            check.conclusion === "success" &&
+            check.app?.slug === "github-actions" &&
+            check.details_url?.startsWith("https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section/actions/runs/")
+          ) ?? [];
+          assert.equal(accepted.length, 1, "exact original Gitlink has no independently completed native Code-consumer receipt");
+          console.log("Original child source " + selected + ": GitHub Actions Code consumer received.");
+          NODE
+          echo "Source-pinned external check received; no independent customer Work, deployment, production isolation or package publication inferred."

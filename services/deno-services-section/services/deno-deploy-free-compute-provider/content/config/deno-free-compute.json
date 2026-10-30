@@ -1,0 +1,17 @@
+{
+  "appSlug": "union-free-compute-assay",
+  "productionUrl": "https://union-free-compute-assay.emsenn.deno.net",
+  "requiredOrganizationPlan": "free_verified",
+  "entrypoint": "main.ts",
+  "region": "us",
+  "cloudEnvironmentVariables": 0,
+  "authentication": {
+    "algorithm": "Ed25519",
+    "publicKey": "../request-signing-public.pem",
+    "privateKeyUploaded": false,
+    "maximumAuthorizationAgeSeconds": 900
+  },
+  "operations": ["health", "sha256", "pbkdf2-hmac-sha256"],
+  "durableState": false,
+  "outboundFetch": false
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@red-cup-engineering/pnpm-lifecycle-command-normalization-service",
+  "version": "0.1.0",
+  "description": "Normalizes pnpm invocations in one npm lifecycle command to npm invocations.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/normalize-pnpm-lifecycle-command.mjs",
+  "bin": { "normalize-pnpm-lifecycle-command": "./scripts/normalize-pnpm-lifecycle-command.mjs" },
+  "files": ["scripts", "package.json"],
+  "dependencies": {
+    "@red-cup-engineering/read-javascript-node-standard-input-text-service": "0.1.0",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.1.0"
+  },
+  "scripts": {
+    "check": "node --check scripts/normalize-pnpm-lifecycle-command.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": { "node": ">=22" }
+}

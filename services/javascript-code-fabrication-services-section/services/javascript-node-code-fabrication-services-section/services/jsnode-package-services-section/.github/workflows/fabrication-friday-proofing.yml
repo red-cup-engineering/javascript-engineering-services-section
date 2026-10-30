@@ -1,0 +1,32 @@
+name: Fabrication Friday source receiving
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# New source revisions supersede older proofing runs for the same review.
+# Keep main-release receiving separate from pull-request candidate receiving.
+concurrency:
+  group: fabrication-friday-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  native-source-receiving:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Resolve actual original package dependencies
+        run: npm install --no-audit --no-fund --ignore-scripts
+      - name: Run original kinetic-proofing and connected-module assays
+        run: node --test test/assay-channels.test.mjs test/connected-module-fabrication.test.mjs
+      - name: Run entire existing package test plan
+        run: npm test

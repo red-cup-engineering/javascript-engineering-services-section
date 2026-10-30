@@ -1,0 +1,19 @@
+{
+  "name": "@red-cup-engineering/npm-package-set-services-section",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Holds services that apply singular npm package operations across explicit or observed package collections.",
+  "exports": "./scripts/registry.mjs",
+  "files": ["scripts", "package.json", "README.md"],
+  "dependencies": {
+    "@red-cup-engineering/npm-package-directory-observation-service": "0.1.0",
+    "@red-cup-engineering/read-npm-package-set-info-service": "0.1.0"
+  },
+  "scripts": {
+    "check": "node --check scripts/registry.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": { "node": ">=22" }
+}

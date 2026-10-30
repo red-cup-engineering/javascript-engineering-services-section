@@ -1,0 +1,8 @@
+{
+  "name": "capcell-manifest-fabrication-service",
+  "main": "src/worker.mjs",
+  "compatibility_date": "2026-07-27",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "routes": [{"pattern": "capcell-manifest-fabrication.actions.561.group", "custom_domain": true}]
+}

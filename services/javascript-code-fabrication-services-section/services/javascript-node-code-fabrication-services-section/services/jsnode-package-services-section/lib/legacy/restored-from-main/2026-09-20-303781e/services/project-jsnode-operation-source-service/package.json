@@ -1,0 +1,28 @@
+{
+  "name": "@red-cup-engineering/project-jsnode-operation-source-service",
+  "version": "0.2.0",
+  "description": "Projects an admitted JSNode operation source into its executable future text file.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/project-jsnode-operation-source.mjs",
+  "bin": {
+    "project-jsnode-operation-source": "scripts/project-jsnode-operation-source.mjs"
+  },
+  "files": [
+    "scripts",
+    "package.json"
+  ],
+  "dependencies": {
+    "@red-cup-engineering/javascript-node-services-section": "0.2.0",
+    "@red-cup-engineering/text-file-creation-projection-admission-service": "0.1.1"
+  },
+  "scripts": {
+    "check": "node --check scripts/project-jsnode-operation-source.mjs",
+    "test": "node --test test/*.test.mjs",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=24.2.0"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@red-cup-engineering/project-jsnode-operation-source-from-arguments-service",
+  "version": "0.5.2",
+  "description": "Projects one JsnodeOperationArguments record into canonical JSNode operation source text: shebang, ordered imports, one JSDoc block ahead of the exported function, and a minimal import.meta.main delegation to the shared typed NDJSON operation runtime — a pure, deterministic text projection with no filesystem access.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/project-jsnode-operation-source-from-arguments.mjs",
+  "bin": {
+    "project-jsnode-operation-source-from-arguments": "scripts/project-jsnode-operation-source-from-arguments.mjs"
+  },
+  "files": [
+    "scripts",
+    "README.md",
+    "package.json"
+  ],
+  "dependencies": {
+    "@red-cup-engineering/computer-data-engine": "0.10.0",
+    "@red-cup-engineering/javascript-node-services-section": "0.2.0"
+  },
+  "scripts": {
+    "check": "node --check scripts/project-jsnode-operation-source-from-arguments.mjs",
+    "test": "node --test test/*.test.mjs",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=24.2.0"
+  }
+}

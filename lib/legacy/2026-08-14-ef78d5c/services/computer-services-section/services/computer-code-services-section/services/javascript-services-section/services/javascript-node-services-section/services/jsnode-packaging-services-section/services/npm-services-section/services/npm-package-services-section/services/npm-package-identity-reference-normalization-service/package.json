@@ -1,0 +1,36 @@
+{
+  "name": "@red-cup-engineering/npm-package-identity-reference-normalization-service",
+  "version": "1.0.0",
+  "description": "Pure ordered replacement of admitted npm package identity references in one source resource.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/normalize-jsnode-package-identity-references.mjs",
+  "files": [
+    "scripts",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "bin": {
+    "normalize-jsnode-package-identity-references": "./scripts/normalize-jsnode-package-identity-references.mjs"
+  },
+  "scripts": {
+    "check": "node --check scripts/normalize-jsnode-package-identity-references.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@red-cup-engineering/file-services": "0.2.0",
+    "@red-cup-engineering/json-codec-service": "0.1.4",
+    "@red-cup-engineering/parse-javascript-argv-service": "0.1.0",
+    "@red-cup-engineering/read-javascript-node-standard-input-text-service": "0.1.0",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.1.0"
+  }
+}

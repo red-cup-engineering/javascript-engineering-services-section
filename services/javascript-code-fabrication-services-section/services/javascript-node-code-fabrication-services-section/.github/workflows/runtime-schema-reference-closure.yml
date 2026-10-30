@@ -1,0 +1,179 @@
+name: Native runtime schema-reference closure
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/transform-json-schema-to-typescript.mjs'
+      - 'scripts/project-engineering-design-code.mjs'
+      - 'test/runtime-reference-closure.test.mjs'
+      - 'test/source-reviewed-architecture-fabrication.test.mjs'
+      - 'test/source-reviewed-design-fabrication.test.mjs'
+      - 'test/index.test.mjs'
+      - 'test/jsnode-assay-packed-receiver.mjs'
+      - 'services/jsnode-package-services-section'
+      - 'package.json'
+      - '.github/workflows/runtime-schema-reference-closure.yml'
+  push:
+    branches: [main]
+  merge_group:
+    types: [checks_requested]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualified-reference-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '24'
+      - name: Select the source-and-build-qualified original Specification/Design reader and schema
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: red-cup-engineering/specification-engineering-services-section
+          ref: db52af5115ce9cc12e027d3ec23c42fe5a2a1aa2
+          path: specification-source
+          persist-credentials: false
+      - name: Select original JSNode maker from this exact reviewed Gitlink
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_path=services/jsnode-package-services-section
+          # The original Gitlink is the selection. Never follow a source PR
+          # that substitutes an unrelated remote or mutable branch.
+          test "$(git config -f .gitmodules --get submodule.jsnode-package-services-section.url)" = "https://github.com/red-cup-engineering/jsnode-package-engineering-services-section.git"
+          selected="$(git rev-parse "HEAD:$source_path")"
+          [[ "$selected" =~ ^[0-9a-f]{40}$ ]]
+          git -c protocol.file.allow=never submodule update --init -- "$source_path"
+          test "$(git -C "$source_path" rev-parse HEAD)" = "$selected"
+      - name: Verify original schema origin and install the actual Code runtime consumer
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C specification-source rev-parse HEAD)" = "db52af5115ce9cc12e027d3ec23c42fe5a2a1aa2"
+          test "$(git hash-object specification-source/data/records/schema/architecture-description.schema.json)" = "978863fa30df43b9c207fdac0fef085f9a37407e"
+          npm install --ignore-scripts --no-audit --no-fund --no-package-lock --registry=https://registry.561.group/
+          npm install --prefix specification-source --ignore-scripts --no-audit --no-fund --no-package-lock --registry=https://registry.561.group/
+          node -e "const p=require('./node_modules/@red-cup-engineering/signcell/package.json');if(p.version!=='0.4.2')process.exit(1)"
+      - name: Independently authenticate the exact original Specification maker package
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/specification-attestation"
+          # Reproduce the original signed job's package at the already pinned
+          # upstream revision, not an unaudited mutable npm registry version.
+          (
+            cd specification-source
+            npm pack --ignore-scripts --silent               --pack-destination "$RUNNER_TEMP/specification-attestation" >/dev/null
+          )
+          shopt -s nullglob
+          archives=( "$RUNNER_TEMP"/specification-attestation/*.tgz )
+          test "${#archives[@]}" -eq 1
+          archive="${archives[0]}"
+          # Digest of upstream merged-main run 40576268741's real signed subject.
+          printf '%s  %s\n'             4f8ec8696390f40cde192447a9f48bcd571f6e53a4a6d09ae4d2fc240c4b74a2             "$archive" | sha256sum --check --strict
+          # A Git checkout pin and checksum do not verify builder identity:
+          # demand the original public Sigstore/SLSA statement for these bytes,
+          # workflow and immutable source revision.
+          gh attestation verify "$archive"             --repo red-cup-engineering/specification-engineering-services-section             --signer-workflow red-cup-engineering/specification-engineering-services-section/.github/workflows/specification-native-receiving.yml             --source-digest db52af5115ce9cc12e027d3ec23c42fe5a2a1aa2             --deny-self-hosted-runners             --format json > "$RUNNER_TEMP/specification-attestation/verified.json"
+          node --input-type=module - "$archive" "$RUNNER_TEMP/specification-attestation/verified.json" <<'NODE'
+          import assert from 'node:assert/strict';
+          import { createHash } from 'node:crypto';
+          import { readFileSync } from 'node:fs';
+          const [, , tarball, verificationFile] = process.argv;
+          const digest = createHash('sha256').update(readFileSync(tarball)).digest('hex');
+          const records = JSON.parse(readFileSync(verificationFile, 'utf8'));
+          assert.ok(Array.isArray(records) && records.length > 0, 'no independently verified statement');
+          assert.ok(records.some(row => {
+            const statement = row?.verificationResult?.statement;
+            return statement?.predicateType === 'https://slsa.dev/provenance/v1' &&
+              statement.subject?.some(subject => subject.digest?.sha256 === digest);
+          }), 'no signed SLSA v1 statement names the exact original artifact bytes');
+          console.log('Source-qualified upstream maker: exact checksum and independently verified Sigstore/SLSA v1 statement received.');
+          NODE
+          cp "$archive" "$RUNNER_TEMP/specification-attestation/tampered.tgz"
+          printf x >> "$RUNNER_TEMP/specification-attestation/tampered.tgz"
+          if gh attestation verify "$RUNNER_TEMP/specification-attestation/tampered.tgz"             --repo red-cup-engineering/specification-engineering-services-section             --signer-workflow red-cup-engineering/specification-engineering-services-section/.github/workflows/specification-native-receiving.yml             --source-digest db52af5115ce9cc12e027d3ec23c42fe5a2a1aa2             --deny-self-hosted-runners > "$RUNNER_TEMP/specification-attestation/invalid-response.txt" 2>&1; then
+            echo "::error::One-byte-modified Specification package was accepted as signed"
+            exit 1
+          fi
+          echo "Original signed source admitted; one-byte-modified source refused. Semantic Stage Proof and fabrication authorization remain unreceived."
+      - name: Generate and test Code against original Requirement-traced Architecture schema
+        env:
+          SPEC_ARCHITECTURE_SCHEMA_FILE: ${{ github.workspace }}/specification-source/data/records/schema/architecture-description.schema.json
+          SPEC_ARCHITECTURE_SOURCE_DIR: ${{ github.workspace }}/specification-source
+        run: |
+          node --check scripts/transform-json-schema-to-typescript.mjs
+          node --check scripts/project-engineering-design-code.mjs
+          node --check test/index.test.mjs
+          node --check test/runtime-reference-closure.test.mjs
+          node --check test/source-reviewed-architecture-fabrication.test.mjs
+          node --check test/source-reviewed-design-fabrication.test.mjs
+          node --test test/index.test.mjs test/runtime-reference-closure.test.mjs test/source-reviewed-architecture-fabrication.test.mjs test/source-reviewed-design-fabrication.test.mjs
+      - name: Independently install packed original Code maker and receive HLD/LLD through its public export
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/code-consumer"
+          archive="$(npm pack --ignore-scripts --silent)"
+          test -s "$archive"
+          sha256sum "$archive"
+          # Receive the *actual packed* test entrance under the original npm
+          # publisher's package-relative file grammar, not a checkout path.
+          node --input-type=module - "$archive" <<'NODE'
+          import assert from 'node:assert/strict';
+          import {execFileSync} from 'node:child_process';
+          const archive=process.argv[2];
+          const manifest=JSON.parse(execFileSync('tar',['-xOzf',archive,'package/package.json'],{encoding:'utf8'}));
+          const file='test/jsnode-assay-packed-receiver.mjs';
+          assert.deepEqual(manifest.receivingTests,[file],
+            'the original published Code consumer must be explicitly selected without ./ path alias');
+          const carried=new Set(execFileSync('tar',['-tzf',archive],{encoding:'utf8'}).split('\n'));
+          assert.ok(carried.has('package/'+file),'the declared receiving test must be carried in the actual npm artifact');
+          console.log('Original publisher receiver declaration and packed Code test file qualified.');
+          NODE
+          npm install --prefix "$RUNNER_TEMP/code-consumer" "$GITHUB_WORKSPACE/$archive" \
+            --ignore-scripts --no-audit --no-fund --no-package-lock \
+            --registry=https://registry.561.group/
+          cp test/source-reviewed-design-fabrication.test.mjs "$RUNNER_TEMP/code-consumer/"
+          cd "$RUNNER_TEMP/code-consumer"
+          CODE_PACKED_CONSUMER=1 \
+            SPEC_ARCHITECTURE_SOURCE_DIR="$GITHUB_WORKSPACE/specification-source" \
+            node --test source-reviewed-design-fabrication.test.mjs
+          echo "Original packed Code recipient: HLD/LLD-derived runtime schemas installed and exercised; stale, unmodeled and cross-stage sources refused; source adoption, Proof, host installation and beneficiary effects remain open."
+
+      - name: Independently pack, install and behavior-assay the exact JSNode producer from Code
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_path=services/jsnode-package-services-section
+          selected="$(git rev-parse "HEAD:$source_path")"
+          [[ "$selected" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git -C "$source_path" rev-parse HEAD)" = "$selected"
+          test "$(node -p "require('./services/jsnode-package-services-section/package.json').version")" = "0.5.1-dev.5"
+          mkdir -p "$RUNNER_TEMP/jsnode-receiving-archive" "$RUNNER_TEMP/jsnode-clean-consumer"
+          (
+            cd services/jsnode-package-services-section
+            npm pack --ignore-scripts --silent --pack-destination "$RUNNER_TEMP/jsnode-receiving-archive" >/dev/null
+          )
+          shopt -s nullglob
+          archives=( "$RUNNER_TEMP"/jsnode-receiving-archive/*.tgz )
+          test "${#archives[@]}" -eq 1
+          archive="${archives[0]}"
+          sha256sum "$archive"
+          npm install --prefix "$RUNNER_TEMP/jsnode-clean-consumer" "$archive"             --ignore-scripts --no-audit --no-fund --no-package-lock             --registry=https://registry.561.group/
+          cp test/jsnode-assay-packed-receiver.mjs "$RUNNER_TEMP/jsnode-clean-consumer/"
+          (
+            cd "$RUNNER_TEMP/jsnode-clean-consumer"
+            node --check jsnode-assay-packed-receiver.mjs
+            node --test --test-reporter=tap jsnode-assay-packed-receiver.mjs
+          )
+          echo "Exact gitlink producer received by a clean Code-owned consumer. Native module behavior assayed; operating host, Work, Stage Proof and independent buyer receiving remain unobserved."

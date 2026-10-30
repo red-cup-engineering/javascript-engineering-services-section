@@ -1,0 +1,30 @@
+{
+  "name": "@red-cup-engineering/read-jsnode-operation-arguments-service",
+  "version": "0.3.0",
+  "description": "Reads one JavaScript ESM script's source into a JsnodeOperationArguments record: its single exported function's JSDoc, parameters, imports, main-guard shape, and source residue — a pure AST reading with no filesystem access.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/read-jsnode-operation-arguments.mjs",
+  "bin": {
+    "read-jsnode-operation-arguments": "scripts/read-jsnode-operation-arguments.mjs"
+  },
+  "files": [
+    "scripts",
+    "README.md",
+    "package.json"
+  ],
+  "dependencies": {
+    "@red-cup-engineering/read-javascript-file-export-documentation-service": "0.1.3",
+    "typescript": "5.9.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "check": "node --check scripts/read-jsnode-operation-arguments.mjs",
+    "test": "node --test test/*.test.mjs",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=24.2.0"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "@red-cup-engineering/read-jsnode-package-body-service",
+  "version": "0.1.0",
+  "description": "Reads npm manifests and active JavaScript-family source files from an explicit set of package directories.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/read-jsnode-package-body.mjs",
+  "bin": { "read-jsnode-package-body": "./scripts/read-jsnode-package-body.mjs" },
+  "files": ["scripts", "package.json"],
+  "scripts": {
+    "check": "node --check scripts/read-jsnode-package-body.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": { "node": ">=22" }
+}

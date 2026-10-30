@@ -1,0 +1,18 @@
+{
+  "name": "@red-cup-engineering/node-runtime-release-promotion-service",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Atomically bind one verified content-addressed Node runtime release to a named deployment pointer.",
+  "exports": {
+    ".": "./src/promote-release.mjs"
+  },
+  "bin": {
+    "promote-node-runtime-release": "./scripts/promote-node-runtime-release.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}

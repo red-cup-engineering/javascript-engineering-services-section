@@ -1,0 +1,21 @@
+name: CapCell source contract
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: capcell-source-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  contract:
+    # Reuse the Group's established package verification service; never spin
+    # up an uncredentialed GitHub-hosted fallback to mask a house outage.
+    uses: red-cup-engineering/continuous-delivery-engineering-services-section/.github/workflows/node-package.yml@e141a4445864895631aa4f775a9ad6397e1772c8
+    with:
+      runs-on: '["ubuntu-24.04"]'
+      paths: '["."]'
+      install: false
+      check: true
+      test-script: 'test:source-contract'

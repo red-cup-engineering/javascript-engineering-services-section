@@ -1,0 +1,45 @@
+{
+  "name": "@red-cup-engineering/javascript-node-code-fabrication-services-section",
+  "version": "0.1.4",
+  "type": "module",
+  "description": "Red Cup Engineering service section for javascript node code fabrication.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/red-cup-engineering/javascript-node-code-fabrication-engineering-services-section.git"
+  },
+  "license": "MIT",
+  "exports": {
+    "./transform-json-schema-to-typescript": "./scripts/transform-json-schema-to-typescript.mjs",
+    "./project-engineering-design-code": "./scripts/project-engineering-design-code.mjs",
+    "./native-code-programme.scm": "./src/native-code-programme.scm",
+    "./materialize-native-code-programme": "./src/materialize-native-code-programme.mjs",
+    "./native-code-declaration.scm": "./src/native-code-declaration.scm"
+  },
+  "scripts": {
+    "test": "run-package-tests",
+    "check": "check-package-syntax",
+    "test:native:programme": "node --experimental-import-meta-resolve --test test/native-code-programme.native.mjs"
+  },
+  "devDependencies": {
+    "@red-cup-engineering/jsnode-package-services-section": "0.2.4"
+  },
+  "files": [
+    "scripts",
+    "test",
+    "content",
+    "README.md",
+    "package.json",
+    "src",
+    "specifications"
+  ],
+  "dependencies": {
+    "@red-cup-engineering/signcell": "0.4.2"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://github.com/561-group/.github/blob/main/TIPS.md"
+  },
+  "receivingTests": [
+    "test/jsnode-assay-packed-receiver.mjs"
+  ]
+}

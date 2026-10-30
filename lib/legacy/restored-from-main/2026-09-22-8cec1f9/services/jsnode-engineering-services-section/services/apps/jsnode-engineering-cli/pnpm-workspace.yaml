@@ -1,0 +1,11 @@
+# These exact leaves were source-verified and published locally during closure recovery.
+minimumReleaseAgeExclude:
+  - '@red-cup-engineering/javascript-algebra@0.1.0'
+  - '@red-cup-engineering/javascript-computer@0.1.0 || 0.2.6'
+  - '@red-cup-engineering/jsnode-topology@0.1.0'
+  - '@red-cup-engineering/computer-data-type-engine@0.8.0'
+  - '@red-cup-engineering/jsnode-engine@0.2.1'
+  - '@red-cup-engineering/typed-code-networking-engine@0.4.0'
+  - '@red-cup-engineering/typed-computer-code-engine@0.5.1'
+  - '@red-cup-engineering/typed-computer-system-engine@0.4.0'
+  - '@red-cup-engineering/graph-data-service@0.5.0'

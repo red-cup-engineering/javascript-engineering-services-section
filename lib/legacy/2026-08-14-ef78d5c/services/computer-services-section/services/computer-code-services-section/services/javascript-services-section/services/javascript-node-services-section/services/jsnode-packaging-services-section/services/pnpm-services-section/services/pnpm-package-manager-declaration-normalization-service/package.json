@@ -1,0 +1,25 @@
+{
+  "name": "@red-cup-engineering/pnpm-package-manager-declaration-normalization-service",
+  "version": "0.1.0",
+  "description": "Removes a pnpm packageManager declaration from one admitted npm package manifest.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/normalize-pnpm-package-manager-declaration.mjs",
+  "bin": { "normalize-pnpm-package-manager-declaration": "./scripts/normalize-pnpm-package-manager-declaration.mjs" },
+  "files": ["scripts", "package.json"],
+  "dependencies": {
+    "@red-cup-engineering/immutable-json-value-service": "0.1.0",
+    "@red-cup-engineering/json-codec-service": "0.1.4",
+    "@red-cup-engineering/npm-package-manifest-admission-service": "0.1.0",
+    "@red-cup-engineering/read-javascript-node-standard-input-text-service": "0.1.0",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.1.0"
+  },
+  "scripts": {
+    "check": "node --check scripts/normalize-pnpm-package-manager-declaration.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": { "node": ">=22" }
+}

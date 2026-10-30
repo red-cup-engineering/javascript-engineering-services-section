@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "directory": "lib/agency",
+  "pools": [
+    "offices",
+    "forms",
+    "duties",
+    "works",
+    "skills",
+    "characters",
+    "masks",
+    "bodies",
+    "organs",
+    "incumbencies",
+    "rules",
+    "enterprises",
+    "contracts",
+    "entities",
+    "principals",
+    "requirements",
+    "deontic-powers",
+    "deontic-immunities",
+    "liberties",
+    "axioms",
+    "directives",
+    "policies",
+    "packets",
+    "runbooks"
+  ],
+  "records": {
+    "default": "{id}.json",
+    "skills": "{id}/SKILL.md"
+  },
+  "resources": {
+    "default": "{id}/",
+    "skills": "{id}/"
+  }
+}

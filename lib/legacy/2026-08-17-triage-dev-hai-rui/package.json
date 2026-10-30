@@ -1,0 +1,30 @@
+{
+  "name": "@emsenn/hai-rui",
+  "version": "0.0.1",
+  "type": "module",
+  "keywords": [
+    "decommissioned",
+    "triage"
+  ],
+  "description": "hai-rui.561.group — inference and advice layer over workspace conformance findings.",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "check": "tsc --noEmit"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@emsenn/conformance-tics": "workspace:*",
+    "@emsenn/organizing-with-the-web": "workspace:*",
+    "@emsenn/http-server": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0"
+  },
+  "sideEffects": false
+}

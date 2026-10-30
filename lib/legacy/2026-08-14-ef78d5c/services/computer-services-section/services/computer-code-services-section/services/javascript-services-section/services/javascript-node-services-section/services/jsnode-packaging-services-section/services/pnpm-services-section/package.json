@@ -1,0 +1,8 @@
+{
+  "name": "@red-cup-engineering/pnpm-services-section",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Registry of pnpm-specific package-manager transformations.",
+  "exports": "./scripts/registry.mjs",
+  "files": ["scripts", "services", "package.json"]
+}

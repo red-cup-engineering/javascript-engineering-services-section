@@ -1,0 +1,30 @@
+{
+  "name": "@red-cup-engineering/npm-package-dependency-normalization-service",
+  "version": "1.0.0",
+  "description": "Pure normalization of dependency edges in one npm package manifest.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./src/normalize-jsnode-package-dependencies.mjs",
+  "files": [
+    "src",
+    "scripts",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "bin": {
+    "normalize-jsnode-package-dependencies": "./scripts/normalize-jsnode-package-dependencies.mjs"
+  },
+  "scripts": {
+    "check": "node --check src/normalize-jsnode-package-dependencies.mjs && node --check scripts/normalize-jsnode-package-dependencies.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

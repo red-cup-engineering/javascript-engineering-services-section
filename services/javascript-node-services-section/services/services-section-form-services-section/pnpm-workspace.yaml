@@ -1,0 +1,12 @@
+minimumReleaseAgeExclude:
+  # House releases have no artificial age delay (Leader correction, 2026-10-20; 2026-10-26).
+  - '@561-group/*'
+  - '@causeway-services/*'
+  - '@coesite-operations/*'
+  - '@emsenn/*'
+  - '@emsweb/*'
+  - '@harmonious-union/*'
+  - '@koios-news/*'
+  - '@lenticule-science/*'
+  - '@red-cup-engineering/*'
+  - '@red-cup-science/*'

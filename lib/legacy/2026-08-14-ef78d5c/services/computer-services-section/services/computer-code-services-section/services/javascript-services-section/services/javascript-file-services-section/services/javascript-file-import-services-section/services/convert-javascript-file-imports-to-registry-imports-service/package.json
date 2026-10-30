@@ -1,0 +1,33 @@
+{
+  "name": "@red-cup-engineering/convert-javascript-file-imports-to-registry-imports-service",
+  "version": "0.1.0",
+  "description": "Composes import reading, JSNode resolution, npm custody, registry conversion, text editing, and npm projections for one text-file reading.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/convert-javascript-file-imports-to-registry-imports.mjs",
+  "bin": {
+    "convert-javascript-file-imports-to-registry-imports": "./scripts/convert-javascript-file-imports-to-registry-imports.mjs"
+  },
+  "files": ["scripts", "package.json"],
+  "dependencies": {
+    "@red-cup-engineering/apply-text-file-content-edits-service": "0.1.0",
+    "@red-cup-engineering/classify-cross-package-javascript-file-import-service": "0.1.0",
+    "@red-cup-engineering/convert-javascript-file-import-to-registry-import-service": "0.1.0",
+    "@red-cup-engineering/json-codec-service": "0.1.4",
+    "@red-cup-engineering/project-npm-package-dependency-from-cross-package-import-service": "0.1.0",
+    "@red-cup-engineering/project-npm-package-edge-from-cross-package-import-service": "0.1.0",
+    "@red-cup-engineering/project-npm-package-export-from-cross-package-import-service": "0.1.0",
+    "@red-cup-engineering/read-javascript-file-imports-service": "0.1.0",
+    "@red-cup-engineering/read-javascript-node-standard-input-text-service": "0.1.0",
+    "@red-cup-engineering/resolve-javascript-node-file-import-service": "0.1.0",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.1.0"
+  },
+  "scripts": {
+    "check": "node --check scripts/convert-javascript-file-imports-to-registry-imports.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": { "node": ">=24" }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "@red-cup-engineering/regenerating-package-lock-service",
+  "version": "1.0.0",
+  "description": "Regenerates package-lock.json without installing package contents.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/regenerate-package-lock.mjs",
+  "files": [
+    "scripts",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "bin": {
+    "regenerate-package-lock": "./scripts/regenerate-package-lock.mjs"
+  },
+  "scripts": {
+    "check": "node --check scripts/regenerate-package-lock.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@red-cup-engineering/execute-javascript-node-command-service": "0.1.0",
+    "@red-cup-engineering/json-codec-service": "0.1.4",
+    "@red-cup-engineering/npm-package-lock-regeneration-command-formation-service": "0.1.0",
+    "@red-cup-engineering/parse-javascript-argv-service": "0.1.0",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.1.0"
+  }
+}

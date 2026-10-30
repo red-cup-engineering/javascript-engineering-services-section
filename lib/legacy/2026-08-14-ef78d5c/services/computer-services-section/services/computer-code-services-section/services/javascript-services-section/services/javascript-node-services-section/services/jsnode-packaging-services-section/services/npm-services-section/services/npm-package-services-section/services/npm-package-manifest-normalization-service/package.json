@@ -1,0 +1,38 @@
+{
+  "name": "@red-cup-engineering/npm-package-manifest-normalization-service",
+  "version": "1.0.0",
+  "description": "Pure normalization of one npm package manifest lifecycle.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/normalize-jsnode-package-manifest.mjs",
+  "files": ["scripts", "package.json"],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "bin": {
+    "normalize-jsnode-package-manifest": "./scripts/normalize-jsnode-package-manifest.mjs"
+  },
+  "dependencies": {
+    "@red-cup-engineering/file-services": "0.2.0",
+    "@red-cup-engineering/json-codec-service": "0.1.4",
+    "@red-cup-engineering/npm-package-lifecycle-scripts-normalization-service": "0.1.0",
+    "@red-cup-engineering/npm-package-manifest-identity-application-service": "0.1.0",
+    "@red-cup-engineering/npm-package-manifest-version-normalization-service": "0.1.0",
+    "@red-cup-engineering/parse-javascript-argv-service": "0.1.0",
+    "@red-cup-engineering/pnpm-engine-declaration-normalization-service": "0.1.0",
+    "@red-cup-engineering/pnpm-package-manager-declaration-normalization-service": "0.1.0",
+    "@red-cup-engineering/resolve-filepath-service": "0.1.0",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.1.0"
+  },
+  "scripts": {
+    "check": "node --check scripts/normalize-jsnode-package-manifest.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

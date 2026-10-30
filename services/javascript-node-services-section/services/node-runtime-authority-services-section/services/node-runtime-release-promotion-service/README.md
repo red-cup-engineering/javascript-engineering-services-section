@@ -119,6 +119,54 @@ own construction and production generation changes. The older selected-install
 utilities are outside this production route and must not be used to recreate
 its source or lock authority.
 
+### Read selected committed source without unrelated archive acquisition
+
+The local selected-workspace receiver must reproduce the selected package
+composition on a fresh machine even when unrelated historical trees were never
+received. Its input remains a real Git root at the requested commit, its original
+native workspace configuration and full lock, and the recorded selected Gitlinks.
+This source-reading refinement does not replace the recursive LAGOON production
+path or admit a second dependency graph.
+
+**Requirements.** A source fact must identify the original owner, commit, literal
+path, Git mode and object ID. Reading bytes must additionally match that Git blob
+and retain SHA-256 provenance. Every required selected manifest, executable,
+generation input and applicable Git attribute policy must be present and exact.
+An unrelated missing subtree must not prevent an otherwise complete selected
+read. A missing selected ancestor tree is an error, never evidence that an output
+path is uncommitted. Selection still closes over the original lock's required
+workspace dependencies; sparse source receiving cannot prune that closure.
+
+**Architecture and detailed contract.** `workspaceSourceReader` retains the
+existing root/mount verification and confines paths to regular, non-redirected
+source. For each owner it caches Git's literal exact-path lookup at the pinned
+revision instead of eagerly listing every descendant tree. Returned directories
+and genuinely absent paths retain the existing null result; files and Gitlinks
+retain their existing facts. `bytes` and `verify` keep their original byte,
+revision and mount checks. Required missing objects refuse without implicit lazy
+fetch. The lookup does not run generators, hooks, user-authored shell commands,
+registry operations or a new acquisition transport.
+
+`receiveSelectedSources` authenticates root and mounted-owner `.gitattributes`,
+all governing ancestors, and descendant overrides within selected packages.
+The scoped Git tree query uses literal pathspecs and refuses missing selected
+objects. Each policy file must be a committed regular file with exact bytes.
+The automatic workspace-root importer `.` does not select the whole repository:
+root policy covers the explicit importer paths and bounded positive root
+`package.json.files` prefixes, including the root attribute file. In contrast,
+selecting a mounted owner itself produces owner-relative `.`, which intentionally
+retains that owner's complete ordinary declared source tree and all its attribute
+policies. Unselected Gitlink repositories remain unreceived.
+
+**Receiving obligations.** Full and sparse genuine Git carriers at the same
+commit must yield identical selected facts, bytes and provenance. Tests cover
+literal metacharacters, absent paths, missing selected ancestors/files, modified
+bytes, filesystem redirection, changed root/mount identity, root and nested
+attribute overrides, and complete selected-owner `.` behavior. Reading must not
+silently fetch a missing object. A successful source read is not an installed
+runtime: ordinary frozen installation, required generation and the actual local
+operation remain separate receiving conditions.
+
 ### Receive manifest changes before source integration
 
 `qualify-workspace-lockfile --repository <checkout> --commit <source> --spec-in-commit <release-spec> --state-dir <outside-source>`
@@ -291,3 +339,9 @@ The source-owned component contract and extraction history are in
 The owning caller may invoke this generic command after its ordinary PNPM packing
 and static compilation, before construction. This component does not modify that
 caller, enroll any product package or activate a deployment.
+
+Assess a selected installed programme before starting its application with `assessInstalledInterfaces` (`./assess-installed-interfaces`) or `node scripts/assess-installed-interfaces.mjs INPUT.json REPORT.json`. Input names exact entry files and the package namespaces whose source interfaces are being assessed. The operation resolves the whole selected family, records source digests, and reports missing programmes, providers and named exports together without executing application code. Vendor boundaries and nonliteral dynamic imports remain explicit limits; this assessment does not establish useful operation or state migration.
+
+## Installed assessment input composition
+
+`collectInstalledInterfaceInput({runtimeRoot, entries, declarationFiles, jobsDirectories})` collects caller-selected application entries, recursively declared module roots and canonical node-job programme roots. Configuration and job-directory selections are runtime-relative; application entries are absolute. The collector retains unresolved declared modules as findings and uses node-job-service's explicit retained-missing mode for programmes. Invalid job declarations still refuse through its canonical validator. It never runs an application, job or finalizer. Call `assessInstalledInterfaces` on its entries and combine its declared-provider findings with the resulting assessment. This evidence describes the specified installed runtime, not a release or receiving verdict.

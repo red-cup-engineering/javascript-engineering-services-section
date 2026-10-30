@@ -1,0 +1,158 @@
+{
+  "identity": {
+    "version": "0.1.0",
+    "stability": "draft",
+    "status": "requires-independent-requirement-and-interpretation-admission",
+    "date-created": "2026-10-29",
+    "id": "agency-normalization-retains-methods-and-role-traits-specification",
+    "title": "Source-bound agency method and persona-trait preservation",
+    "seat": "red-cup-engineering/agentic-organization-services-section-engineering-services-section",
+    "carrier": "data/records/specification-records/agency-normalization-retains-methods-and-role-traits.json",
+    "authors": [
+      "Codex engineering session /root"
+    ],
+    "profile": "prose"
+  },
+  "whatThisIs": "An unadmitted candidate reading of Requirement agency-normalization-retains-methods-and-role-traits at ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8. External authority and specification acceptance remain open.",
+  "topics": [
+    {
+      "heading": "Source-owned requirement conditions",
+      "body": "{{clause:shared-owner}}\n\n{{clause:method-bytes}}\n\n{{clause:one-source-parser}}\n\n{{clause:persona-traits}}\n\n{{clause:received-destination}}\n\n{{clause:mask-preservation}}\n\n{{clause:prior-normalization}}\n\n{{clause:identity-and-authority}}\n\n{{clause:source-plan}}\n\n{{clause:general-parameters}}\n\n{{clause:real-receiving}}\n\n{{clause:finish-family}}\n\n{{clause:generation}}",
+      "clauses": [
+        {
+          "id": "shared-owner",
+          "keyword": "MUST",
+          "actor": "The shared source-bound agency normalization engine",
+          "statement": "Complete the original shared agency source parser and normalization engine in agentic-organization-services-section-engineering-services-section; every section uses that one implementation and the shared Scientific Character declaration, without caller-specific converters, legacy runtime readers or compatibility aliases.",
+          "backedBy": [
+            "Original Requirement agency-normalization-retains-methods-and-role-traits (ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8), cell agency-normalization-retains-methods-and-role-traits:shared-owner"
+          ]
+        },
+        {
+          "id": "method-bytes",
+          "keyword": "MUST",
+          "actor": "The shared source-bound agency normalization engine",
+          "statement": "Preserve every byte after a Markdown frontmatter closing-fence line terminator as method body, including leading blank lines, indentation, trailing whitespace, LF and CRLF. Source decoding must not consume body whitespace as fence whitespace; normalized metadata must not rewrite the method or resource bytes. A separately source-qualified canonical repository relocation MAY substitute only an exact authored path token when the original and new paths resolve to the same canonical repository and intended resource, with each selected source revision and any intervening source change independently qualified; its owning source operation preserves every other byte, retains the exact original preimage, independently receives the inverse substitution and actual old/new target identity, and makes no compatibility alias or authority grant.",
+          "backedBy": [
+            "Original Requirement agency-normalization-retains-methods-and-role-traits (ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8), cell agency-normalization-retains-methods-and-role-traits:method-bytes"
+          ]
+        },
+        {
+          "id": "one-source-parser",
+          "keyword": "MUST",
+          "actor": "The shared source-bound agency normalization engine",
+          "statement": "The original source parser derives both authored metadata and exact method body from the same hash-bound complete source bytes and the existing owning Markdown/YAML primitives. A supplied authored object, sidecar or offset cannot override the actual source.",
+          "backedBy": [
+            "Original Requirement agency-normalization-retains-methods-and-role-traits (ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8), cell agency-normalization-retains-methods-and-role-traits:one-source-parser"
+          ]
+        },
+        {
+          "id": "persona-traits",
+          "keyword": "MUST",
+          "actor": "The shared source-bound agency normalization engine",
+          "statement": "Move original authored pronouns, intended-work and performable-duties metadata to an explicitly received correctly source-qualified persona or role mask, while the Character declaration retains only its Scientific fields. Preserve exact trait values and order so existing cast profile, intended-work selection and performance consumers retain their useful behavior.",
+          "backedBy": [
+            "Original Requirement agency-normalization-retains-methods-and-role-traits (ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8), cell agency-normalization-retains-methods-and-role-traits:persona-traits"
+          ]
+        },
+        {
+          "id": "received-destination",
+          "keyword": "MUST",
+          "actor": "The shared source-bound agency normalization engine",
+          "statement": "Receive the original Character and selected target mask source bytes and semantic role reference together. The target is an explicit checked input or a uniquely supported source-owned choice; missing, foreign, ambiguous, conflicting or changed destinations refuse before mutation. Bare sibling role IDs never choose another section mask.",
+          "backedBy": [
+            "Original Requirement agency-normalization-retains-methods-and-role-traits (ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8), cell agency-normalization-retains-methods-and-role-traits:received-destination"
+          ]
+        },
+        {
+          "id": "mask-preservation",
+          "keyword": "MUST",
+          "actor": "The shared source-bound agency normalization engine",
+          "statement": "Preserve all unrelated existing mask fields, commitments, practice records, source citations and provenance. Equal existing trait values are idempotent; conflicting authored trait values remain an explicit unresolved decision rather than an overwrite, merge of incompatible faces or invented grant.",
+          "backedBy": [
+            "Original Requirement agency-normalization-retains-methods-and-role-traits (ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8), cell agency-normalization-retains-methods-and-role-traits:mask-preservation"
+          ]
+        },
+        {
+          "id": "prior-normalization",
+          "keyword": "MUST",
+          "actor": "The shared source-bound agency normalization engine",
+          "statement": "Finish already-applied Character normalization by receiving the retained exact original source and original normalization witness together with current strict Character and mask bytes. Recover traits from the original typed source, not prose mining of the disposition; refuse missing or mismatched original source hashes and concurrent current-source changes.",
+          "backedBy": [
+            "Original Requirement agency-normalization-retains-methods-and-role-traits (ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8), cell agency-normalization-retains-methods-and-role-traits:prior-normalization"
+          ]
+        },
+        {
+          "id": "identity-and-authority",
+          "keyword": "MUST",
+          "actor": "The shared source-bound agency normalization engine",
+          "statement": "Preserve the existing separation of Scientific roles from physical organs, accounts, providers, models, offices, recognition and induction. No normalized record or mask trait confers an appointment, provider admission, account ownership or capability grant, and no old runtime actor/Character alias is restored.",
+          "backedBy": [
+            "Original Requirement agency-normalization-retains-methods-and-role-traits (ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8), cell agency-normalization-retains-methods-and-role-traits:identity-and-authority"
+          ]
+        },
+        {
+          "id": "source-plan",
+          "keyword": "MUST",
+          "actor": "The shared source-bound agency normalization engine",
+          "statement": "Return one complete source-hash-bound normalization plan covering every changed original source, target and companion. Receive all collisions and current-byte conditions before the first effect; retain original knowledge and private resources in their original custody. Use the original apply operation and Data law, not another writer or transaction registry.",
+          "backedBy": [
+            "Original Requirement agency-normalization-retains-methods-and-role-traits (ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8), cell agency-normalization-retains-methods-and-role-traits:source-plan"
+          ]
+        },
+        {
+          "id": "general-parameters",
+          "keyword": "MUST",
+          "actor": "The shared source-bound agency normalization engine",
+          "statement": "Names, source roots, sections, roles, selected persona destinations, pools and source cuts are checked parameters. No Perrin-specific implementation, generated account identity, fixed host, hardcoded original source path or blanket new persona is a substitute for the general boundary.",
+          "backedBy": [
+            "Original Requirement agency-normalization-retains-methods-and-role-traits (ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8), cell agency-normalization-retains-methods-and-role-traits:general-parameters"
+          ]
+        },
+        {
+          "id": "real-receiving",
+          "keyword": "MUST",
+          "actor": "The shared source-bound agency normalization engine",
+          "statement": "Independently receive the actual current internal-services-section lot: all29 selected Skill method bodies remain byte-identical while16 complete sidecar contracts move to canonical Skill metadata; Perrin keeps they/them and all6 intended-work values, is included by the game-design roster filter, and retains every original persona practice and commitment. Also receive sibling-ID, conflicting target, changed source, missing predecessor, LF/CRLF/indentation and zero-write reentry cases.",
+          "backedBy": [
+            "Original Requirement agency-normalization-retains-methods-and-role-traits (ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8), cell agency-normalization-retains-methods-and-role-traits:real-receiving"
+          ]
+        },
+        {
+          "id": "finish-family",
+          "keyword": "MUST",
+          "actor": "The shared source-bound agency normalization engine",
+          "statement": "Re-derive all applicable original Character source migrations and current section Skill carrier migrations through the one repaired converter, integrate their actual source owners and receive the original Organizing/FeltOS/MetroPlat/harness consumers. Normalization files, a source test or a draft pull request do not complete the agency family.",
+          "backedBy": [
+            "Original Requirement agency-normalization-retains-methods-and-role-traits (ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8), cell agency-normalization-retains-methods-and-role-traits:finish-family"
+          ]
+        },
+        {
+          "id": "generation",
+          "keyword": "MUST",
+          "actor": "The shared source-bound agency normalization engine",
+          "statement": "Generate specification, architecture, design and source through the original admitted zero-cash house producers and independent receiving. Preserve source provenance and unreceived Proof; do not hand-edit the parser, generated Data outputs or an assay to hide a failed receiving condition.",
+          "backedBy": [
+            "Original Requirement agency-normalization-retains-methods-and-role-traits (ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8), cell agency-normalization-retains-methods-and-role-traits:generation"
+          ]
+        }
+      ]
+    }
+  ],
+  "implementations": [],
+  "openQuestions": [
+    {
+      "question": "Has the original source Requirement and each BCP 14 interpretation been independently admitted?",
+      "blockedBy": "An original competent Office and external reviewer; no approval is inferred from this record"
+    }
+  ],
+  "laws": [],
+  "standards": [],
+  "provenance": {
+    "derivedAt": "2026-10-29T07:19:34.290Z",
+    "derivedBy": "Codex agency migration receiving",
+    "derivedFrom": [
+      "agency-normalization-retains-methods-and-role-traits@ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8"
+    ]
+  }
+}

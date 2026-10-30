@@ -1,0 +1,36 @@
+name: JSNode source-generated Code assay receiving
+on:
+  pull_request:
+    paths:
+      - 'src/plan-jsnode-modules.mjs'
+      - 'src/project-jsnode-example-tests.mjs'
+      - 'test/source-export-assay-fabrication.test.mjs'
+      - '.github/workflows/source-generated-code-assays.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/plan-jsnode-modules.mjs'
+      - 'src/project-jsnode-example-tests.mjs'
+      - 'test/source-export-assay-fabrication.test.mjs'
+      - '.github/workflows/source-generated-code-assays.yml'
+permissions:
+  contents: read
+jobs:
+  generated-source-assays:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '24'
+      - name: Qualify original source-owned ESM projector and consumer syntax
+        run: |
+          node --version
+          node --check src/project-jsnode-example-tests.mjs
+          node --check src/plan-jsnode-modules.mjs
+          node --check test/source-export-assay-fabrication.test.mjs
+      - name: Execute generated reserved-name exports and behavioral negative controls
+        run: node --test test/source-export-assay-fabrication.test.mjs

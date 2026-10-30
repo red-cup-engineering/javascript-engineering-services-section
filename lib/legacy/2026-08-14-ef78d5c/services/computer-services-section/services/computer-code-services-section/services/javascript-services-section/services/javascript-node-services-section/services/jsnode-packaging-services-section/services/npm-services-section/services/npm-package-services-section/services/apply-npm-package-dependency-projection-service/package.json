@@ -1,0 +1,24 @@
+{
+  "name": "@red-cup-engineering/apply-npm-package-dependency-projection-service",
+  "version": "0.1.0",
+  "description": "Applies one npm dependency projection to one admitted package manifest.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/apply-npm-package-dependency-projection.mjs",
+  "bin": { "apply-npm-package-dependency-projection": "./scripts/apply-npm-package-dependency-projection.mjs" },
+  "files": ["scripts", "package.json"],
+  "dependencies": {
+    "@red-cup-engineering/json-codec-service": "0.1.4",
+    "@red-cup-engineering/npm-package-manifest-admission-service": "0.1.0",
+    "@red-cup-engineering/read-javascript-node-standard-input-text-service": "0.1.0",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.1.0"
+  },
+  "scripts": {
+    "check": "node --check scripts/apply-npm-package-dependency-projection.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": { "node": ">=24" }
+}

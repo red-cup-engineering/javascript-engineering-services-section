@@ -1,0 +1,39 @@
+{
+  "name": "@red-cup-engineering/npm-registry-snapshot-publication-app",
+  "version": "1.0.0",
+  "description": "Builds an immutable npm registry snapshot and atomically activates it through snapshot pointers.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "exports": "./src/npm-registry-snapshot-publication-app.mjs",
+  "bin": {
+    "publish-npm-registry-snapshot": "./scripts/publish-npm-registry-snapshot.mjs"
+  },
+  "files": [
+    "src",
+    "scripts",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "verify": "node --check src/npm-registry-snapshot-publication-app.mjs && node --check scripts/publish-npm-registry-snapshot.mjs && node --test test/*.test.mjs && npm pack --dry-run --ignore-scripts",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@red-cup-engineering/npm-carrier-projection-service": "1.0.0",
+    "@red-cup-engineering/npm-package-packing-service": "1.0.0",
+    "@red-cup-engineering/npm-release-manifest-projection-service": "1.0.0",
+    "@red-cup-engineering/npm-registry-release-coordinator-service": "1.0.0",
+    "@red-cup-engineering/npm-registry-snapshot-activation-service": "1.0.0",
+    "@red-cup-engineering/npm-registry-snapshot-assembly-service": "1.0.0",
+    "@red-cup-engineering/npm-registry-snapshot-verification-service": "1.0.1"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@red-cup-engineering/javascript-argv-parsing-services-section",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Holds independently addressable projections and parsers for JavaScript-host process argument vectors.",
+  "exports": "./scripts/registry.mjs",
+  "files": ["scripts", "package.json", "README.md"],
+  "dependencies": {
+    "@red-cup-engineering/parse-javascript-argv-service": "0.1.0",
+    "@red-cup-engineering/project-javascript-argv-tail-service": "0.1.0"
+  },
+  "scripts": {
+    "check": "node --check scripts/registry.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run check && npm test && npm run pack:dry-run",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": { "node": ">=22" }
+}
