@@ -1,3 +1,0 @@
-ControlGroup=
-ActiveState=inactive
-SubState=dead
