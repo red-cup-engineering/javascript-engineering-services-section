@@ -173,8 +173,8 @@ by the residue that remains, like an EDA flow or protein folding.
 - **Duplicate.** `computer-code-development-engine` is a full copy of
   fabrication under the same package name and version.
 - **Publication service.** npm-workspace-publication-service still admits
-  house releases by exact version for consumers without a committed workspace
-  policy. Every live workspace config now exempts the house scopes.
+  Group releases by exact version for consumers without a committed workspace
+  policy. Every live workspace config now exempts the Group scopes.
 - **Content taxonomy.** `custodyStems` in `services-section-form-content-taxonomy.json`
   is no longer read. Custody comes from the path, and `internal` is a custody.
 - **Missing terms.** Science has no schemas for engine, service, system,
