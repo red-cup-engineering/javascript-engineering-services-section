@@ -1,0 +1,38 @@
+{
+  "name": "@red-cup-engineering/jsnode-operation-package-projection-admission-service",
+  "version": "0.2.3",
+  "description": "Purely admits a complete JSNode operation package projection against its package, source, dependency, test, and digest laws.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/admit-jsnode-operation-package-projection.mjs",
+  "bin": {
+    "admit-jsnode-operation-package-projection": "scripts/admit-jsnode-operation-package-projection.mjs"
+  },
+  "files": [
+    "scripts",
+    "package.json"
+  ],
+  "dependencies": {
+    "@red-cup-engineering/computer-data-engine": "0.10.0",
+    "@red-cup-engineering/javascript-node-services-section": "0.2.0",
+    "@red-cup-engineering/npm-package-manifest-admission-service": "0.2.1",
+    "@red-cup-engineering/npm-package-version-admission-service": "0.1.2",
+    "@red-cup-engineering/read-javascript-file-export-documentation-service": "0.1.1",
+    "@red-cup-engineering/read-javascript-file-imports-service": "0.2.1",
+    "@red-cup-engineering/read-javascript-file-main-guards-service": "0.1.1",
+    "@red-cup-engineering/read-javascript-node-standard-input-text-service": "0.2.1",
+    "@red-cup-engineering/text-file-creation-projection-set-admission-service": "0.1.1",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.2.1"
+  },
+  "devDependencies": {
+    "@red-cup-engineering/jsnode-package-services-section": "0.2.0"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=24.2.0"
+  }
+}

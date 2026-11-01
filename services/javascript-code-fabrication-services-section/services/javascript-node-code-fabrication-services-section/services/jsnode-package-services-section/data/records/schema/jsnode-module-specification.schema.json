@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:red-cup:jsnode-module-specification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operations"],
+  "anyOf": [
+    { "required": ["sources"], "properties": { "sources": { "minItems": 1 } } },
+    { "required": ["dataModules"], "properties": { "dataModules": { "minItems": 1 } } }
+  ],
+  "properties": {
+    "sources": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "text"],
+        "properties": {
+          "path": { "type": "string", "pattern": "^src/(?:[^/]+/)*[^/]+\\.mjs$" },
+          "text": { "type": "string" }
+        }
+      }
+    },
+    "dataModules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "exports"],
+        "properties": {
+          "path": { "type": "string", "pattern": "^src/(?:[^/]+/)*[^/]+\\.mjs$" },
+          "exports": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "value", "schema"],
+              "properties": {
+                "name": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$" },
+                "value": {},
+                "schema": { "type": ["object", "boolean"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "module", "exportName", "description"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "pattern": "^[a-z][a-z0-9-]*$" },
+          "module": { "type": "string", "pattern": "^src/(?:[^/]+/)*[^/]+\\.mjs$" },
+          "exportName": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$" },
+          "description": { "type": "string", "minLength": 1 },
+          "inputSchema": { "type": ["object", "boolean"] },
+          "inputSchemaPath": { "type": "string", "pattern": "^data/records/schema/(?:[^/]+/)*[^/]+\\.json$" },
+          "outputSchema": { "type": ["object", "boolean"] },
+          "outputSchemaPath": { "type": "string", "pattern": "^data/records/schema/(?:[^/]+/)*[^/]+\\.json$" },
+          "nativeProfile": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "version", "id", "source", "contract", "scenarioSchema", "observationSchema"],
+            "properties": {
+              "type": { "const": "JsnodeNativeAssayProfile" },
+              "version": { "const": 1 },
+              "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+              "source": {
+                "type": "object", "additionalProperties": false, "required": ["locator", "digest"],
+                "properties": {
+                  "locator": { "type": "string", "minLength": 1, "maxLength": 2048 },
+                  "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+                }
+              },
+              "contract": { "type": "string", "minLength": 1, "maxLength": 65536 },
+              "scenarioSchema": { "type": ["object", "boolean"] },
+              "observationSchema": { "type": ["object", "boolean"] },
+              "sourceClosure": {
+                "type": "object", "additionalProperties": false,
+                "required": ["type", "version", "readOnly", "identity", "files"],
+                "properties": {
+                  "type": { "const": "JsnodeNativeSourceClosure" },
+                  "version": { "const": 1 },
+                  "readOnly": { "const": true },
+                  "identity": { "type": "string", "minLength": 1 },
+                  "files": {
+                    "type": "array", "minItems": 1, "maxItems": 128,
+                    "items": {
+                      "type": "object", "additionalProperties": false, "required": ["path", "source"],
+                      "properties": {
+                        "path": { "type": "string", "pattern": "^src/(?:[^/]+/)*[^/]+\\.mjs$" },
+                        "source": {
+                          "type": "object", "additionalProperties": false, "required": ["locator", "digest"],
+                          "properties": {
+                            "locator": { "type": "string", "minLength": 1, "maxLength": 2048 },
+                            "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "externalReferences": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "cli": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "name", "description"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^apps/(?:[^/]+/)*[^/]+\\.mjs$" },
+        "name": { "type": "string", "minLength": 1, "pattern": "^[a-z][a-z0-9-]*$" },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

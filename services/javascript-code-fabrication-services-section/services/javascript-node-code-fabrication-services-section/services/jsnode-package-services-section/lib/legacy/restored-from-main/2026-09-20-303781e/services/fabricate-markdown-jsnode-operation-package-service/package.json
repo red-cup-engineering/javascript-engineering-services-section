@@ -1,0 +1,46 @@
+{
+  "name": "@red-cup-engineering/fabricate-markdown-jsnode-operation-package-service",
+  "version": "0.5.3",
+  "description": "Composes Markdown specification translation, admission, JSNode package birth, registry publication, and realization evidence.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": {
+    ".": "./src/markdown-jsnode-package.mjs",
+    "./mcp": "./apps/fabrication-mcp.mjs"
+  },
+  "bin": {
+    "fabricate-markdown-jsnode-operation-package": "apps/fabricate-cli.mjs",
+    "fabrication-mcp": "apps/fabrication-mcp.mjs"
+  },
+  "files": [
+    "scripts",
+    "package.json",
+    "README.md",
+    "apps",
+    "src",
+    "data/records/schema"
+  ],
+  "dependencies": {
+    "@red-cup-engineering/admit-javascript-node-command-execution-request-service": "0.1.1",
+    "@red-cup-engineering/artifact-fabrication-specification-admission-service": "0.1.0",
+    "@red-cup-engineering/computer-data-engine": "0.11.2",
+    "@red-cup-engineering/execute-javascript-node-command-service": "0.3.0",
+    "@red-cup-engineering/javascript-node-services-section": "0.3.0",
+    "@red-cup-engineering/jsnode-package-services-section": "0.2.2",
+    "@red-cup-engineering/npm-workspace-publication-service": "0.6.1",
+    "@red-cup-engineering/read-javascript-node-standard-input-text-service": "0.2.1",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.2.1",
+    "@red-cup-engineering/write-text-file-service": "0.2.0",
+    "@red-cup-engineering/computer-platform": "0.5.3",
+    "@red-cup-engineering/jsnode-engine": "0.3.0"
+  },
+  "scripts": {
+    "check": "node --check src/markdown-jsnode-package.mjs && node --check scripts/fabricate-markdown-jsnode-operation-package.mjs && node --check apps/fabricate-cli.mjs && node --check apps/fabrication-mcp.mjs",
+    "test": "node --test test/*.test.mjs",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=24.2.0"
+  }
+}

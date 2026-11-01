@@ -1,0 +1,31 @@
+{
+  "name": "@red-cup-engineering/read-javascript-file-imports-service",
+  "version": "0.2.3",
+  "description": "Reads the import specifiers and source spans carried by one JavaScript text-file reading.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/read-javascript-file-imports.mjs",
+  "bin": {
+    "read-javascript-file-imports": "scripts/read-javascript-file-imports.mjs"
+  },
+  "files": [
+    "scripts",
+    "package.json",
+    "data/records/schema"
+  ],
+  "dependencies": {
+    "@red-cup-engineering/computer-data-engine": "0.10.0",
+    "@red-cup-engineering/javascript-node-services-section": "0.3.0",
+    "@red-cup-engineering/read-javascript-file-export-documentation-service": "0.1.1",
+    "@red-cup-engineering/read-text-file-service": "0.1.2",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "@red-cup-engineering/mcp-tool-observation-service",
+  "version": "0.1.4",
+  "description": "Observe and optionally invoke one named tool through an MCP Streamable HTTP boundary.",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/observe-mcp-tool.mjs"
+  },
+  "files": [
+    "content/",
+    "src/",
+    "test/",
+    "types/"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@red-cup-engineering/canonicalize-https-url-service": "0.1.0",
+    "@red-cup-engineering/relation-model-notation-json-codec": "0.0.6",
+    "@red-cup-engineering/relation-model-notation-typing": "0.0.2",
+    "@red-cup-engineering/semantic-content-identify-service": "0.2.7"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/red-cup-engineering/mcp-tool-observation-service.git"
+  }
+}

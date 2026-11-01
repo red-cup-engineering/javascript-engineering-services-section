@@ -1,0 +1,7 @@
+[submodule "services/cell-identity-verification-service"]
+	path = services/cell-identity-verification-service
+	url = https://github.com/red-cup-engineering/cell-identity-verification-service.git
+[submodule "mcp-tool-observation-service"]
+	path = services/mcp-tool-observation-service
+	url = https://github.com/red-cup-engineering/mcp-tool-observation-service.git
+	branch = main

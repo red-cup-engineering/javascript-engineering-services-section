@@ -1,0 +1,81 @@
+{
+  "name": "@red-cup-engineering/agentic-organization-services-section-engineering-services-section",
+  "version": "0.1.2",
+  "description": "Observes, measures, places, founds and aligns 561 Group services sections: reads source-qualified Service Sections through SignCraft and judges each section's directory form against the Group's section law. Its engine is agentic-organization-services-section-engine.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/red-cup-engineering/agentic-organization-services-section-engineering-services-section.git"
+  },
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": {
+    "./service-section": "./src/service-section.mjs",
+    "./engine": "./apps/agentic-organization-services-section-engine/src/cli.mjs",
+    "./read-services-section-tree": "./scripts/read-services-section-tree.mjs",
+    "./read-services-section-law": "./scripts/read-services-section-law.mjs",
+    "./fold-directory-entries-into-services-section-form": "./scripts/fold-directory-entries-into-services-section-form.mjs",
+    "./check-services-section-form-conformance": "./scripts/check-services-section-form-conformance.mjs",
+    "./measure-services-section-fitness": "./scripts/measure-services-section-fitness.mjs",
+    "./derive-services-section-path": "./scripts/derive-services-section-path.mjs",
+    "./found-services-section": "./scripts/found-services-section.mjs",
+    "./plan-services-section-normalization": "./scripts/plan-services-section-normalization.mjs",
+    "./apply-services-section-normalization": "./scripts/apply-services-section-normalization.mjs",
+    "./plan-agency-character-normalization": "./scripts/plan-agency-character-normalization.mjs",
+    "./plan-agency-record-normalization": "./scripts/plan-agency-record-normalization.mjs",
+    "./apply-agency-normalization": "./scripts/apply-agency-normalization.mjs",
+    "./agency-layout": "./src/agency-layout.mjs",
+    "./agency-layout-data": "./data/records/schemas/agency-layout.json"
+  },
+  "bin": {
+    "agentic-organization-services-section-engine": "apps/agentic-organization-services-section-engine/src/cli.mjs"
+  },
+  "files": [
+    "src",
+    "scripts",
+    "apps",
+    "content/text/documents/articles/specifications/service-section-v1.md",
+    "data/records/service-section.json",
+    "README.md",
+    "package.json",
+    "data/records/schemas/agency-layout.json",
+    "test/agency-layout.test.mjs",
+    "test/agency-record-normalization.test.mjs",
+    "test/agency-character-normalization.test.mjs"
+  ],
+  "dependencies": {
+    "@red-cup-engineering/signcraft": "0.6.2",
+    "@coesite-operations/enterprise-branding-services-section": "0.1.5",
+    "@red-cup-engineering/computer-file-engineering-services-section": "0.4.0",
+    "@red-cup-engineering/computer-filepath-engineering-services-section": "0.1.0",
+    "@red-cup-engineering/eavt-services-section": "0.14.1",
+    "@red-cup-engineering/javascript-node-services-section": "0.3.2",
+    "@red-cup-engineering/json-schema-services-section": "0.5.0",
+    "@red-cup-engineering/markdown-engineering-services-section": "0.5.2",
+    "@red-cup-engineering/node-process-services-section": "0.3.0",
+    "@red-cup-engineering/yaml-frontmatter-codec-service": "0.1.8",
+    "@red-cup-engineering/read-markdown-features-service": "0.2.0",
+    "@red-cup-engineering/read-markdown-structure-service": "0.2.0"
+  },
+  "devDependencies": {
+    "@red-cup-engineering/jsnode-package-services-section": "0.3.0"
+  },
+  "scripts": {
+    "check": "check-package-syntax",
+    "test": "run-package-tests",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=24.2.0"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://github.com/561-group/.github/blob/main/TIPS.md"
+  },
+  "packageManager": "pnpm@11.19.0",
+  "receivingTests": [
+    "test/agency-layout.test.mjs",
+    "test/agency-record-normalization.test.mjs",
+    "test/agency-character-normalization.test.mjs"
+  ]
+}

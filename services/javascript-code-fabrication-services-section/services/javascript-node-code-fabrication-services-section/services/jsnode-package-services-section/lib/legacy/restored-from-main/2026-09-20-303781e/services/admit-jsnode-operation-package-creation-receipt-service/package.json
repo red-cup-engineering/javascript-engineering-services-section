@@ -1,0 +1,37 @@
+{
+  "name": "@red-cup-engineering/admit-jsnode-operation-package-creation-receipt-service",
+  "version": "0.2.0",
+  "description": "Admits the complete immutable evidence that one JSNode operation package was created successfully.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/admit-jsnode-operation-package-creation-receipt.mjs",
+  "bin": {
+    "admit-jsnode-operation-package-creation-receipt": "scripts/admit-jsnode-operation-package-creation-receipt.mjs"
+  },
+  "files": [
+    "scripts",
+    "README.md",
+    "package.json"
+  ],
+  "dependencies": {
+    "@red-cup-engineering/computer-data-engine": "0.10.0",
+    "@red-cup-engineering/file-services": "0.2.1",
+    "@red-cup-engineering/is-absolute-filepath-service": "0.1.0",
+    "@red-cup-engineering/javascript-node-services-section": "0.3.0",
+    "@red-cup-engineering/project-file-url-filepath-service": "0.1.0",
+    "@red-cup-engineering/read-javascript-file-export-documentation-service": "0.1.1",
+    "@red-cup-engineering/read-javascript-node-standard-input-text-service": "0.2.1",
+    "@red-cup-engineering/relative-posix-filepath-admission-service": "0.1.1",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "check": "node --check scripts/admit-jsnode-operation-package-creation-receipt.mjs",
+    "test": "node --test test/*.test.mjs",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=24.2.0"
+  }
+}

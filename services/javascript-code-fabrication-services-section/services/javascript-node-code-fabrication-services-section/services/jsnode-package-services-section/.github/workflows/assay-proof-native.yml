@@ -1,0 +1,28 @@
+name: JSNode proof-stage native receiving
+on:
+  pull_request:
+    paths:
+      - 'src/assay-completion.mjs'
+      - 'test/assay-completion.test.mjs'
+      - '.github/workflows/assay-proof-native.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/assay-completion.mjs'
+      - 'test/assay-completion.test.mjs'
+      - '.github/workflows/assay-proof-native.yml'
+permissions:
+  contents: read
+jobs:
+  native-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax of the original proof-stage receiver
+        run: node --check src/assay-completion.mjs
+      - name: Execute original complete TAP proof receiving regression suite
+        run: node --test test/assay-completion.test.mjs

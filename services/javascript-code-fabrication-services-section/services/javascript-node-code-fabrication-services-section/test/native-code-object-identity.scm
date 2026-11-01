@@ -1,0 +1,18 @@
+(use-modules (native-code-programme) (srfi srfi-1))
+(define same? (@@ (native-code-programme) package-identity=?))
+(define expected '(("name" . "@fixture/main") ("version" . "1.0.0")
+                   ("sourceCommit" . "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+                   ("integrity" . "exact-original-archive")))
+(unless (and (same? expected (reverse expected))
+             (not (same? expected (cdr expected)))
+             (not (same? expected (cons '("other" . "authority") expected)))
+             (not (same? expected (cons '("name" . "@fixture/substituted") (cdr expected)))))
+  (error "native package identity did not preserve exact JSON object semantics"))
+(display "exact package identity preserved across JSON object ordering\n")
+(for-each (lambda (name)
+  (unless (procedure? (module-ref (resolve-interface '(native-code-programme)) name))
+    (error "original Systems interface requires callable procedures" name)))
+  '(native-code-construction-input native-code-product? native-code-product-input
+    native-code-product-entry native-code-product-programme-runtime native-code-product-binds-source?))
+(display "original Systems dynamic Code interface is callable\n")
+

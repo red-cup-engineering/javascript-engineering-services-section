@@ -1,0 +1,82 @@
+{
+  "kind": "requirement",
+  "id": "agency-source-parser-preserves-markdown-body-bytes",
+  "name": "Original agency source parser preserves Markdown body bytes",
+  "raised-by": "codex-agency-migration-receiving",
+  "asks": "Construct the smallest source-owned parser repair that preserves the exact authored Markdown body at the existing shared agency source boundary, as a prerequisite of the full agency normalization obligation.",
+  "met-when": [
+    {
+      "cell": "agency-source-parser-preserves-markdown-body-bytes:original-owner",
+      "target": "held",
+      "says": "The existing shared src/agency-source-declaration.mjs source declaration boundary and its existing actual callers receive the construction; no parallel parser, per-section converter, compatibility branch or new runtime identity is introduced."
+    },
+    {
+      "cell": "agency-source-parser-preserves-markdown-body-bytes:exact-source",
+      "target": "held",
+      "says": "The declaration is derived only from complete source bytes received with their matching SHA-256; valid UTF-8 must round trip exactly, and supplied authored mappings or offsets may corroborate but never replace source bytes."
+    },
+    {
+      "cell": "agency-source-parser-preserves-markdown-body-bytes:owned-fence",
+      "target": "held",
+      "says": "Use the original Markdown-owned split-markdown-frontmatter-fence and original YAML codec at independently received source revisions to derive frontmatter and the exact body; a complete closing fence terminator leaves every subsequent byte in body, including leading blank lines, indentation, trailing whitespace, LF, CRLF and Unicode."
+    },
+    {
+      "cell": "agency-source-parser-preserves-markdown-body-bytes:failure-boundary",
+      "target": "held",
+      "says": "Differentiate absent frontmatter from an opened but malformed or unclosed fence; refuse malformed or ambiguous YAML, duplicate keys, conflicting body fields, invalid UTF-8, mismatched source hash and conflicting authored corroboration without source effects."
+    },
+    {
+      "cell": "agency-source-parser-preserves-markdown-body-bytes:existing-inputs",
+      "target": "held",
+      "says": "Preserve the exact original JSON declaration and its authored method; preserve source metadata, order and the original source-qualified identity for valid Markdown declarations, without inventing authority or changing Character trait semantics."
+    },
+    {
+      "cell": "agency-source-parser-preserves-markdown-body-bytes:counterexamples",
+      "target": "held",
+      "says": "Independently receive the exact 54 currently witnessed source files against physical body bytes after the closing fence, with source hashes checked; also receive absent and malformed fences, EOF, LF, CRLF, indentation, trailing whitespace, Unicode and hash/corroboration refusal."
+    },
+    {
+      "cell": "agency-source-parser-preserves-markdown-body-bytes:caller-receiving",
+      "target": "held",
+      "says": "Receive the original source declaration consumer interfaces and their actual record and Character planning callers against the selected source revision; this parser slice creates no migration authority and no input is retired or rewritten until the separate complete family planning, link-preservation, collision, exclusion and original apply obligations hold."
+    },
+    {
+      "cell": "agency-source-parser-preserves-markdown-body-bytes:parent-obligations",
+      "target": "held",
+      "says": "Preserve every condition of the parent agency-normalization-retains-methods-and-role-traits Requirement, including typed persona and mask traits, prior-normalization repair, whole-plan safety, link/resource preservation and actual installed consumer receiving; this bounded parser construction is not completion of that requirement."
+    },
+    {
+      "cell": "agency-source-parser-preserves-markdown-body-bytes:native-generation",
+      "target": "held",
+      "says": "Generate specification, architecture, design and target source through the original zero-cash house producers and independent receiving; preserve provenance and unreceived Proof, and do not hand-edit executable source or generated Data."
+    }
+  ],
+  "x-provenance": {
+    "recorded-by": "Codex agency migration receiving",
+    "basis": "Derived bounded construction slice of the existing agency-normalization-retains-methods-and-role-traits Requirement and its v4 Architecture and high-level design, answering the Leader direction to finish the shared agency family.",
+    "parentRequirement": "lib/agency/requirements/agency-normalization-retains-methods-and-role-traits.json",
+    "parentRequirementRevision": "ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8",
+    "parentSpecification": "data/records/specification-records/agency-normalization-retains-methods-and-role-traits.json",
+    "parentSpecificationRevision": "ni:///sha-256;2FeN9wuhrLn974eCU0l6fJYhPRvBw1YbBTsgiHDDSeg",
+    "parentArchitecture": "data/state/agency-source-preservation-generation-service-state/architecture-review-request-v4.architecture.json",
+    "parentArchitectureSha256": "d89387188e2624d2d00399ee0079a15d540a274305075f56cf1c0b0efdd729d3",
+    "parentHighLevel": "data/state/agency-source-preservation-generation-service-state/high-level-v4.candidate.json",
+    "parentHighLevelSha256": "4a7509e500270b737dec724a77f6a27d9e55e5057b0c5aa5ac3662635ab736ce",
+    "targetSource": "src/agency-source-declaration.mjs",
+    "targetSourceSha256": "7f4cc0f93bae7305453f006743231713890e48286d8de17b7766ec739d4fab8c",
+    "sourceCounterexamples": "data/state/agency-source-preservation-generation-service-state/physical-method-preservation-counterexamples.json",
+    "sourceCounterexamplesSha256": "a3d618c20b2d2b896aa2c60f6a2cb102beca878f1cab99829ecda15b9f0ca6d7",
+    "splitterPackage": "@red-cup-engineering/split-markdown-frontmatter-fence-service@0.2.0",
+    "splitterSourceSha256": "b0d47063f6776bc0930dc4e7c73c292eb551c8434a8e346c9c6f7108b45c485e",
+    "status": "Bounded requirement proposal; no admission, fabrication, migration or parent completion asserted.",
+    "sourceCutContinuation": {
+      "author": "Codex agency migration receiving",
+      "priorRequirement": "ni:///sha-256;sxcrIQFiRv5dQn0V2W3eb654eTEC7mXCnbGeovQEl_U",
+      "priorSourceSha256": "21db7d647444af7ff4c01d82376179810bb2e8a01d78ca2cd01486fbaaf1e38b",
+      "basis": "Correct the applied parent amendment provenance standing and bind the current parent Requirement and generated Specification. All nine bounded parser conditions remain unchanged.",
+      "priorArchitectureStanding": "Previously reviewed parent Architecture and HLD are historical pre-amendment source cuts; rederive affected downstream stages before acceptance.",
+      "newParentRequirement": "ni:///sha-256;-62KC8cEnfx2MjbYExQJsWcKlm00Ht7xtfKzjQ1JBV8",
+      "newParentSpecification": "ni:///sha-256;2FeN9wuhrLn974eCU0l6fJYhPRvBw1YbBTsgiHDDSeg"
+    }
+  }
+}

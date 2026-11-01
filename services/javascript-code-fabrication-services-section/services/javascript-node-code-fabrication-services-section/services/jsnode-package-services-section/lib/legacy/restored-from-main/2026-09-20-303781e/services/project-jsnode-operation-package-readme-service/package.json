@@ -1,0 +1,31 @@
+{
+  "name": "@red-cup-engineering/project-jsnode-operation-package-readme-service",
+  "version": "0.1.1",
+  "description": "Projects JSNode operation package help from standard JSDoc and admitted examples.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "exports": "./scripts/project-jsnode-operation-package-readme.mjs",
+  "bin": {
+    "project-jsnode-operation-package-readme": "scripts/project-jsnode-operation-package-readme.mjs"
+  },
+  "files": [
+    "scripts",
+    "package.json"
+  ],
+  "dependencies": {
+    "@red-cup-engineering/computer-data-engine": "0.10.0",
+    "@red-cup-engineering/javascript-node-services-section": "0.2.0",
+    "@red-cup-engineering/read-javascript-node-standard-input-text-service": "0.2.1",
+    "@red-cup-engineering/text-file-creation-projection-admission-service": "0.1.1",
+    "@red-cup-engineering/write-javascript-node-standard-output-text-service": "0.2.1"
+  },
+  "scripts": {
+    "check": "node --check scripts/project-jsnode-operation-package-readme.mjs",
+    "test": "node --test test/*.test.mjs",
+    "pack:dry-run": "npm pack --dry-run --ignore-scripts"
+  },
+  "engines": {
+    "node": ">=24.2.0"
+  }
+}
