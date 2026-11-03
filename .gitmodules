@@ -50,3 +50,7 @@
 	path = services/deno-services-section
 	url = https://github.com/red-cup-engineering/deno-engineering-services-section.git
 	branch = main
+[submodule "services/node-js-engineering-services-section"]
+	path = services/node-js-engineering-services-section
+	url = https://github.com/red-cup-engineering/node-js-engineering-services-section.git
+	branch = main
