@@ -46,7 +46,7 @@ Historical evidence for earlier child cuts remains at [Code Fabrication PR #3](h
 
 ## Earlier consolidation and research
 
-The August 10 JavaScript/JSNode source collation removed competing live homes under the old computer-code-development tree. The [original August knowledge-and-code index](lib/legacy/2026-08-11-bd3f7f2/services/computer-services-section/services/computer-coding-services-section/services/javascript-services-section/content/documents/references/2026/08/10/javascript-knowledge-and-code-index.md) **is present** in a retained legacy snapshot. It is a historical reading map, not the current repository topology or an instruction to recreate any old subsection.
+The August 10 JavaScript/JSNode source collation removed competing live homes under the old computer-code-development tree. The [original August knowledge-and-code index](lib/legacy/2026-08-11-bd3f7f2/services/computer-services-section/services/computer-coding-services-section/services/javascript-engineering-services-section/content/documents/references/2026/08/10/javascript-knowledge-and-code-index.md) **is present** in a retained legacy snapshot. It is a historical reading map, not the current repository topology or an instruction to recreate any old subsection.
 
 The earlier README said that this index was lost; the source tree now supplies its exact archived file. It also referred to a current `content/text/documents/articles/notes/` directory that is **not present in this repository**. Read historical notes through their actual surviving sources rather than interpreting those legacy paths as live documentation.
 
