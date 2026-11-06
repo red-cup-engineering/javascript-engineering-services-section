@@ -7,7 +7,7 @@
 [![Tips welcome](https://img.shields.io/badge/tips-welcome-d4a017)](https://github.com/561-group/.github/blob/main/TIPS.md)
 <!-- 561-group-standards:badges:end -->
 
-This is Red Cup Engineering's source owner for reusable work **about the JavaScript ecosystem**: JavaScript and TypeScript source, Node.js and Deno, package and workspace structure, and JSNode. A program merely *written in JavaScript* remains with the engineering section that owns its actual subject.
+This is Red Cup Engineering's source owner for reusable work **about the JavaScript ecosystem**: JavaScript and TypeScript source, Node.js and Deno, and package and workspace structure. A program merely *written in JavaScript* remains with the engineering section that owns its actual subject.
 
 This section provides cross-cutting source readers and composes separately owned services. It does not own every runtime, compiler, registry, publisher, or application that uses JavaScript.
 
@@ -27,12 +27,11 @@ The corresponding command-line entries are in [`scripts/`](scripts/) and the tes
 
 The [`.gitmodules`](.gitmodules) and selected Git tree, not an earlier README's copied commit hashes, identify the child sources this section currently composes. The principal subsection mounts are:
 
-- [JavaScript Code Analysis](https://github.com/red-cup-engineering/javascript-code-analysis-engineering-services-section) for source analysis rather than code fabrication;
-- [JavaScript Code Fabrication](https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section) for its separately qualified maker and Code receiving;
-- [JavaScript File](https://github.com/red-cup-engineering/javascript-file-engineering-services-section), [JavaScript Node](https://github.com/red-cup-engineering/javascript-node-engineering-services-section) and [JavaScript Normalization](https://github.com/red-cup-engineering/javascript-normalization-engineering-services-section) for their corresponding reusable capabilities;
-- [Deno Engineering](https://github.com/red-cup-engineering/deno-engineering-services-section) for Deno-specific work.
-
-Other directly mounted services, including the source-read and editing suppliers, retain their identities in the same Git tree. The JavaScript Node section's package-management descendants govern the lifecycle of existing packages; Code Fabrication's original source owns creating a new JSNode Code package. The distinction prevents a second maker or registry being built in this parent.
+- [JavaScript Code Analysis Engineering](services/javascript-code-analysis-engineering-services-section) owns JavaScript and TypeScript source analysis, workspace inspection, and algebraic representations.
+- [JavaScript Code Fabrication](services/javascript-code-fabrication-services-section) owns source generation and fabrication.
+- [JavaScript File Engineering](services/javascript-file-services-section) and [JavaScript Normalization](services/javascript-normalization-services-section) own their respective source operations.
+- [Node.js Engineering](services/node-js-engineering-services-section) owns the Node.js runtime, package tooling, and JSDoc.
+- [Deno Engineering](services/deno-engineering-services-section) owns the Deno runtime and Deno Deploy tooling.
 
 A submodule records **selected source**, not installed host state or downstream use. The directory `lib/legacy/` holds historical material, never an alternative live package.
 
