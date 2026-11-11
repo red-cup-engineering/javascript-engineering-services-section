@@ -27,10 +27,10 @@
     "test": "node --test test/*.test.mjs"
   },
   "dependencies": {
-    "@red-cup-engineering/computer-content-graph-engineering-services-section": "workspace:*",
-    "@red-cup-engineering/javascript-file-import-services-section": "workspace:*",
-    "@red-cup-engineering/javascript-node-services-section": "workspace:*",
-    "@red-cup-engineering/javascript-normalization-services-section": "workspace:*"
+    "@red-cup-engineering/computer-content-graph-engineering-services-section": "^0.1.2",
+    "@red-cup-engineering/javascript-file-import-services-section": "^0.1.1",
+    "@red-cup-engineering/javascript-node-services-section": "^0.4.2",
+    "@red-cup-engineering/javascript-normalization-services-section": "^0.1.1"
   },
   "engines": {
     "node": ">=24"
