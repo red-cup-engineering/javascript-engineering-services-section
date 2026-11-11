@@ -13,7 +13,7 @@ This section provides cross-cutting source readers and composes separately owned
 
 ## Maintained source
 
-The [package manifest](package.json) defines the current exported interfaces and Node.js requirement (24 or later). The section's directly maintained logic is in `src/`, its command entry points in `scripts/`, and its bounded behavioral checks in `test/`.
+The [package manifest](package.json) defines the current exported interfaces and Node.js requirement (24 or later). The maintained logic lives in `src/`, with commands in `scripts/` and behavioral checks in `test/`.
 
 - `./import-lattice` checks local JavaScript imports against the source → scripts → application composition order. Package-import authority belongs to the package dependency graph, not this local-file check.
 - `./package-import-lattice` reads package import relationships under their own declared constraints.
@@ -21,7 +21,10 @@ The [package manifest](package.json) defines the current exported interfaces and
 - `./project-capability-graph` projects package scripts and local source imports into an operations graph. It is a source observation, not a runtime-capability grant.
 - `./review-package` reviews an existing JavaScript package through the maintained reader.
 
-The corresponding command-line entries are in [`scripts/`](scripts/) and the tests in [`test/`](test/). `npm test` runs the package's declared Node tests when its workspace dependencies are available. A package test is not a native Code Work, Proof, host installation, release or beneficiary acceptance.
+Run `npm ci` and `npm test` on Node.js 24 or later. The suites exercise
+the import lattice, package review, executable readiness, and capability
+graph against local fixtures. The source reader skips nested packages,
+dependency folders, build output, and historical source.
 
 ## Subsection and supplier custody
 

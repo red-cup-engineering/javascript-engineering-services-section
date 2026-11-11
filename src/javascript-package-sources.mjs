@@ -4,6 +4,7 @@ import path from "node:path";
 export const javascriptSourceExtensions = Object.freeze([".js", ".mjs", ".ts", ".mts"]);
 const sourceExtensions = new Set(javascriptSourceExtensions);
 const sourceLayers = Object.freeze(["src", "scripts", "apps"]);
+const inactiveDirectories = new Set([".git", "coverage", "dist", "legacy", "node_modules"]);
 
 /**
  * Read the source carriers owned by one JavaScript package. Build output,
@@ -14,10 +15,12 @@ export function readJavascriptPackageSources(packageDirectory) {
   const root = path.resolve(packageDirectory);
   const readings = [];
   const visit = (directory) => {
-    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const entries = readdirSync(directory, { withFileTypes: true });
+    if (entries.some(entry => entry.name === "package.json")) return;
+    for (const entry of entries) {
       const absolute = path.join(directory, entry.name);
-      if (entry.isDirectory()) visit(absolute);
-      else if (entry.isFile() && sourceExtensions.has(path.extname(entry.name)) && !entry.name.endsWith(".d.ts")) {
+      if (entry.isDirectory() && !inactiveDirectories.has(entry.name)) visit(absolute);
+      else if (entry.isFile() && sourceExtensions.has(path.extname(entry.name)) && !/\.d\.[cm]?ts$/u.test(entry.name)) {
         readings.push(Object.freeze({
           type: "TextFileRead",
           path: path.relative(root, absolute).replaceAll(path.sep, "/"),
