@@ -26,7 +26,7 @@ jobs:
         run: |
           set -euo pipefail
           child=services/javascript-code-fabrication-engineering-services-section
-          test "$(git config -f .gitmodules --get submodule.javascript-code-fabrication-services-section.url)" = "https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section.git"
+          test "$(git config -f .gitmodules --get submodule.javascript-code-fabrication-engineering-services-section.url)" = "https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section.git"
           selected="$(git rev-parse "HEAD:$child")"
           [[ "$selected" =~ ^[0-9a-f]{40}$ ]]
           git -c protocol.file.allow=never submodule update --init -- "$child"
