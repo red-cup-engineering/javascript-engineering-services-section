@@ -18,16 +18,16 @@
 	path = services/jsnode-observation-service
 	url = https://github.com/red-cup-engineering/jsnode-observation-service.git
 	branch = main
-[submodule "javascript-normalization-services-section"]
-	path = services/javascript-normalization-services-section
+[submodule "services/javascript-normalization-engineering-services-section"]
+	path = services/javascript-normalization-engineering-services-section
 	url = https://github.com/red-cup-engineering/javascript-normalization-engineering-services-section.git
 	branch = main
-[submodule "javascript-file-services-section"]
-	path = services/javascript-file-services-section
+[submodule "services/javascript-file-engineering-services-section"]
+	path = services/javascript-file-engineering-services-section
 	url = https://github.com/red-cup-engineering/javascript-file-engineering-services-section.git
 	branch = main
-[submodule "javascript-code-fabrication-services-section"]
-	path = services/javascript-code-fabrication-services-section
+[submodule "services/javascript-code-fabrication-engineering-services-section"]
+	path = services/javascript-code-fabrication-engineering-services-section
 	url = https://github.com/red-cup-engineering/javascript-code-fabrication-engineering-services-section.git
 	branch = main
 [submodule "services/node-js-engineering-services-section"]

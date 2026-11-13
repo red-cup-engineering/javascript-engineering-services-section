@@ -31,8 +31,8 @@ dependency folders, build output, and historical source.
 The [`.gitmodules`](.gitmodules) and selected Git tree, not an earlier README's copied commit hashes, identify the child sources this section currently composes. The principal subsection mounts are:
 
 - [JavaScript Code Analysis Engineering](services/javascript-code-analysis-engineering-services-section) owns JavaScript and TypeScript source analysis, workspace inspection, and algebraic representations.
-- [JavaScript Code Fabrication](services/javascript-code-fabrication-services-section) owns source generation and fabrication.
-- [JavaScript File Engineering](services/javascript-file-services-section) and [JavaScript Normalization](services/javascript-normalization-services-section) own their respective source operations.
+- [JavaScript Code Fabrication](services/javascript-code-fabrication-engineering-services-section) owns source generation and fabrication.
+- [JavaScript File Engineering](services/javascript-file-engineering-services-section) and [JavaScript Normalization](services/javascript-normalization-engineering-services-section) own their respective source operations.
 - [Node.js Engineering](services/node-js-engineering-services-section) owns the Node.js runtime, package tooling, and JSDoc.
 - [Deno Engineering](services/deno-engineering-services-section) owns the Deno runtime and Deno Deploy tooling.
 
@@ -40,7 +40,7 @@ A submodule records **selected source**, not installed host state or downstream 
 
 ## Native Code fabrication evidence
 
-The existing [native Code receiving workflow](.github/workflows/native-code-fabrication-receiving.yml) validates the exact `services/javascript-code-fabrication-services-section` Gitlink, its declared GitHub origin, and one independently completed successful `child-code-receiving` check-run for that selected source SHA. It **reuses** the child's native clean-installed Code-consumer evidence instead of rebuilding the same producer here.
+The existing [native Code receiving workflow](.github/workflows/native-code-fabrication-receiving.yml) validates the exact `services/javascript-code-fabrication-engineering-services-section` Gitlink, its declared GitHub origin, and one independently completed successful `child-code-receiving` check-run for that selected source SHA. It **reuses** the child's native clean-installed Code-consumer evidence instead of rebuilding the same producer here.
 
 This is a source-receiving check only. It neither fabricates the Code, proves that every requirement is met, runs an isolated production Work, publishes a package, grants a principal authority, nor settles a customer's outcome. The continuing [Computer Code Engineering obligation #74](https://github.com/red-cup-engineering/computer-code-engineering-services-section/issues/74) retains the downstream Stage Proof, execution, installation, source-release and beneficiary-receiving questions. A passing child check cannot substitute for a missing parent or host result.
 
