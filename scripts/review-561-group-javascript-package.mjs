@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { reviewJsnodePackageDirectory } from "@red-cup-engineering/javascript-normalization-services-section/review-jsnode-package";
-import { runJavascriptNodeOperation } from "@red-cup-engineering/javascript-node-services-section/operation";
+import { reviewJsnodePackageDirectory } from "@red-cup-engineering/javascript-normalization-engineering-services-section/review-jsnode-package";
+import { runJavascriptNodeOperation } from "@red-cup-engineering/javascript-node-engineering-services-section/operation";
 
 /**
  * Review exactly one 561 Group JavaScript package without changing it. Run this before using, extending, moving, or creating a package. Any deviation is a stop signal for repository discovery, especially a package or service name that does not resolve to an actual owner in the 561 Group services section or its upstream engineering services. Inspect the owning section, upstream package, package keywords, consumers, and nearby conformance tests before deciding whether the package is usable or represents debt to repair.

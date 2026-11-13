@@ -2,7 +2,7 @@
 import { basename, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { admitEdge, admitNode, createOperationsGraph, isDag, proposeEdge, proposeNode, toDot } from "@red-cup-engineering/computer-content-graph-engineering-services-section/operations-graph";
-import { readJavascriptFileImports } from "@red-cup-engineering/javascript-file-import-services-section/read-javascript-file-imports";
+import { readJavascriptFileImports } from "@red-cup-engineering/javascript-file-import-engineering-services-section/read-javascript-file-imports";
 import { readJavascriptPackageSources, resolveJavascriptPackageSource } from "../src/javascript-package-sources.mjs";
 
 /** Project executable scripts and their local source dependencies into an operations graph. */

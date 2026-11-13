@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { runJavascriptNodeOperation } from "@red-cup-engineering/javascript-node-services-section/operation";
+import { runJavascriptNodeOperation } from "@red-cup-engineering/javascript-node-engineering-services-section/operation";
 function text(value, label) {
   if (typeof value !== "string" || value.trim() === "") throw new TypeError(`${label} must be non-empty text`);
   return value.trim();

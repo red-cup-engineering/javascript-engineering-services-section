@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { readJavascriptFileImports } from "@red-cup-engineering/javascript-file-import-services-section/read-javascript-file-imports";
+import { readJavascriptFileImports } from "@red-cup-engineering/javascript-file-import-engineering-services-section/read-javascript-file-imports";
 
 export const javascriptImportLattice = Object.freeze({
   src: Object.freeze(["src"]),
