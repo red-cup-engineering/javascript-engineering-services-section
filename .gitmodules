@@ -1,20 +1,20 @@
-[submodule "check-stale-references-app"]
+[submodule "apps/check-stale-references-app"]
 	path = apps/check-stale-references-app
 	url = https://github.com/red-cup-engineering/check-stale-references-app.git
 	branch = main
-[submodule "transform-json-schema-to-typescript-service"]
+[submodule "services/transform-json-schema-to-typescript-service"]
 	path = services/transform-json-schema-to-typescript-service
 	url = https://github.com/red-cup-engineering/transform-json-schema-to-typescript-service.git
 	branch = main
-[submodule "software-edit-language-service"]
+[submodule "services/software-edit-language-service"]
 	path = services/software-edit-language-service
 	url = https://github.com/red-cup-engineering/software-edit-language-service.git
 	branch = main
-[submodule "sandbox-command-execution-service"]
+[submodule "services/sandbox-command-execution-service"]
 	path = services/sandbox-command-execution-service
 	url = https://github.com/red-cup-engineering/sandbox-command-execution-service.git
 	branch = main
-[submodule "jsnode-observation-service"]
+[submodule "services/jsnode-observation-service"]
 	path = services/jsnode-observation-service
 	url = https://github.com/red-cup-engineering/jsnode-observation-service.git
 	branch = main
@@ -34,11 +34,11 @@
 	path = services/node-js-engineering-services-section
 	url = https://github.com/red-cup-engineering/node-js-engineering-services-section.git
 	branch = main
-[submodule "deno-engineering-services-section"]
+[submodule "services/deno-engineering-services-section"]
 	path = services/deno-engineering-services-section
 	url = https://github.com/red-cup-engineering/deno-engineering-services-section.git
 	branch = main
-[submodule "javascript-code-analysis-engineering-services-section"]
+[submodule "services/javascript-code-analysis-engineering-services-section"]
 	path = services/javascript-code-analysis-engineering-services-section
 	url = https://github.com/red-cup-engineering/javascript-code-analysis-engineering-services-section.git
 	branch = main
