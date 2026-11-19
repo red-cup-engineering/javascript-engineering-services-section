@@ -10,7 +10,7 @@ function texts(value, label) {
   return Object.freeze([...new Set(value.map((item, index) => text(item, `${label}[${index}]`)))]);
 }
 
-function admitCriterion(candidate, index) {
+function validateCriterion(candidate, index) {
   if (candidate === null || typeof candidate !== "object" || Array.isArray(candidate)) {
     throw new TypeError(`criteria[${index}] must be an object`);
   }
@@ -34,7 +34,7 @@ export function assessJavascriptExecutableReadiness(input) {
   if (input === null || typeof input !== "object" || Array.isArray(input)) throw new TypeError("input must be an object");
   const packageName = text(input.packageName, "packageName");
   const executableNames = Object.freeze([...texts(input.executableNames, "executableNames")].sort());
-  const criteria = (input.criteria ?? []).map(admitCriterion);
+  const criteria = (input.criteria ?? []).map(validateCriterion);
   if (criteria.length === 0) throw new TypeError("criteria must not be empty");
   const available = new Set(executableNames);
   const readings = criteria.map((criterion) => {
