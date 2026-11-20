@@ -14,7 +14,7 @@ export function project561GroupJavascriptCapabilityGraph(packageDirectory) {
   let graph = createOperationsGraph();
   const packageId = `package:${root}`;
   graph = admitNode(graph, proposeNode({ id: packageId, kind: "javascript-package-carrier", payload: { directory: root } })).operationsGraph;
-  const validatedModules = new Set();
+  const admittedModules = new Set();
   for (const script of scripts) {
     const scriptId = `script:${script.path}`;
     graph = admitNode(graph, proposeNode({ id: scriptId, kind: "javascript-executable", payload: { file: script.path }, acts: [basename(script.path, ".mjs")] })).operationsGraph;
@@ -26,9 +26,9 @@ export function project561GroupJavascriptCapabilityGraph(packageDirectory) {
     for (const specifier of localSpecifiers) {
       const modulePath = resolveJavascriptPackageSource(script.path, specifier, sourcePaths);
       const moduleId = modulePath.startsWith("scripts/") && sourcePaths.has(modulePath) ? `script:${modulePath}` : `module:${modulePath}`;
-      if (!moduleId.startsWith("script:") && !validatedModules.has(moduleId)) {
+      if (!moduleId.startsWith("script:") && !admittedModules.has(moduleId)) {
         graph = admitNode(graph, proposeNode({ id: moduleId, kind: "javascript-source-module", payload: { file: modulePath } })).operationsGraph;
-        validatedModules.add(moduleId);
+        admittedModules.add(moduleId);
       }
       graph = admitEdge(graph, proposeEdge({ from: scriptId, kind: "imports", to: moduleId, evidence: { specifier } })).operationsGraph;
     }
