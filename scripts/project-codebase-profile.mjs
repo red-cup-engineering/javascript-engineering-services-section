@@ -1,0 +1,2 @@
+#!/usr/bin/env node
+import{project561GroupCodebaseProfile}from"../src/codebase-projection.mjs";const chunks=[];for await(const chunk of process.stdin)chunks.push(chunk);const input=JSON.parse(Buffer.concat(chunks).toString("utf8")||"{}");if(import.meta.main)process.stdout.write(`${JSON.stringify(project561GroupCodebaseProfile(input.reading??input,input.topology??{},input.params??{},input.options??{}),null,2)}\n`);
