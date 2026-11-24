@@ -1,7 +1,3 @@
-[submodule "apps/check-stale-references-app"]
-	path = apps/check-stale-references-app
-	url = https://github.com/red-cup-engineering/check-stale-references-app.git
-	branch = main
 [submodule "services/transform-json-schema-to-typescript-service"]
 	path = services/transform-json-schema-to-typescript-service
 	url = https://github.com/red-cup-engineering/transform-json-schema-to-typescript-service.git
